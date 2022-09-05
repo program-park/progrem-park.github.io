@@ -1,0 +1,787 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Redis 的基本数据类型与特殊数据类型详解 | 程序园</title><meta name="keywords" content="Redis"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是对 Redis 常用的五大数据类型，以及三种特殊数据类型的详细介绍。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis 的基本数据类型与特殊数据类型详解">
+<meta property="og:url" content="https://program-park.github.io/2021/07/29/redis_8/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是对 Redis 常用的五大数据类型，以及三种特殊数据类型的详细介绍。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/redis/1.png">
+<meta property="article:published_time" content="2021-07-29T09:31:38.000Z">
+<meta property="article:modified_time" content="2022-09-05T10:08:57.628Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/redis/1.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://program-park.github.io/2021/07/29/redis_8/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Redis 的基本数据类型与特殊数据类型详解',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-05 18:08:57'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">53</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">16</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/redis/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Redis 的基本数据类型与特殊数据类型详解</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-07-29T09:31:38.000Z" title="发表于 2021-07-29 17:31:38">2021-07-29</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-05T10:08:57.628Z" title="更新于 2022-09-05 18:08:57">2022-09-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Redis/">Redis</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">8.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>39分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Redis 的基本数据类型与特殊数据类型详解"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="一、官网介绍">一、官网介绍</h1>
+<p><img src="https://img-blog.csdnimg.cn/20210712203520640.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDc1ODg3Ng==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>
+Redis 是一个开源（BSD许可）的，内存中的数据结构存储系统，它可以用作<code>数据库</code>、<code>缓存</code>和<code>消息中间件</code>。 它支持多种类型的数据结构，如<code>字符串（strings）</code>， <code>散列（hashes）</code>，<code>列表（lists）</code>，<code>集合（sets）</code>，<code>有序集合（sorted sets）</code> 与范围查询， bitmaps， hyperloglogs 和 地理空间（geospatial） 索引半径查询。 Redis 内置了 复制（replication），LUA脚本（Lua scripting）， LRU驱动事件（LRU eviction），事务（transactions） 和不同级别的 磁盘持久化（persistence）， 并通过 Redis哨兵（Sentinel）和自动 分区（Cluster）提供高可用性（high availability）。</p>
+<h1 id="二、Redis常用的五大数据类型">二、Redis常用的五大数据类型</h1>
+<p>Redis常用的五大数据类型为：<code>String（字符串）</code>、<code>List（列表）</code>、<code>Set（集合）</code>、<code>Hash（哈希，类似java里的map）</code>、<code>Zset（sorted set：有序集合）</code>。</p>
+<h2 id="1-String（字符串）">1. String（字符串）</h2>
+<p>String 是 Redis 最基本的类型，你可以理解成与 Memcached 一模一样的类型，一个 key 对应一个 value。<br>
+String 类型是 Redis 最基本的数据类型（可以为整形、浮点型和字符串，统称为元素），最大能存储 <code>512MB</code>。</p>
+<h3 id="1-1-常用命令">1.1 常用命令</h3>
+<ul>
+<li><code>set : 设置值</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set key1 v1</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>get : 获取值</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; get key1</span><br><span class="line">&quot;v1&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>获取所有的key</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys *</span><br><span class="line">1) &quot;key1&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>exists : 判断某个key是否存在</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; EXISTS key1</span><br><span class="line">(integer) 1</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>append : 追加字符串，如果当前key不存在，就相当于‘set key’</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; APPEND key1 &quot;hello&quot;</span><br><span class="line">(integer) 7</span><br><span class="line">127.0.0.1:6379&gt; get key1</span><br><span class="line">&quot;v1hello&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>strlen : 获取字符串的长度</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; STRLEN key1</span><br><span class="line">(integer) 7</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>incr : 自增</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set views 0</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; get views</span><br><span class="line">&quot;0&quot;</span><br><span class="line">127.0.0.1:6379&gt; incr views</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; get views</span><br><span class="line">&quot;1&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>decr : 自减</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; decr views</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; get views</span><br><span class="line">&quot;0&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>incrby : 加</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; incrby views 3</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; get views</span><br><span class="line">&quot;3&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>decrby : 减</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; decrby views 5</span><br><span class="line">(integer) -2</span><br><span class="line">127.0.0.1:6379&gt; get views</span><br><span class="line">&quot;-2&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>getrange : 获取字符串指定下标范围的元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set key1 &quot;hello,redis&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; get key1</span><br><span class="line">&quot;hello,redis&quot;</span><br><span class="line">127.0.0.1:6379&gt; GETRANGE key1 0 5</span><br><span class="line">&quot;hello,&quot;</span><br><span class="line">127.0.0.1:6379&gt; GETRANGE key1 0 -1</span><br><span class="line">&quot;hello,redis&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>setrange : 替换字符串指定下标的元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set key2 &quot;abcdefghijklmn&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; get key2</span><br><span class="line">&quot;abcdefghijklmn&quot;</span><br><span class="line">127.0.0.1:6379&gt; SETRANGE key2 1 xx</span><br><span class="line">(integer) 14</span><br><span class="line">127.0.0.1:6379&gt; get key2</span><br><span class="line">&quot;axxdefghijklmn&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>setex : 设置过期时间</code></li>
+<li><code>ttl : 查看剩余过期时间</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 设置“key3”30秒后过期</span><br><span class="line">127.0.0.1:6379&gt; setex key3 30 &quot;hello&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; ttl key3</span><br><span class="line">(integer) 20</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>setnx : 设置值，前提是键必须不存在</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; setnx key4 v1</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; keys *</span><br><span class="line">1) &quot;key4&quot;</span><br><span class="line">2) &quot;key2&quot;</span><br><span class="line">3) &quot;key1&quot;</span><br><span class="line">127.0.0.1:6379&gt; setnx key4 v3</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; get key4</span><br><span class="line">&quot;v1&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>mset : 批量设置值</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; mset k1 v1 k2 v2 k3 v3</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; keys *</span><br><span class="line">1) &quot;k3&quot;</span><br><span class="line">2) &quot;k1&quot;</span><br><span class="line">3) &quot;k2&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>mget : 批量获取值</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; mget k1 k2 k3</span><br><span class="line">1) &quot;v1&quot;</span><br><span class="line">2) &quot;v2&quot;</span><br><span class="line">3) &quot;v3&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>msetnx : 批量设置值，前提是键必须不存在</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys *</span><br><span class="line">1) &quot;k3&quot;</span><br><span class="line">2) &quot;k1&quot;</span><br><span class="line">3) &quot;k2&quot;</span><br><span class="line">127.0.0.1:6379&gt; msetnx k1 v2 k4 v4	# msetnx 是一个原子性的操作，要么一起成功，要么一起失败</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">&quot;v1&quot;</span><br><span class="line">127.0.0.1:6379&gt; get k4</span><br><span class="line">(nil)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>设置一个对象</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># user:&#123;id&#125;:&#123;filed&#125;</span><br><span class="line">127.0.0.1:6379&gt; mset user:1:name zhangsan user:1:age 2</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; mget user:1:name user:1:age</span><br><span class="line">1) &quot;zhangsan&quot;</span><br><span class="line">2) &quot;2&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>设置一个对象，用json字符串保存</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set user:1 &#123;name:zhangsan,age:26&#125;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; get user:1</span><br><span class="line">&quot;&#123;name:zhangsan,age:26&#125;&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>getset 组合命令</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys *</span><br><span class="line">(empty array)</span><br><span class="line">127.0.0.1:6379&gt; getset key1 hello</span><br><span class="line">(nil)</span><br><span class="line">127.0.0.1:6379&gt; get key1</span><br><span class="line">&quot;hello&quot;</span><br><span class="line">127.0.0.1:6379&gt; getset key1 redis</span><br><span class="line">&quot;hello&quot;</span><br><span class="line">127.0.0.1:6379&gt; get key1</span><br><span class="line">&quot;redis&quot;</span><br></pre></td></tr></table></figure>
+<p><code>想知道更多详细的命令可以访问：</code> <a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44758876/article/details/118191804">Redis命令详解</a></p>
+<h3 id="1-2-使用场景">1.2 使用场景</h3>
+<ul>
+<li>计数器</li>
+<li>统计多单位的数量</li>
+<li>粉丝数</li>
+<li>对象缓存、存储</li>
+</ul>
+<h3 id="1-3-数据结构">1.3 数据结构</h3>
+<p>String的数据结构为简单动态字符串（Simple Dynamic String,缩写SDS）。是可以修改的字符串，内部结构实现上类似于 Java 的 ArrayList ，采用预分配冗余空间的方式来减少内存的频繁分配。<br>
+<img src="https://img-blog.csdnimg.cn/59d3706049054848bdb41c586fee4085.png#pic_center" alt="在这里插入图片描述"><br>
+如图中所示，内部为当前字符串实际分配的空间 capacity 一般要高于实际字符串长度 len 。当字符串长度小于1M时，扩容都是加倍现有的空间，如果超过1M，扩容时一次只会多扩1M的空间。<br>
+<br></p>
+<h2 id="2-List（列表）">2. List（列表）</h2>
+<p><img src="https://img-blog.csdnimg.cn/5050488cb18a4a088afc6def567707f1.png#pic_center" alt="在这里插入图片描述"></p>
+<p>Redis 的列表类型是简单的字符串列表，按照插入顺序排序，可以添加一个元素到列表的头部（左边）或者尾部（右边）。<br>
+它的底层实际是个<code>双向链表</code>，对两端的操作性能很高，通过索引下标的操作中间的节点性能会较差。</p>
+<h3 id="2-1-常用命令">2.1 常用命令</h3>
+<ul>
+<li><code>lrange : 获取列表的多个元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;three&quot;</span><br><span class="line">2) &quot;two&quot;</span><br><span class="line">3) &quot;one&quot;</span><br><span class="line">127.0.0.1:6379&gt; lrange list 0 1</span><br><span class="line">1) &quot;three&quot;</span><br><span class="line">2) &quot;two&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>lindex : 获取列表指定下标的元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;three&quot;</span><br><span class="line">2) &quot;two&quot;</span><br><span class="line">3) &quot;one&quot;</span><br><span class="line">127.0.0.1:6379&gt; lindex list 0</span><br><span class="line">&quot;three&quot;</span><br><span class="line">127.0.0.1:6379&gt; lindex list 1</span><br><span class="line">&quot;two&quot;</span><br><span class="line">127.0.0.1:6379&gt; lindex list 3</span><br><span class="line">(nil)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>llen : 获取列表的长度</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;three&quot;</span><br><span class="line">2) &quot;two&quot;</span><br><span class="line">3) &quot;one&quot;</span><br><span class="line">127.0.0.1:6379&gt; llen list</span><br><span class="line">(integer) 3</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>lpush : 将一个值或多个值插入列表的头部</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lpush list one</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; lpush list two three</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;three&quot;</span><br><span class="line">2) &quot;two&quot;</span><br><span class="line">3) &quot;one&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>rpush : 将一个值或多个值插入列表的尾部</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; rpush list one</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; rpush list two three</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;one&quot;</span><br><span class="line">2) &quot;two&quot;</span><br><span class="line">3) &quot;three&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>lpop : 移除列表头部的元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;one&quot;</span><br><span class="line">2) &quot;two&quot;</span><br><span class="line">3) &quot;three&quot;</span><br><span class="line">127.0.0.1:6379&gt; lpop list</span><br><span class="line">&quot;one&quot;</span><br><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;two&quot;</span><br><span class="line">2) &quot;three&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>rpop : 移除列表尾部的元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;three&quot;</span><br><span class="line">2) &quot;two&quot;</span><br><span class="line">3) &quot;one&quot;</span><br><span class="line">127.0.0.1:6379&gt; rpop list</span><br><span class="line">&quot;one&quot;</span><br><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;three&quot;</span><br><span class="line">2) &quot;two&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>lrem : 移除列表指定的元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;three&quot;</span><br><span class="line">2) &quot;two&quot;</span><br><span class="line">3) &quot;one&quot;</span><br><span class="line">127.0.0.1:6379&gt; lrem list 1 one</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;three&quot;</span><br><span class="line">2) &quot;two&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>lrem : 移除列表指定的多个元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;three&quot;</span><br><span class="line">2) &quot;two&quot;</span><br><span class="line">3) &quot;one&quot;</span><br><span class="line">4) &quot;one&quot;</span><br><span class="line">127.0.0.1:6379&gt; lrem list 2 one</span><br><span class="line">(integer) 2</span><br><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;three&quot;</span><br><span class="line">2) &quot;two&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>ltrim : 截取列表指定下标内的元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; rpush mylist &quot;hello&quot; &quot;hello1&quot; &quot;hello2&quot; &quot;hello3&quot;</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; lrange mylist 0 -1</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;hello1&quot;</span><br><span class="line">3) &quot;hello2&quot;</span><br><span class="line">4) &quot;hello3&quot;</span><br><span class="line">127.0.0.1:6379&gt; ltrim mylist 1 2</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; lrange mylist 0 -1</span><br><span class="line">1) &quot;hello1&quot;</span><br><span class="line">2) &quot;hello2&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>rpoplpush : 移除列表最后一个元素，将该元素移动到新的列表中（新列表不存在时会自动创建）</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lrange mylist 0 -1</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;hello1&quot;</span><br><span class="line">3) &quot;hello2&quot;</span><br><span class="line">127.0.0.1:6379&gt; rpoplpush mylist myotherlist</span><br><span class="line">&quot;hello2&quot;</span><br><span class="line">127.0.0.1:6379&gt; lrange mylist 0 -1</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;hello1&quot;</span><br><span class="line">127.0.0.1:6379&gt; lrange myotherlist 0 -1</span><br><span class="line">1) &quot;hello2&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>lset : 将列表中指定下标的值替换为另一个值（更新操作，更新不存在的下标会报错）</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; exists list</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; lset list 0 item</span><br><span class="line">(error) ERR no such key</span><br><span class="line">127.0.0.1:6379&gt; lpush list value1</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;value1&quot;</span><br><span class="line">127.0.0.1:6379&gt; lset list 0 item</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; lrange list 0 -1</span><br><span class="line">1) &quot;item&quot;</span><br><span class="line">127.0.0.1:6379&gt; lset list 1 other</span><br><span class="line">(error) ERR index out of range</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>linsert : 将某个具体的值插入到列表中指定元素的前面或后面</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lrange mylist 0 -1</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;world&quot;</span><br><span class="line">127.0.0.1:6379&gt; linsert mylist before &quot;world&quot; &quot;other&quot;</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; lrange mylist 0 -1</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;other&quot;</span><br><span class="line">3) &quot;world&quot;</span><br><span class="line">127.0.0.1:6379&gt; linsert mylist after &quot;world&quot; &quot;new&quot;</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; lrange mylist 0 -1</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;other&quot;</span><br><span class="line">3) &quot;world&quot;</span><br><span class="line">4) &quot;new&quot;</span><br></pre></td></tr></table></figure>
+<h3 id="2-2-使用场景">2.2 使用场景</h3>
+<ul>
+<li>List 类型经常会被用于消息队列的服务，以完成多程序之间的消息交换</li>
+<li>消息队列（lpush rpop）</li>
+<li>栈（lpush lpop）</li>
+</ul>
+<h3 id="2-3-数据结构">2.3 数据结构</h3>
+<p>List的数据结构为快速链表 quickList 。<br>
+首先在列表元素较少的情况下会使用一块连续的内存存储，这个结构是ziplist，也即是压缩列表。<br>
+它将所有的元素紧挨着一起存储，分配的是一块连续的内存。<br>
+当数据量比较多的时候才会改成quicklist。<br>
+因为普通的链表需要的附加指针空间太大，会比较浪费空间。比如这个列表里存的只是int类型的数据，结构上还需要两个额外的指针prev和next。<br>
+<img src="https://img-blog.csdnimg.cn/04f1550332bc48d797f57011add50a1a.png#pic_center" alt="在这里插入图片描述"><br>
+Redis将链表和ziplist结合起来组成了quicklist。也就是将多个ziplist使用双向指针串起来使用。这样既满足了快速的插入删除性能，又不会出现太大的空间冗余。</p>
+<h2 id="3-Set（集合）">3. Set（集合）</h2>
+<p>set对外提供的功能与list类似是一个列表的功能，特殊之处在于set是可以<code>自动排重</code>的，当你需要存储一个列表数据，又不希望出现重复数据时，set是一个很好的选择，并且set提供了判断某个成员是否在一个set集合内的重要接口，这个也是list所不能提供的。<br>
+edis的Set是string类型的无序集合。它底层其实是一个value为null的hash表，所以添加，删除，查找的<code>复杂度都是O(1)</code>。<br>
+一个算法，随着数据的增加，执行时间的长短，如果是O(1)，数据增加，查找数据的时间不变。</p>
+<h3 id="3-1-常用命令">3.1 常用命令</h3>
+<ul>
+<li><code>smembers : 查看集合的所有元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; smembers myset</span><br><span class="line">1) &quot;world&quot;</span><br><span class="line">2) &quot;hello&quot;</span><br><span class="line">3) &quot;redis&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>sadd : 往集合中添加值</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; smembers myset</span><br><span class="line">1) &quot;world&quot;</span><br><span class="line">2) &quot;hello&quot;</span><br><span class="line">3) &quot;redis&quot;</span><br><span class="line">127.0.0.1:6379&gt; sadd myset &quot;Redis&quot;</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; smembers myset</span><br><span class="line">1) &quot;Redis&quot;</span><br><span class="line">2) &quot;world&quot;</span><br><span class="line">3) &quot;hello&quot;</span><br><span class="line">4) &quot;redis&quot;</span><br><span class="line">127.0.0.1:6379&gt; sadd myset &quot;hello1&quot; &quot;hello2&quot;</span><br><span class="line">(integer) 2</span><br><span class="line">127.0.0.1:6379&gt; smembers myset</span><br><span class="line">1) &quot;redis&quot;</span><br><span class="line">2) &quot;hello&quot;</span><br><span class="line">3) &quot;world&quot;</span><br><span class="line">4) &quot;Redis&quot;</span><br><span class="line">5) &quot;hello1&quot;</span><br><span class="line">6) &quot;hello2&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>sismember : 判断集合中是否存在指定元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; smembers myset</span><br><span class="line">1) &quot;redis&quot;</span><br><span class="line">2) &quot;hello&quot;</span><br><span class="line">3) &quot;world&quot;</span><br><span class="line">4) &quot;Redis&quot;</span><br><span class="line">5) &quot;hello1&quot;</span><br><span class="line">6) &quot;hello2&quot;</span><br><span class="line">127.0.0.1:6379&gt; sismember myset hello1</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; sismember myset hello3</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>scard : 获取集合所有元素的个数</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; smembers myset</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;world&quot;</span><br><span class="line">3) &quot;Redis&quot;</span><br><span class="line">4) &quot;redis&quot;</span><br><span class="line">5) &quot;hello1&quot;</span><br><span class="line">6) &quot;hello2&quot;</span><br><span class="line">127.0.0.1:6379&gt; scard myset</span><br><span class="line">(integer) 6</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>srem : 移除集合中指定元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; smembers myset</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;world&quot;</span><br><span class="line">3) &quot;Redis&quot;</span><br><span class="line">4) &quot;redis&quot;</span><br><span class="line">5) &quot;hello1&quot;</span><br><span class="line">6) &quot;hello2&quot;</span><br><span class="line">127.0.0.1:6379&gt; srem myset world</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; smembers myset</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;Redis&quot;</span><br><span class="line">3) &quot;redis&quot;</span><br><span class="line">4) &quot;hello1&quot;</span><br><span class="line">5) &quot;hello2&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>srandmember : 随机获取集合中的元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; smembers myset</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;Redis&quot;</span><br><span class="line">3) &quot;redis&quot;</span><br><span class="line">4) &quot;hello1&quot;</span><br><span class="line">5) &quot;hello2&quot;</span><br><span class="line">127.0.0.1:6379&gt; srandmember myset</span><br><span class="line">&quot;hello&quot;</span><br><span class="line">127.0.0.1:6379&gt; srandmember myset</span><br><span class="line">&quot;hello2&quot;</span><br><span class="line">127.0.0.1:6379&gt; srandmember myset 2</span><br><span class="line">1) &quot;Redis&quot;</span><br><span class="line">2) &quot;hello&quot;</span><br><span class="line">127.0.0.1:6379&gt; srandmember myset 2</span><br><span class="line">1) &quot;redis&quot;</span><br><span class="line">2) &quot;hello2&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>spop : 随机删除集合中的元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; smembers myset</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;Redis&quot;</span><br><span class="line">3) &quot;redis&quot;</span><br><span class="line">4) &quot;hello1&quot;</span><br><span class="line">5) &quot;hello2&quot;</span><br><span class="line">127.0.0.1:6379&gt; spop myset</span><br><span class="line">&quot;hello2&quot;</span><br><span class="line">127.0.0.1:6379&gt; smembers myset</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;Redis&quot;</span><br><span class="line">3) &quot;redis&quot;</span><br><span class="line">4) &quot;hello1&quot;</span><br><span class="line">127.0.0.1:6379&gt; spop myset</span><br><span class="line">&quot;Redis&quot;</span><br><span class="line">127.0.0.1:6379&gt; smembers myset</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;redis&quot;</span><br><span class="line">3) &quot;hello1&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>smove : 将集合中指定的元素移动到另一个集合中</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; smembers myset</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;redis&quot;</span><br><span class="line">3) &quot;hello1&quot;</span><br><span class="line">127.0.0.1:6379&gt; smembers myset2</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">127.0.0.1:6379&gt; smove myset myset2 &quot;hello1&quot;</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; smembers myset</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;redis&quot;</span><br><span class="line">127.0.0.1:6379&gt; smembers myset2</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;hello1&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>sdiff : 获取两个集合之间的差集</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; smembers set1</span><br><span class="line">1) &quot;c&quot;</span><br><span class="line">2) &quot;b&quot;</span><br><span class="line">3) &quot;a&quot;</span><br><span class="line">127.0.0.1:6379&gt; smembers set2</span><br><span class="line">1) &quot;e&quot;</span><br><span class="line">2) &quot;c&quot;</span><br><span class="line">3) &quot;d&quot;</span><br><span class="line">127.0.0.1:6379&gt; sdiff set1 set2</span><br><span class="line">1) &quot;a&quot;</span><br><span class="line">2) &quot;b&quot;</span><br><span class="line">127.0.0.1:6379&gt; sdiff set2 set1</span><br><span class="line">1) &quot;e&quot;</span><br><span class="line">2) &quot;d&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>sinter : 获取两个集合之间的交集</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; smembers set1</span><br><span class="line">1) &quot;c&quot;</span><br><span class="line">2) &quot;b&quot;</span><br><span class="line">3) &quot;a&quot;</span><br><span class="line">127.0.0.1:6379&gt; smembers set2</span><br><span class="line">1) &quot;e&quot;</span><br><span class="line">2) &quot;c&quot;</span><br><span class="line">3) &quot;d&quot;</span><br><span class="line">127.0.0.1:6379&gt; sinter set1 set2</span><br><span class="line">1) &quot;c&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>sunion : 获取两个集合之间的并集</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; smembers set1</span><br><span class="line">1) &quot;c&quot;</span><br><span class="line">2) &quot;b&quot;</span><br><span class="line">3) &quot;a&quot;</span><br><span class="line">127.0.0.1:6379&gt; smembers set2</span><br><span class="line">1) &quot;e&quot;</span><br><span class="line">2) &quot;c&quot;</span><br><span class="line">3) &quot;d&quot;</span><br><span class="line">127.0.0.1:6379&gt; sunion set1 set2</span><br><span class="line">1) &quot;a&quot;</span><br><span class="line">2) &quot;b&quot;</span><br><span class="line">3) &quot;c&quot;</span><br><span class="line">4) &quot;e&quot;</span><br><span class="line">5) &quot;d&quot;</span><br></pre></td></tr></table></figure>
+<h3 id="3-2-使用场景">3.2 使用场景</h3>
+<ul>
+<li>用户之间的共同关注、共同爱好、二度好友</li>
+<li>推荐好友</li>
+<li>六度分割理论</li>
+</ul>
+<h3 id="3-3-数据结构">3.3 数据结构</h3>
+<p>Set数据结构是dict字典，字典是用哈希表实现的。<br>
+Java中 HashSet 的内部实现使用的是 HashMap ，只不过所有的 value 都指向同一个对象。Redis的 set 结构也是一样，它的内部也使用 hash 结构，所有的 value 都指向同一个内部值。</p>
+<h2 id="4-Hash（哈希）">4. Hash（哈希）</h2>
+<p>Redis hash 是一个键值对集合。<br>
+Redis hash 是一个 string 类型的 field 和 value 的映射表，hash 特别适合用于存储对象。<br>
+类似 Java 里面的<code>Map&lt;String,Object&gt;</code>。</p>
+<p>举个例子，用户ID为查找的 key ，存储的 value 用户对象包含姓名，年龄，生日等信息，如果用普通的 key/value 结构来存储，主要有以下2种存储方式：</p>
+<ol>
+<li>每次修改用户的某个属性需要，先反序列化改好后再序列化回去，开销较大。<br>
+<img src="https://img-blog.csdnimg.cn/81bd9b7532f4442695a5416f9837ec4c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDc1ODg3Ng==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>用户ID数据冗余。<br>
+<img src="https://img-blog.csdnimg.cn/001df24aca2c40ba8a8321e402347f9e.png#pic_center" alt="在这里插入图片描述"></li>
+</ol>
+<p>通过 <code>key(用户ID) + field(属性标签)</code> 就可以操作对应属性数据了，既不需要重复存储数据，也不会带来序列化和并发修改控制的问题。<br>
+<img src="https://img-blog.csdnimg.cn/75dd0fc25371410dbc2baf86e9b6c633.png#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="4-1-常用命令">4.1 常用命令</h3>
+<ul>
+<li><code>hkeys : 获取hash中所有的field</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hkeys myhash</span><br><span class="line">1) &quot;field1&quot;</span><br><span class="line">2) &quot;field2&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>hvals : 获取hash中所有的value</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hvals myhash</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;world&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>hset : 设置hash的field-value值</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hset myhash field1 &quot;hello&quot;</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; hkeys myhash</span><br><span class="line">1) &quot;field1&quot;</span><br><span class="line">127.0.0.1:6379&gt; hvals myhash</span><br><span class="line">1) &quot;hello&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>hmset : 设置多个hash的field-value值</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hmset myhash field1 hello field2 world</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; hkeys myhash</span><br><span class="line">1) &quot;field1&quot;</span><br><span class="line">2) &quot;field2&quot;</span><br><span class="line">127.0.0.1:6379&gt; hvals myhash</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;world&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>hget : 获取hash中指定的value</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hget myhash field1</span><br><span class="line">&quot;hello&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>hmget : 获取hash中指定的多个value</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hmget myhash field1 field2</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;world&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>hgetall : 获取hash中所有的值</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hgetall myhash</span><br><span class="line">1) &quot;field1&quot;</span><br><span class="line">2) &quot;hello&quot;</span><br><span class="line">3) &quot;field2&quot;</span><br><span class="line">4) &quot;world&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>hdel : 删除hash中指定的field（对应的value同样被删除）</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hkeys myhash</span><br><span class="line">1) &quot;field1&quot;</span><br><span class="line">2) &quot;field2&quot;</span><br><span class="line">127.0.0.1:6379&gt; hvals myhash</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;world&quot;</span><br><span class="line">127.0.0.1:6379&gt; hdel myhash field1</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; hkeys myhash</span><br><span class="line">1) &quot;field2&quot;</span><br><span class="line">127.0.0.1:6379&gt; hvals myhash</span><br><span class="line">1) &quot;world&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>hlen : 获取hash的元素数量</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hkeys myhash</span><br><span class="line">1) &quot;field2&quot;</span><br><span class="line">2) &quot;field1&quot;</span><br><span class="line">127.0.0.1:6379&gt; hvals myhash</span><br><span class="line">1) &quot;world&quot;</span><br><span class="line">2) &quot;hello&quot;</span><br><span class="line">127.0.0.1:6379&gt; hlen myhash</span><br><span class="line">(integer) 2</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>hexists : 判断hash中的指定元素是否存在</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hkeys myhash</span><br><span class="line">1) &quot;field2&quot;</span><br><span class="line">2) &quot;field1&quot;</span><br><span class="line">127.0.0.1:6379&gt; hvals myhash</span><br><span class="line">1) &quot;world&quot;</span><br><span class="line">2) &quot;hello&quot;</span><br><span class="line">127.0.0.1:6379&gt; hexists myhash field1</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; hexists myhash field3</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>hincrby : 使hash中指定field的值增量</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hset myhash field1 3</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; hincrby myhash field1 1</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; hgetall myhash</span><br><span class="line">1) &quot;field1&quot;</span><br><span class="line">2) &quot;4&quot;</span><br><span class="line">127.0.0.1:6379&gt; hincrby myhash field1 -1</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; hgetall myhash</span><br><span class="line">1) &quot;field1&quot;</span><br><span class="line">2) &quot;3&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>hsetnx : 设置hash的field-value值，如果field存在则不能设置，如果field不存在可以设置</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hsetnx myhash field1 hello</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; hgetall myhash</span><br><span class="line">1) &quot;field1&quot;</span><br><span class="line">2) &quot;hello&quot;</span><br><span class="line">127.0.0.1:6379&gt; hsetnx myhash field1 hello1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; hgetall myhash</span><br><span class="line">1) &quot;field1&quot;</span><br><span class="line">2) &quot;hello&quot;</span><br></pre></td></tr></table></figure>
+<h3 id="4-2-使用场景">4.2 使用场景</h3>
+<ul>
+<li>hash更适合存储对象，而string更适合存储字符串</li>
+<li>用户信息，经常变动的信息</li>
+</ul>
+<h3 id="4-3-数据结构">4.3 数据结构</h3>
+<p>Hash类型对应的数据结构是两种：<code>ziplist（压缩列表）</code>，<code>hashtable（哈希表）</code>。<br>
+当 field-value 长度较短且个数较少时，使用 ziplist ，否则使用 hashtable 。</p>
+<h2 id="5-Zset（sorted-set：有序集合）">5. Zset（sorted set：有序集合）</h2>
+<p>Redis有序集合zset与普通集合set非常相似，是一个<code>没有重复元素</code>的字符串集合。<br>
+不同之处是有序集合的每个成员都关联了一个<code>评分（score）</code>,这个评分（score）被用来按照从最低分到最高分的方式排序集合中的成员。<code>集合的成员是唯一的，但是评分可以是重复了</code> 。<br>
+因为元素是有序的, 所以你也可以很快的根据评分（score）或者次序（position）来获取一个范围的元素。<br>
+访问有序集合的中间元素也是非常快的,因此你能够使用有序集合作为一个没有重复成员的智能列表。</p>
+<h3 id="5-1-常用命令">5.1 常用命令</h3>
+<ul>
+<li><code>zrange : 获取zset集合的多个元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zrange salary 0 -1</span><br><span class="line">1) &quot;wangwu&quot;</span><br><span class="line">2) &quot;zhangsan&quot;</span><br><span class="line">3) &quot;lisi&quot;</span><br><span class="line">127.0.0.1:6379&gt; zrange salary 0 1</span><br><span class="line">1) &quot;wangwu&quot;</span><br><span class="line">2) &quot;zhangsan&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>zadd : 向zset集合中添加数据</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zadd myset 1 one</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; zadd myset 2 two 3 three</span><br><span class="line">(integer) 2</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>zrangebyscore : 排序，从小到大</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zadd salary 2500 zhangsan</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; zadd salary 5000 lisi</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; zadd salary 1000 wangwu</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; zrangebyscore salary -inf +inf</span><br><span class="line">1) &quot;wangwu&quot;</span><br><span class="line">2) &quot;zhangsan&quot;</span><br><span class="line">3) &quot;lisi&quot;</span><br><span class="line">127.0.0.1:6379&gt; zrangebyscore salary -inf +inf withscores</span><br><span class="line">1) &quot;wangwu&quot;</span><br><span class="line">2) &quot;1000&quot;</span><br><span class="line">3) &quot;zhangsan&quot;</span><br><span class="line">4) &quot;2500&quot;</span><br><span class="line">5) &quot;lisi&quot;</span><br><span class="line">6) &quot;5000&quot;</span><br><span class="line">127.0.0.1:6379&gt; zrangebyscore salary -inf +2500 withscores</span><br><span class="line">1) &quot;wangwu&quot;</span><br><span class="line">2) &quot;1000&quot;</span><br><span class="line">3) &quot;zhangsan&quot;</span><br><span class="line">4) &quot;2500&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>zrevrange : 排序，从大到小</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zrevrange salary 0 -1</span><br><span class="line">1) &quot;lisi&quot;</span><br><span class="line">2) &quot;zhangsan&quot;</span><br><span class="line">3) &quot;zhaoliu&quot;</span><br><span class="line">4) &quot;wangwu&quot;</span><br><span class="line">127.0.0.1:6379&gt; zrevrange salary 0 -1 withscores</span><br><span class="line">1) &quot;lisi&quot;</span><br><span class="line">2) &quot;5000&quot;</span><br><span class="line">3) &quot;zhangsan&quot;</span><br><span class="line">4) &quot;2500&quot;</span><br><span class="line">5) &quot;zhaoliu&quot;</span><br><span class="line">6) &quot;2000&quot;</span><br><span class="line">7) &quot;wangwu&quot;</span><br><span class="line">8) &quot;1000&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>zrem : 删除zset集合中的元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zrange salary 0 -1</span><br><span class="line">1) &quot;wangwu&quot;</span><br><span class="line">2) &quot;zhangsan&quot;</span><br><span class="line">3) &quot;lisi&quot;</span><br><span class="line">127.0.0.1:6379&gt; zrem salary wangwu</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; zrange salary 0 -1</span><br><span class="line">1) &quot;zhangsan&quot;</span><br><span class="line">2) &quot;lisi&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>zcard : 获取zset集合所有元素的个数</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zrange salary 0 -1</span><br><span class="line">1) &quot;zhangsan&quot;</span><br><span class="line">2) &quot;lisi&quot;</span><br><span class="line">127.0.0.1:6379&gt; zcard salary</span><br><span class="line">(integer) 2</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>zcount : 获取指定区间内的元素数量</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zrevrange salary 0 -1 withscores</span><br><span class="line">1) &quot;lisi&quot;</span><br><span class="line">2) &quot;5000&quot;</span><br><span class="line">3) &quot;zhangsan&quot;</span><br><span class="line">4) &quot;2500&quot;</span><br><span class="line">5) &quot;zhaoliu&quot;</span><br><span class="line">6) &quot;2000&quot;</span><br><span class="line">7) &quot;wangwu&quot;</span><br><span class="line">8) &quot;1000&quot;</span><br><span class="line">127.0.0.1:6379&gt; zcount salary 2000 5000</span><br><span class="line">(integer) 3</span><br></pre></td></tr></table></figure>
+<h3 id="5-2-使用场景">5.2 使用场景</h3>
+<ul>
+<li>存储班级成绩表、工资表排序</li>
+<li>带权重排序，普通消息为1，重要消息为2</li>
+<li>排行榜应用实现、取TopN</li>
+</ul>
+<h3 id="5-3-数据结构">5.3 数据结构</h3>
+<p>SortedSet（zset） 是 Redis 提供的一个非常特别的数据结构，一方面它等价于 Java 的数据结构<code>Map&lt;String, Double&gt;</code>，可以给每一个元素 value 赋予一个权重 score ，另一方面它又类似于<code>TreeSet</code>，内部的元素会按照权重 score 进行排序，可以得到每个元素的名次，还可以通过 score 的范围来获取元素的列表。</p>
+<p>zset 底层使用了两个数据结构：</p>
+<ol>
+<li>hash ，hash 的作用就是关联元素 value 和权重 score ，保障元素 value 的唯一性，可以通过元素 value 找到相应的 score 值。</li>
+<li>跳跃表，跳跃表的目的在于给元素 value 排序，根据 score 的范围获取元素列表。</li>
+</ol>
+<h3 id="5-4-跳跃表（跳表）">5.4 跳跃表（跳表）</h3>
+<h4 id="5-4-1-简介">5.4.1 简介</h4>
+<p>有序集合在生活中比较常见，例如根据成绩对学生排名，根据得分对玩家排名等。对于有序集合的底层实现，可以用数组、平衡树、链表等。数组不便元素的插入、删除；平衡树或红黑树虽然效率高但结构复杂；链表查询需要遍历所有效率低。 Redis 采用的是跳跃表。跳跃表效率堪比红黑树，实现远比红黑树简单。</p>
+<h4 id="5-4-2-实例">5.4.2 实例</h4>
+<p><strong>对比有序链表和跳跃表，从链表中查询出“51”：</strong></p>
+<ol>
+<li>有序链表<br>
+<img src="https://img-blog.csdnimg.cn/b84964b25e504d4ca76524d5582676f8.png#pic_center" alt="在这里插入图片描述">要查找值为51的元素，需要从第一个元素开始依次查找、比较才能找到。共需要6次比较。</li>
+<li>跳跃表<br>
+<img src="https://img-blog.csdnimg.cn/1e8d09a0060e4f50a4a894f64d440aee.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDc1ODg3Ng==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>
+从第2层开始，1节点比51节点小，向后比较。<br>
+21节点比51节点小，继续向后比较，后面就是NULL了，所以从21节点向下到第1层；<br>
+在第1层，41节点比51节点小，继续向后，61节点比51节点大，所以从41向下；<br>
+在第0层，51节点为要查找的节点，节点被找到，共查找4次。</li>
+</ol>
+<p><strong>从此可以看出跳跃表比有序链表效率要高。</strong></p>
+<h1 id="三、Redis的三种特殊数据类型">三、Redis的三种特殊数据类型</h1>
+<p><code>Geospatial（地理信息）</code>、<code>HyperLogLog（基数统计）</code>、Bitmaps</p>
+<h2 id="1-Geospatial（地理信息）">1. Geospatial（地理信息）</h2>
+<p>Redis 3.2 中增加了对 GEO 类型的支持。GEO 是 Geographic（地理信息）的缩写。该类型，就是元素的 2 维坐标，在地图上就是经纬度。 redis 基于该类型，提供了经纬度设置，查询，范围查询，距离查询，经纬度 Hash 等常见操作。</p>
+<h3 id="1-1-常用命令-2">1.1 常用命令</h3>
+<ul>
+<li><code>geoadd : 添加地理位置，两级无法直接添加（一般会下载城市数据通过java程序一次性导入），有效的经度是 -180 度到 180 度，有效的纬度是 -85.05112878 度到 85.05112878 度，当坐标位置超出指定范围时，该命令将会返回一个错误。已经添加的数据，是无法再次往里面添加的。</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; geoadd china:city 116.405285 39.904989 beijing</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; geoadd china:city 121.472644 31.231706 shanghai</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; geoadd china:city 114.085947 22.547 shenzhen</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; geoadd china:city 113.280637 23.125178 guangzhou</span><br><span class="line">(integer) 1</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>geopos : 获取指定地区的坐标值</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; geopos china:city beijing</span><br><span class="line">1) 1) &quot;116.40528291463851929&quot;</span><br><span class="line">   2) &quot;39.9049884229125027&quot;</span><br><span class="line">127.0.0.1:6379&gt; geopos china:city beijing shanghai</span><br><span class="line">1) 1) &quot;116.40528291463851929&quot;</span><br><span class="line">   2) &quot;39.9049884229125027&quot;</span><br><span class="line">2) 1) &quot;121.47264629602432251&quot;</span><br><span class="line">   2) &quot;31.23170490709807012&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>geodist : 获取两个位置之间的直线距离</code>
+<ul>
+<li>m 表示单位为米 [ 默认值 ]</li>
+<li>km 表示单位为千米</li>
+<li>mi 表示单位为英里</li>
+<li>ft 表示单位为英尺</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; geodist china:city beijing shanghai</span><br><span class="line">&quot;1067597.9668&quot;</span><br><span class="line">127.0.0.1:6379&gt; geodist china:city beijing shanghai km</span><br><span class="line">&quot;1067.5980&quot;</span><br><span class="line">127.0.0.1:6379&gt; geodist china:city beijing shanghai mi</span><br><span class="line">&quot;663.3763&quot;</span><br><span class="line">127.0.0.1:6379&gt; geodist china:city beijing shanghai ft</span><br><span class="line">&quot;3502618.0013&quot;</span><br><span class="line">127.0.0.1:6379&gt; geodist china:city beijing guangzhou km</span><br><span class="line">&quot;1889.3706&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>georadius : 以给定的维度为中心，找出半径内的元素</code>
+<ul>
+<li>withdist : 显示到中心位置的距离</li>
+<li>withcoord : 显示半径内元素的坐标</li>
+<li>count : 限定显示几个元素</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; georadius china:city 110 30 1000 km</span><br><span class="line">1) &quot;shenzhen&quot;</span><br><span class="line">2) &quot;guangzhou&quot;</span><br><span class="line">127.0.0.1:6379&gt; georadius china:city 110 30 900 km</span><br><span class="line">1) &quot;guangzhou&quot;</span><br><span class="line">127.0.0.1:6379&gt; georadius china:city 110 30 1000 km withdist</span><br><span class="line">1) 1) &quot;shenzhen&quot;</span><br><span class="line">   2) &quot;923.4929&quot;</span><br><span class="line">2) 1) &quot;guangzhou&quot;</span><br><span class="line">   2) &quot;831.2636&quot;</span><br><span class="line">127.0.0.1:6379&gt; georadius china:city 110 30 900 km withdist</span><br><span class="line">1) 1) &quot;guangzhou&quot;</span><br><span class="line">   2) &quot;831.2636&quot;</span><br><span class="line">127.0.0.1:6379&gt; georadius china:city 110 30 1000 km withcoord</span><br><span class="line">1) 1) &quot;shenzhen&quot;</span><br><span class="line">   2) 1) &quot;114.08594459295272827&quot;</span><br><span class="line">      2) &quot;22.54699993773966327&quot;</span><br><span class="line">2) 1) &quot;guangzhou&quot;</span><br><span class="line">   2) 1) &quot;113.28063815832138062&quot;</span><br><span class="line">      2) &quot;23.12517743834835215&quot;</span><br><span class="line">127.0.0.1:6379&gt; georadius china:city 110 30 1000 km withdist withcoord</span><br><span class="line">1) 1) &quot;shenzhen&quot;</span><br><span class="line">   2) &quot;923.4929&quot;</span><br><span class="line">   3) 1) &quot;114.08594459295272827&quot;</span><br><span class="line">      2) &quot;22.54699993773966327&quot;</span><br><span class="line">2) 1) &quot;guangzhou&quot;</span><br><span class="line">   2) &quot;831.2636&quot;</span><br><span class="line">   3) 1) &quot;113.28063815832138062&quot;</span><br><span class="line">      2) &quot;23.12517743834835215&quot;</span><br><span class="line">127.0.0.1:6379&gt; georadius china:city 110 30 1000 km withdist withcoord count 1</span><br><span class="line">1) 1) &quot;guangzhou&quot;</span><br><span class="line">   2) &quot;831.2636&quot;</span><br><span class="line">   3) 1) &quot;113.28063815832138062&quot;</span><br><span class="line">      2) &quot;23.12517743834835215&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>georadiusbymember : 以指定元素为中心，找出半径内的元素</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; georadiusbymember china:city beijing 1500 km</span><br><span class="line">1) &quot;shanghai&quot;</span><br><span class="line">2) &quot;beijing&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>geohash : 返回一个或多个位置元素，以Geohash表示（会返回一个11个字符的Geohash字符串）</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 将二维的经纬度转换为一维的字符串，如果两个字符串越接近，则距离越近</span><br><span class="line">127.0.0.1:6379&gt; geohash china:city beijing guangzhou</span><br><span class="line">1) &quot;wx4g0b7xrt0&quot;</span><br><span class="line">2) &quot;ws0e9cb3yj0&quot;</span><br></pre></td></tr></table></figure>
+<p><strong>GEO底层的实现原理其实就是Zset，可以使用Zset命令来操作GEO</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zrange china:city 0 -1</span><br><span class="line">1) &quot;shenzhen&quot;</span><br><span class="line">2) &quot;guangzhou&quot;</span><br><span class="line">3) &quot;shanghai&quot;</span><br><span class="line">4) &quot;beijing&quot;</span><br><span class="line">127.0.0.1:6379&gt; zrem china:city beijing</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; zrange china:city 0 -1</span><br><span class="line">1) &quot;shenzhen&quot;</span><br><span class="line">2) &quot;guangzhou&quot;</span><br><span class="line">3) &quot;shanghai&quot;</span><br></pre></td></tr></table></figure>
+<h3 id="1-2-使用场景-2">1.2 使用场景</h3>
+<ul>
+<li>附近的人</li>
+<li>打车距离计算</li>
+</ul>
+<h2 id="2-HyperLogLog（基数统计）">2. HyperLogLog（基数统计）</h2>
+<p>在工作当中，我们经常会遇到与统计相关的功能需求，比如统计网站 PV（PageView 页面访问量）,可以使用 Redis 的 incr 、incrby 轻松实现。<br>
+但像 UV（UniqueVisitor，独立访客）、独立 IP 数、搜索记录数等需要去重和计数的问题如何解决？这种求集合中不重复元素个数的问题称为基数问题。<br>
+解决基数问题有很多种方案：</p>
+<ol>
+<li>数据存储在 MySQL 表中，使用 distinct count 计算不重复个数</li>
+<li>使用 Redis 提供的 hash、set、bitmaps 等数据结构来处理</li>
+</ol>
+<p>以上的方案结果精确，但随着数据不断增加，导致占用空间越来越大，对于非常大的数据集是不切实际的。<br>
+能否能够降低一定的精度来平衡存储空间？Redis推出了 HyperLogLog<br>
+Redis HyperLogLog 是用来做<code>基数统计的算法</code>，HyperLogLog 的优点是，在输入元素的数量或者体积非常非常大时，计算基数所需的空间总是固定的、并且是很小的。<br>
+在 Redis 里面，每个 HyperLogLog 键只需要花费 12 KB 内存，就可以计算接近 2^64 个不同元素的基数。这和计算基数时，元素越多耗费内存就越多的集合形成鲜明对比。<br>
+但是，因为 HyperLogLog 只会根据输入元素来计算基数，而不会储存输入元素本身，所以 HyperLogLog 不能像集合那样，返回输入的各个元素。</p>
+<p>什么是基数?<br>
+比如数据集 {1, 3, 5, 7, 5, 7, 8}， 那么这个数据集的基数集为 {1, 3, 5 ,7, 8}, 基数(不重复元素)为5。 基数估计就是在误差可接受的范围内，快速计算基数。</p>
+<h3 id="2-1-常用命令-2">2.1 常用命令</h3>
+<ul>
+<li><code>pfadd : 添加指定元素到HyperLogLog中（如果执行命令后HyperLogLog估计的近似基数发生变化，则返回1，否则返回0）</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; pfadd mykey a b c d e f g h i j k l m</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; pfadd mykey2 f s v z a b i j l</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; pfadd mykey a</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>pfcount : 统计HyperLogLog的元素个数，计算HyperLogLog的近似基数（可以计算多个HyperLogLog，比如用HyperLogLog存储每天的UV，计算一周的UV可以使用7天的UV合并计算即可）</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; pfadd mykey a b c d e f g h i j k l m</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; pfcount mykey</span><br><span class="line">(integer) 13</span><br><span class="line">127.0.0.1:6379&gt; pfadd mykey2 f s v z a b i j l</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; pfcount mykey2</span><br><span class="line">(integer) 9</span><br><span class="line">127.0.0.1:6379&gt; pfcount mykey mykey2</span><br><span class="line">(integer) 16</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>pfmerge : 将一个或多个HyperLogLog合并后的结果存储在另一个HLL中，比如每月活跃用户可以使用每天的活跃用户来合并计算可得</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; pfcount mykey</span><br><span class="line">(integer) 13</span><br><span class="line">127.0.0.1:6379&gt; pfcount mykey2</span><br><span class="line">(integer) 9</span><br><span class="line">127.0.0.1:6379&gt; pfcount mykey mykey2</span><br><span class="line">(integer) 16</span><br><span class="line">127.0.0.1:6379&gt; pfmerge mykey3 mykey mykey2</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; pfcount mykey3</span><br><span class="line">(integer) 16</span><br></pre></td></tr></table></figure>
+<h3 id="2-2-使用场景-2">2.2 使用场景</h3>
+<ul>
+<li>网页的UV统计</li>
+</ul>
+<h2 id="3-Bitmaps（位图）">3. Bitmaps（位图）</h2>
+<p>现代计算机用二进制（位） 作为信息的基础单位， 1个字节等于8位， 例如“abc”字符串是由3个字节组成， 但实际在计算机存储时将其用二进制表示， “abc”分别对应的ASCII码分别是97、 98、 99， 对应的二进制分别是 01100001、 01100010 和 01100011，如下图：<br>
+<img src="https://img-blog.csdnimg.cn/9ace81b9faa2438f91e20654cc7025dc.png#pic_center" alt="在这里插入图片描述"><br>
+合理地使用操作位能够有效地提高内存使用率和开发效率。<br>
+Redis 提供了 Bitmaps 这个“数据类型”可以实现对位的操作：</p>
+<ol>
+<li>Bitmaps 本身不是一种数据类型， 实际上它就是字符串（key-value） ， 但是它可以对字符串的位进行操作。</li>
+<li>Bitmaps 单独提供了一套命令， 所以在 Redis 中使用Bitmaps和使用字符串的方法不太相同。 可以把 Bitmaps 想象成一个以位为单位的数组， 数组的每个单元只能存储 0 和 1， 数组的下标在 Bitmaps 中叫做<code>偏移量</code>。</li>
+</ol>
+<p><img src="https://img-blog.csdnimg.cn/6ed7f1c8e8814073b725d97f65607f6e.png#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-1-常用命令-2">3.1 常用命令</h3>
+<ul>
+<li><code>setbit : 设置Bitmaps中某个偏移量的值（0或1）</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; setbit sign 0 1</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
+<p><strong>实例：</strong> 每个独立用户是否访问过网站存放在 Bitmaps 中， 将访问的用户记做 1， 没有访问的用户记做 0， 用偏移量作为用户的 id。<br>
+设置键的第 offset 个位的值（从0算起） ， 假设现在有 20 个用户，userid=1， 6， 11， 15， 19 的用户对网站进行了访问， 那么当前 Bitmaps 初始化结果如图：<br>
+<img src="https://img-blog.csdnimg.cn/fb11189682884b79a71f232119982347.png#pic_center" alt="在这里插入图片描述"><br>
+unique:users:20201106 代表 2020-11-06 这天的独立访问用户的 Bitmaps<br>
+<img src="https://img-blog.csdnimg.cn/efc2112d7e3e453f89d8455bee9885c1.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDc1ODg3Ng==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>
+<strong><font color=red>注：</font></strong> 很多应用的用户 id 以一个指定数字（例如10000） 开头， 直接将用户 id 和 Bitmaps 的偏移量对应势必会造成一定的浪费， 通常的做法是每次做 setbit 操作时将用户id减去这个指定数字。<br>
+在第一次初始化 Bitmaps 时， 假如偏移量非常大， 那么整个初始化过程执行会比较慢， 可能会造成 Redis 的阻塞。</p>
+<ul>
+<li><code>getbit : 获取Bitmaps中某个偏移量的值（获取键的第offset位的值（从0开始算））</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; getbit sign 1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; getbit sign 0</span><br><span class="line">(integer) 1</span><br></pre></td></tr></table></figure>
+<p><strong>实例：</strong> 获取 id=8 的用户是否在 2020-11-06 这天访问过， 返回 0 说明没有访问过：<br>
+<img src="https://img-blog.csdnimg.cn/246d76ed52be4fd1a90688e45fbd9742.png#pic_center" alt="在这里插入图片描述"><br>
+<strong><font color=red>注：</font></strong> 因为 100 根本不存在，所以也是返回 0</p>
+<ul>
+<li><code>bitcount : 统计字符串被设置为1的bit数。一般情况下，给定的整个字符串都会被进行计数，通过指定额外的 start 或 end 参数，可以让计数只在特定的位上进行。start 和 end 参数的设置，都可以使用负数值：比如 -1 表示最后一个位，而 -2 表示倒数第二个位，start、end 是指bit组的字节的下标数，二者皆包含</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; bitcount sign </span><br><span class="line">(integer) 3</span><br></pre></td></tr></table></figure>
+<p><strong>实例：</strong> 计算 2022-11-06 这天的独立访问用户数量<br>
+<img src="https://img-blog.csdnimg.cn/9ddc7b9bef2c471a871a04ff2d2f270b.png#pic_center" alt="在这里插入图片描述"><br>
+start和end代表起始和结束字节数， 下面操作计算用户id在第1个字节到第3个字节之间的独立访问用户数， 对应的用户id是11， 15， 19</p>
+<p><img src="https://img-blog.csdnimg.cn/a6785cc6cbd04b208336a5565c7994c3.png#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li><code>bitop : 复合操作， 它可以做多个Bitmaps的and（交集） 、 or（并集） 、 not（非） 、 xor（异或） 操作并将结果保存在destkey中</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; setbit bitmap1 0 1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; setbit bitmap1 1 0</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; setbit bitmap1 2 1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; setbit bitmap2 2 1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; setbit bitmap2 3 0</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; setbit bitmap2 4 1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; bitop and bitmap3 bitmap1 bitmap2</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; bitcount bitmap3</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; bitop or bitmap4 bitmap1 bitmap2</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; bitcount bitmap4</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; bitop xor bitmap5 bitmap1 bitmap2</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; bitcount bitmap5</span><br><span class="line">(integer) 2</span><br></pre></td></tr></table></figure>
+<h3 id="3-2-使用场景-2">3.2 使用场景</h3>
+<ul>
+<li>统计用户信息</li>
+<li>区分活跃、不活跃用户；登录、未登录等等</li>
+<li>上班打卡</li>
+</ul>
+<h3 id="3-3-Bitmaps与set对比">3.3 Bitmaps与set对比</h3>
+<p>假设网站有1亿用户， 每天独立访问的用户有5千万， 如果每天用集合类型和Bitmaps分别存储活跃用户可以得到表</p>
+<table>
+	<tr align=center>
+		<th colspan="4">set 和 Bitmaps 存储一天活跃用户对比</th>
+	</tr>
+	<tr align=center>
+		<td>数据类型</td>
+		<td>每个用户id占用空间</td>
+		<td>需要存储的用户量</td>
+		<td>全部内存量</td>
+	</tr>
+	<tr align=center>
+		<td>集合类型</td>
+		<td>64位</td>
+		<td>50000000</td>
+		<td>64位 * 50000000 = 400MB</td>
+	</tr>
+	<tr align=center>
+		<td>Bitmaps</td>
+		<td>1位</td>
+		<td>100000000</td>
+		<td>1位 * 100000000 = 12.5MB</td>
+	</tr>
+</table>
+很明显， 这种情况下使用Bitmaps能节省很多的内存空间， 尤其是随着时间推移节省的内存还是非常可观的
+<table>
+	<tr align=center>
+		<th colspan="4">set 和 Bitmaps 存储独立用户空间对比</th>
+	</tr>
+	<tr align=center>
+		<td>数据类型</td>
+		<td>一天</td>
+		<td>一个月</td>
+		<td>一年</td>
+	</tr>
+	<tr align=center>
+		<td>集合类型</td>
+		<td>400MB</td>
+		<td>12GB</td>
+		<td>144GB</td>
+	</tr>
+	<tr align=center>
+		<td>Bitmaps</td>
+		<td>12.5MB</td>
+		<td>375MB</td>
+		<td>4.5GB</td>
+	</tr>
+</table>
+但Bitmaps并不是万金油， 假如该网站每天的独立访问用户很少， 例如只有10万（大量的僵尸用户） ， 那么两者的对比如下表所示， 很显然， 这时候使用Bitmaps就不太合适了， 因为基本上大部分位都是0
+<table>
+	<tr align=center>
+		<th colspan="4">set 和 Bitmaps 存储一天活跃用户对比（独立用户比较少）</th>
+	</tr>
+	<tr align=center>
+		<td>数据类型</td>
+		<td>每个userid占用空间</td>
+		<td>需要存储的用户量</td>
+		<td>全部内存量</td>
+	</tr>
+	<tr align=center>
+		<td>集合类型</td>
+		<td>64位</td>
+		<td>100000</td>
+		<td>64位 * 100000 = 800KB</td>
+	</tr>
+	<tr align=center>
+		<td>Bitmaps</td>
+		<td>1位</td>
+		<td>100000000</td>
+		<td>1位 * 100000000 = 12.5MB</td>
+	</tr>
+</table></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2021/07/29/redis_8/">https://program-park.github.io/2021/07/29/redis_8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Redis/">Redis</a></div><div class="post_share"><div class="social-share" data-image="/img/redis/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/07/29/python_9/"><img class="prev-cover" src="/img/python/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Python 脚本之 API 数据合并（第二版）</div></div></a></div><div class="next-post pull-right"><a href="/2021/07/22/leetcode_1/"><img class="next-cover" src="/img/leetcode/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">每日算法 —— 两数之和</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/05/25/redis_1/" title="Redis 6.2.3 安装教程"><img class="cover" src="/img/redis/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-05-25</div><div class="title">Redis 6.2.3 安装教程</div></div></a></div><div><a href="/2021/05/25/redis_2/" title="redis.clients.jedis.exceptions.JedisDataException: DENIED Redis is running in protected mode because"><img class="cover" src="/img/redis/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-05-25</div><div class="title">redis.clients.jedis.exceptions.JedisDataException: DENIED Redis is running in protected mode because</div></div></a></div><div><a href="/2021/06/21/redis_4/" title="Redis 的简单学习"><img class="cover" src="/img/redis/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-21</div><div class="title">Redis 的简单学习</div></div></a></div><div><a href="/2021/06/21/redis_3/" title="Redis 6.2.3 启动教程"><img class="cover" src="/img/redis/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-21</div><div class="title">Redis 6.2.3 启动教程</div></div></a></div><div><a href="/2021/06/24/redis_5/" title="redis-benchmark 性能测试详解"><img class="cover" src="/img/redis/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-24</div><div class="title">redis-benchmark 性能测试详解</div></div></a></div><div><a href="/2021/07/12/redis_7/" title="Redis 单线程为什么还这么快？"><img class="cover" src="/img/redis/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-07-12</div><div class="title">Redis 单线程为什么还这么快？</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">53</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">16</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AE%98%E7%BD%91%E4%BB%8B%E7%BB%8D"><span class="toc-text">一、官网介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Redis%E5%B8%B8%E7%94%A8%E7%9A%84%E4%BA%94%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-text">二、Redis常用的五大数据类型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-String%EF%BC%88%E5%AD%97%E7%AC%A6%E4%B8%B2%EF%BC%89"><span class="toc-text">1. String（字符串）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-text">1.1 常用命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-text">1.2 使用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-text">1.3 数据结构</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-List%EF%BC%88%E5%88%97%E8%A1%A8%EF%BC%89"><span class="toc-text">2. List（列表）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-text">2.1 常用命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-text">2.2 使用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-text">2.3 数据结构</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Set%EF%BC%88%E9%9B%86%E5%90%88%EF%BC%89"><span class="toc-text">3. Set（集合）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-text">3.1 常用命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-text">3.2 使用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-text">3.3 数据结构</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-Hash%EF%BC%88%E5%93%88%E5%B8%8C%EF%BC%89"><span class="toc-text">4. Hash（哈希）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-text">4.1 常用命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-text">4.2 使用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-text">4.3 数据结构</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-Zset%EF%BC%88sorted-set%EF%BC%9A%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88%EF%BC%89"><span class="toc-text">5. Zset（sorted set：有序集合）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-text">5.1 常用命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-text">5.2 使用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-text">5.3 数据结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-%E8%B7%B3%E8%B7%83%E8%A1%A8%EF%BC%88%E8%B7%B3%E8%A1%A8%EF%BC%89"><span class="toc-text">5.4 跳跃表（跳表）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-4-1-%E7%AE%80%E4%BB%8B"><span class="toc-text">5.4.1 简介</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-4-2-%E5%AE%9E%E4%BE%8B"><span class="toc-text">5.4.2 实例</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81Redis%E7%9A%84%E4%B8%89%E7%A7%8D%E7%89%B9%E6%AE%8A%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-text">三、Redis的三种特殊数据类型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Geospatial%EF%BC%88%E5%9C%B0%E7%90%86%E4%BF%A1%E6%81%AF%EF%BC%89"><span class="toc-text">1. Geospatial（地理信息）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4-2"><span class="toc-text">1.1 常用命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF-2"><span class="toc-text">1.2 使用场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-HyperLogLog%EF%BC%88%E5%9F%BA%E6%95%B0%E7%BB%9F%E8%AE%A1%EF%BC%89"><span class="toc-text">2. HyperLogLog（基数统计）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4-2"><span class="toc-text">2.1 常用命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF-2"><span class="toc-text">2.2 使用场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Bitmaps%EF%BC%88%E4%BD%8D%E5%9B%BE%EF%BC%89"><span class="toc-text">3. Bitmaps（位图）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4-2"><span class="toc-text">3.1 常用命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF-2"><span class="toc-text">3.2 使用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-Bitmaps%E4%B8%8Eset%E5%AF%B9%E6%AF%94"><span class="toc-text">3.3 Bitmaps与set对比</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/08/13/python_12/" title="AttributeEroor: ‘list‘ object has no attribute ‘clear‘"><img src="/img/python/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AttributeEroor: ‘list‘ object has no attribute ‘clear‘"/></a><div class="content"><a class="title" href="/2021/08/13/python_12/" title="AttributeEroor: ‘list‘ object has no attribute ‘clear‘">AttributeEroor: ‘list‘ object has no attribute ‘clear‘</a><time datetime="2021-08-13T07:26:20.000Z" title="发表于 2021-08-13 15:26:20">2021-08-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/08/10/python_11/" title="Python 脚本之对文件进行哈希校验"><img src="/img/python/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 脚本之对文件进行哈希校验"/></a><div class="content"><a class="title" href="/2021/08/10/python_11/" title="Python 脚本之对文件进行哈希校验">Python 脚本之对文件进行哈希校验</a><time datetime="2021-08-10T06:31:23.000Z" title="发表于 2021-08-10 14:31:23">2021-08-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/08/09/pycharm_2/" title="PyCharm 新建脚本开头模板设置"><img src="/img/pycharm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="PyCharm 新建脚本开头模板设置"/></a><div class="content"><a class="title" href="/2021/08/09/pycharm_2/" title="PyCharm 新建脚本开头模板设置">PyCharm 新建脚本开头模板设置</a><time datetime="2021-08-09T15:54:02.000Z" title="发表于 2021-08-09 23:54:02">2021-08-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/08/09/pycharm_1/" title="PyCharm 修改背景颜色"><img src="/img/pycharm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="PyCharm 修改背景颜色"/></a><div class="content"><a class="title" href="/2021/08/09/pycharm_1/" title="PyCharm 修改背景颜色">PyCharm 修改背景颜色</a><time datetime="2021-08-09T15:15:25.000Z" title="发表于 2021-08-09 23:15:25">2021-08-09</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/redis/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2021/07/29/redis_8/'
+    this.page.identifier = '/2021/07/29/redis_8/'
+    this.page.title = 'Redis 的基本数据类型与特殊数据类型详解'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
