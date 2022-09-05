@@ -1,0 +1,312 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Linux 查看 CPU 信息、使用率、核数、操作系统、内存使用率、磁盘空间 | 程序园</title><meta name="keywords" content="Linux"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是 Linux 相关的基础笔记，记录如何查看 Linux CPU、使用率、核数、操作系统、内存使用率、磁盘空间等信息。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux 查看 CPU 信息、使用率、核数、操作系统、内存使用率、磁盘空间">
+<meta property="og:url" content="https://program-park.github.io/2021/06/02/linux_2/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是 Linux 相关的基础笔记，记录如何查看 Linux CPU、使用率、核数、操作系统、内存使用率、磁盘空间等信息。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/linux/1.png">
+<meta property="article:published_time" content="2021-06-02T08:08:25.000Z">
+<meta property="article:modified_time" content="2022-09-05T04:43:41.903Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/linux/1.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://program-park.github.io/2021/06/02/linux_2/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Linux 查看 CPU 信息、使用率、核数、操作系统、内存使用率、磁盘空间',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-05 12:43:41'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/linux/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Linux 查看 CPU 信息、使用率、核数、操作系统、内存使用率、磁盘空间</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-06-02T08:08:25.000Z" title="发表于 2021-06-02 16:08:25">2021-06-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-05T04:43:41.903Z" title="更新于 2022-09-05 12:43:41">2022-09-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Linux/">Linux</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>8分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Linux 查看 CPU 信息、使用率、核数、操作系统、内存使用率、磁盘空间"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="查看CPU信息、使用率、核数">查看CPU信息、使用率、核数</h1>
+<ol>
+<li><strong>查看物理CPU个数</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/cpuinfo | grep &quot;physical id&quot; | sort | uniq | wc -l</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li><strong>查看逻辑CPU个数</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/cpuinfo | grep &quot;processor&quot;| wc –l</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li><strong>每个物理CPU的核数</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/cpuinfo | grep &quot;cpu cores&quot; | uniq</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>
+<p><strong>也可以直接通过 lscpu 命令查看</strong><br>
+<img src="https://img-blog.csdnimg.cn/20210602115655940.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDc1ODg3Ng==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>这是两个CPU，20核，支持超线程，40个逻辑CPU</p>
+</li>
+<li>
+<p><strong>查看是否支持超线程<br>
+如果&quot;siblings&quot;和&quot;cpu cores&quot;一致，则说明不支持超线程，或者超线程未打开；<br>
+如果&quot;siblings&quot;是&quot;cpu cores&quot;的两倍，则说明支持超线程，并且超线程已打开</strong></p>
+</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/cpuinfo |grep &quot;sibling&quot;|uniq</span><br></pre></td></tr></table></figure>
+<ol start="6">
+<li><strong>查看逻辑CPU个数以及CPU型号</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c</span><br></pre></td></tr></table></figure>
+<ol start="7">
+<li><strong>查看CPU是32位运行还是64位运行</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getconf LONG_BIT</span><br></pre></td></tr></table></figure>
+<ol start="8">
+<li><strong>获取CPU详细信息</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/cpuinfo</span><br></pre></td></tr></table></figure>
+<ol start="9">
+<li><strong>top 命令查看CPU使用率</strong><br>
+<img src="https://img-blog.csdnimg.cn/20210602143004722.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDc1ODg3Ng==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">第一行（top）</span><br><span class="line">	13:44:03 ： 系统当前时间</span><br><span class="line">	68 days, 20:13 ： 系统从启动后到现在的运作时间</span><br><span class="line">	7 users ： 当前登录到系统的用户数（确切的说是登录到用户的终端数，同一个用户同一时间对系统多个终端的连接将被视为多个用户连接到系统，这里的用户数也将表现为终端的数目）</span><br><span class="line">	load average ： 当前系统负载的平均值，后面的三个值分别为1分钟前、5分钟前、15分钟前进程的平均数，一般的可以认为这个数值超过 CPU 数目时，CPU 将比较吃力的负载当前系统所包含的进程</span><br><span class="line">第二行（Tasks）</span><br><span class="line">	550 total ： 当前系统进程总数</span><br><span class="line">	2 running ： 当前运行中的进程数</span><br><span class="line">	557 sleeping ： 当前处于等待状态中的进程数</span><br><span class="line">	0 stopped ： 停止的进程数</span><br><span class="line">	0 zombie ： 僵尸进程数</span><br><span class="line">第三行（%Cpu）</span><br><span class="line">	8.1 us ： 用户空间占用CPU百分比，不包含renice值为负的任务占用的CPU的时间</span><br><span class="line">	1.2 sy ： 内核空间占用CPU百分比</span><br><span class="line">	0.0 ni ： 用户进程空间内改变过优先级的进程占用CPU百分比</span><br><span class="line">	90.4 id ： 空闲CPU百分比</span><br><span class="line">	0.0 wa ： 等待I/O的CPU时间百分比</span><br><span class="line">	0.0 hi ： CPU硬中断时间百分比</span><br><span class="line">	0.2 si ： CPU软中断时间百分比</span><br><span class="line">第四行（Mem）</span><br><span class="line">	26403968+total ： 物理内存总量</span><br><span class="line">	24978953+used ： 使用的物理内存量</span><br><span class="line">	14250160 free ： 空闲的物理内存量</span><br><span class="line">	817276 buffers ： 用作内核缓存的物理内存量</span><br><span class="line">第五行（反映着交换分区（Swap）的使用情况，通常，交换分区被频繁使用的情况，将被视作物理内存不足而造成的）</span><br><span class="line">	0 total ： 交换区总量</span><br><span class="line">	0 used ： 使用的交换区总量</span><br><span class="line">	0 free ： 空闲交换区总量</span><br><span class="line">	20137419+cached ： 缓冲的交换区总量</span><br><span class="line">进程信息：</span><br><span class="line">	PID ： 进程的ID</span><br><span class="line">	USER ： 进程的所有者</span><br><span class="line">	PR ： 进程的优先级别，越小越优先被执行</span><br><span class="line">	NI ： 值</span><br><span class="line">	VIRT ： 进程占用的虚拟内存</span><br><span class="line">	RES ： 进程占用的物理内存</span><br><span class="line">	SHR ： 进程使用的共享内存</span><br><span class="line">	S ： 进程的状态；S表示休眠，R表示正在运行，Z表示僵死状态，N表示该进程优先值为负数</span><br><span class="line">	%CPU ： 进程占用CPU的使用率</span><br><span class="line">	%MEN ： 进程使用的物理内存和总内存的百分比</span><br><span class="line">	TIME+ ： 该进程启动后占用的总的CPU时间，即占用CPU使用时间的累加值</span><br><span class="line">	COMMAND ： 进程启动命令名称</span><br><span class="line">top 运行中可以通过 top 的内部命令对进程的显示方式进行控制：</span><br><span class="line">	s	改变画面更新频率</span><br><span class="line">	l	关闭或开启第一部分第一行 top 信息的表示</span><br><span class="line">	t	关闭或开启第一部分第二行 Tasks 和第三行 Cpus 信息的表示</span><br><span class="line">	m	关闭或开启第一部分第四行 Mem 和 第五行 Swap 信息的表示</span><br><span class="line">	N	以 PID 的大小的顺序排列表示进程列表</span><br><span class="line">	P	以 CPU 占用率大小的顺序排列进程列表</span><br><span class="line">	M	以内存占用率大小的顺序排列进程列表</span><br><span class="line">	h	显示帮助</span><br><span class="line">	n	设置在进程列表所显示进程的数量</span><br><span class="line">	q	退出 top</span><br><span class="line">	s	改变画面更新周期</span><br></pre></td></tr></table></figure>
+<p><strong>总核数 = 物理CPU个数 X 每颗物理CPU的核数</strong><br>
+<strong>总逻辑CPU数 = 物理CPU个数 X 每颗物理CPU的核数 X 超线程数</strong></p>
+<h1 id="查看操作系统信息">查看操作系统信息</h1>
+<ol>
+<li><strong>查看操作系统内核信息</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">uname -a	显示全部信息</span><br><span class="line">		-m 或 --machine	显示电脑类型</span><br><span class="line">		-r 或 --release	显示操作系统的发行编号</span><br><span class="line">		-s 或 --sysname	显示操作系统名称</span><br><span class="line">		-v	显示操作系统的版本</span><br><span class="line">		-p 或 --processor	输出处理器类型或&quot;unknown&quot;</span><br><span class="line">		-i 或 --hardware-platform	输出硬件平台或&quot;unknown&quot;</span><br><span class="line">		-o 或 --operating-system	输出操作系统名称</span><br><span class="line">		-- help	显示帮助</span><br><span class="line">		-- version	显示版本信息</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li><strong>查看操作系统版本</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/issue	或	cat /etc/centos-release	或	cat /etc/redhat-release</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li><strong>查看操作系统版本信息</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/version</span><br></pre></td></tr></table></figure>
+<h1 id="查看内存使用率">查看内存使用率</h1>
+<ol>
+<li><strong>查看内存详细信息</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/meminfo</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li><strong>free 查看内存使用情况</strong><br>
+<img src="https://img-blog.csdnimg.cn/20210602150519836.png" alt="在这里插入图片描述"></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">total ： 总计物理内存的大小</span><br><span class="line">used ： 已使用内存大小</span><br><span class="line">free ： 可用内存大小</span><br><span class="line">Shared ： 多个进程共享的内存总额</span><br><span class="line">buffers/cached ： 被 buffer 和 cache 使用的物理内存大小</span><br><span class="line"></span><br><span class="line">free -b ： 以bytes为单位来显示内存的信息</span><br><span class="line">free -k ： 以kb为单位来显示内存的信息</span><br><span class="line">free -m ： 以m为单位来显示内存的信息</span><br><span class="line">free -g ： 以G为单位来显示内存的信息</span><br><span class="line">free -h ： 以适于人类可读方式显示内存信息。-h与其他命令最大不同是-h选项会在数字后面加上适于人类可读的单位</span><br><span class="line">free -l ： 显示高低内存的利用率</span><br><span class="line">free -t ： 显示linux的全部内存（如果我们需要每列的总计信息，我们可以在 free 命令后面跟上 -t 选项。这会在字底部额外加入一行显示）</span><br><span class="line">free -s N ： 表示每隔N秒打印一次内存信息，直到用ctrl+c结束</span><br><span class="line">free -c N ： 表示重复打印内存信息N次</span><br><span class="line">free -V ： 显示版本信息</span><br></pre></td></tr></table></figure>
+<h1 id="查看磁盘空间">查看磁盘空间</h1>
+<ol>
+<li><strong>df 查看磁盘使用情况</strong><br>
+<img src="https://img-blog.csdnimg.cn/20210602153116711.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDc1ODg3Ng==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">Filesystem ： 设备名称，代表该文件系统时哪个分区</span><br><span class="line">1K-blocks ： 总磁盘大小，下面的数字单位是1KB，可利用-h或-m来改变单位大小，也可以用-B来设置</span><br><span class="line">Used ： 已用磁盘大小</span><br><span class="line">Available ： 可用磁盘大小</span><br><span class="line">Use% ： 已用磁盘百分比</span><br><span class="line">Mounted on ： 磁盘挂载的目录，即该磁盘挂载到了哪个目录下面</span><br><span class="line"></span><br><span class="line">-a 或 --all ： 显示所有的文件系统，包括虚拟文件系统</span><br><span class="line">-B 或 --block-size ： 指定单位大小，比如1k，1m等</span><br><span class="line">-h 或 --human-readable ： 以人们易读的GB、MB、KB等格式显示</span><br><span class="line">-H 或 --si ： 和-h参数一样，但是不是以1024，而是1000，即1k=1000，而不是1k=1024</span><br><span class="line">-i 或 --inodes ： 不用硬盘容量，而是以inode的数量来显示</span><br><span class="line">-k ： 以KB的容量显示各文件系统，相当于--block-size=1k</span><br><span class="line">-m ： 以KB的容量显示各文件系统，相当于--block-size=1m</span><br><span class="line">-l ： --local，只显示本地文件系统</span><br><span class="line">--no-sync ： 在统计使用信息之前不调用sync命令(默认)</span><br><span class="line">-sync ： 在统计使用信息之前调用sync命令</span><br><span class="line">-P 或 --portability ： 使用POSIX格式显示，参考示例6</span><br><span class="line">-t 或 --type=TYPE ： 只显示指定类型的文件系统，参考示例7</span><br><span class="line">-T 或 --print-type ： 显示文件系统类型，参考示例8</span><br><span class="line">-x 或 --exclude-type=TYPE ： 不显示指定类型的文件系统</span><br><span class="line">--help ： 显示帮助信息</span><br><span class="line">--version ： 显示版本信息</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>指定一个文件夹，查看该文件夹所在磁盘的使用情况</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df /home</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>指定一个文件，查看该文件所在磁盘的使用情况</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df /bin/ls</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>指定多个文件或文件夹，查看所在磁盘的使用情况</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df /bin/ls /home</span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li><strong>du 查看文件、目录所占磁盘容量</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">du [选项] [文件或目录名称] （默认情况下，只统计目录的容量大小）</span><br><span class="line">参数：</span><br><span class="line">-a 或 --all ：  列出所有的文件和目录容量大小而不仅仅列出目录容量大小，默认情况只是统计目录的容量大小</span><br><span class="line">-B 或 --block-size=SIZE ： 指定单位大小</span><br><span class="line">-b 或 --bytes ： 以字节为单位列出文件和目录的容量大小</span><br><span class="line">-c 或 --total ： 除了列出文件和目录的容量大小外，列出总的容量大小</span><br><span class="line">-h 或 --human-readable ： 以人们易读的方式(KB,MB,GB)显示容量大小</span><br><span class="line">--si ： 和-h参数类似，但是单位换算时是以1000进行换算，而不是1024</span><br><span class="line">-k ： 和--block-size=1k类似，以KB为单位</span><br><span class="line">-m ： 和--block-size=1m类似，以MB为单位</span><br><span class="line">-s 或 --summarize ： 仅列出总量，而不列出每个目录和文件的大小</span><br><span class="line">-S 或 --separate-dirs ： 和-s参数类似，但是统计时不包含子目录的容量大小</span><br><span class="line">--max-depth=N ： 类似于默认情况的du，但是，递归显示时的递归深度小于等于N。如果--max-depth=0，就相当于-s参数，只统计总量而已。如果--max-depth=1，就相当于du -s 目录/*</span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2021/06/02/linux_2/">https://program-park.github.io/2021/06/02/linux_2/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a></div><div class="post_share"><div class="social-share" data-image="/img/linux/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/08/30/reptile_1/"><img class="prev-cover" src="/img/reptile/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Python 爬虫基础之 urllib 库的深入使用详解</div></div></a></div><div class="next-post pull-right"><a href="/2021/06/01/flink_7/"><img class="next-cover" src="/img/flink/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">基于 Flink &amp; Kafka 完成的流式模块</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/03/16/linux_1/" title="Linux 磁盘 mount 普通挂载及 lvm 挂载、lvm 磁盘扩容"><img class="cover" src="/img/linux/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-16</div><div class="title">Linux 磁盘 mount 普通挂载及 lvm 挂载、lvm 磁盘扩容</div></div></a></div><div><a href="/2021/03/25/python_4/" title="Linux 安装 Python3 教程"><img class="cover" src="/img/python/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-25</div><div class="title">Linux 安装 Python3 教程</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8BCPU%E4%BF%A1%E6%81%AF%E3%80%81%E4%BD%BF%E7%94%A8%E7%8E%87%E3%80%81%E6%A0%B8%E6%95%B0"><span class="toc-text">查看CPU信息、使用率、核数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%BF%A1%E6%81%AF"><span class="toc-text">查看操作系统信息</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8%E7%8E%87"><span class="toc-text">查看内存使用率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E7%A3%81%E7%9B%98%E7%A9%BA%E9%97%B4"><span class="toc-text">查看磁盘空间</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/06/02/linux_2/" title="Linux 查看 CPU 信息、使用率、核数、操作系统、内存使用率、磁盘空间"><img src="/img/linux/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux 查看 CPU 信息、使用率、核数、操作系统、内存使用率、磁盘空间"/></a><div class="content"><a class="title" href="/2021/06/02/linux_2/" title="Linux 查看 CPU 信息、使用率、核数、操作系统、内存使用率、磁盘空间">Linux 查看 CPU 信息、使用率、核数、操作系统、内存使用率、磁盘空间</a><time datetime="2021-06-02T08:08:25.000Z" title="发表于 2021-06-02 16:08:25">2021-06-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/06/01/flink_7/" title="基于 Flink &amp; Kafka 完成的流式模块"><img src="/img/flink/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="基于 Flink &amp; Kafka 完成的流式模块"/></a><div class="content"><a class="title" href="/2021/06/01/flink_7/" title="基于 Flink &amp; Kafka 完成的流式模块">基于 Flink &amp; Kafka 完成的流式模块</a><time datetime="2021-06-01T10:13:00.000Z" title="发表于 2021-06-01 18:13:00">2021-06-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/06/01/java_1/" title="Java 通过 UDP 端口发送数据"><img src="/img/java/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Java 通过 UDP 端口发送数据"/></a><div class="content"><a class="title" href="/2021/06/01/java_1/" title="Java 通过 UDP 端口发送数据">Java 通过 UDP 端口发送数据</a><time datetime="2021-06-01T09:42:23.000Z" title="发表于 2021-06-01 17:42:23">2021-06-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/06/01/flink_6/" title="Flink 基于 MapState 实时去重"><img src="/img/flink/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flink 基于 MapState 实时去重"/></a><div class="content"><a class="title" href="/2021/06/01/flink_6/" title="Flink 基于 MapState 实时去重">Flink 基于 MapState 实时去重</a><time datetime="2021-06-01T09:32:30.000Z" title="发表于 2021-06-01 17:32:30">2021-06-01</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/linux/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2021/06/02/linux_2/'
+    this.page.identifier = '/2021/06/02/linux_2/'
+    this.page.title = 'Linux 查看 CPU 信息、使用率、核数、操作系统、内存使用率、磁盘空间'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
