@@ -1,0 +1,365 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>《数据结构与算法》（三）- 如何估算时间复杂度 | 程序园</title><meta name="keywords" content="数据结构,算法"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是《数据结构与算法》系列，第三篇：如何估算时间复杂度。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《数据结构与算法》（三）- 如何估算时间复杂度">
+<meta property="og:url" content="https://program-park.github.io/2021/10/11/algorithm_3/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是《数据结构与算法》系列，第三篇：如何估算时间复杂度。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/algorithm/1.png">
+<meta property="article:published_time" content="2021-10-11T09:42:37.000Z">
+<meta property="article:modified_time" content="2022-09-06T09:43:06.131Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="数据结构">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/algorithm/1.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://program-park.github.io/2021/10/11/algorithm_3/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '《数据结构与算法》（三）- 如何估算时间复杂度',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-06 17:43:06'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">80</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">17</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/algorithm/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">《数据结构与算法》（三）- 如何估算时间复杂度</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-10-11T09:42:37.000Z" title="发表于 2021-10-11 17:42:37">2021-10-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-06T09:43:06.131Z" title="更新于 2022-09-06 17:43:06">2022-09-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">数据结构与算法</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">4k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>14分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="《数据结构与算法》（三）- 如何估算时间复杂度"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="前言">前言</h1>
+<p><font color=#999AAA >部分内容摘自程杰的《大话数据结构》</font></p>
+<h1 id="1-算法时间复杂度">1. 算法时间复杂度</h1>
+<h2 id="1-1-算法时间复杂度的定义">1.1 算法时间复杂度的定义</h2>
+<p>  <strong>在进行算法分析时，语句总的执行次数T(n)是关于问题规模n的函数，进而分析T(n)随n的变化情况并确定T(n)的数量级。算法的时间复杂度，也就是算法的时间量度，记作：T(n)= O(f(n))。它表示随问题规模n的增大，算法执行时间的增长率和f(n)的增长率相同，称作算法的渐近时间复杂度，简称为时间复杂度。其中f(n)是问题规模n的某个函数。</strong></p>
+<p>  这样用大写<code>O()</code>来体现算法时间复杂度的记法，我们称之为<code>大О记法</code>。<br>
+  一般情况下，随着n的增大，T(n)增长最慢的算法为最优算法。</p>
+<h2 id="1-2-推导大O阶方法">1.2 推导大O阶方法</h2>
+<p>  那么如何分析一个算法的时间复杂度呢？即如何推导大O阶呢？我们给出了下面的推导方法，基本上，这也就是总结前面我们举的例子。<br>
+  推导大O阶：</p>
+<ol>
+<li>用常数 1 取代运行时间中的所有加法常数。</li>
+<li>在修改后的运行次数函数中，只保留最高阶项。</li>
+<li>如果最高阶项存在且不是 1，则去除与这个项相乘的常数。</li>
+</ol>
+<p>  得到的结果就是大O阶。</p>
+<p>  事实上，分析一个算法的时间复杂度，没有这么简单，我们还需要多看几个例子。</p>
+<h2 id="1-3-常数阶">1.3 常数阶</h2>
+<p>  首先顺序结构的时间复杂度。下面这个算法，为什么时间复杂度不是<code>O(3)</code>，而是<code>O(1)</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> sum = <span class="number">0</span>,n = <span class="number">100</span>;	<span class="comment">/* 执行1次 */</span></span><br><span class="line">sum = (<span class="number">1</span> + n) * n / <span class="number">2</span>;	<span class="comment">/* 执行1次 */</span></span><br><span class="line"><span class="built_in">printf</span> (<span class="string">&quot;%d&quot;</span>, sum);		<span class="comment">/* 执行1次 */</span></span><br></pre></td></tr></table></figure>
+<p>  这个算法的运行次数函数是<code>f(n)=3</code>。根据我们推导大О阶的方法，第一步就是把常数项<code>3</code>改为<code>1</code>。在保留最高阶项时发现，它根本没有最高阶项，所以这个算法的时间复杂度为<code>O(1)</code>。<br>
+  另外，我们试想一下，如果这个算法当中的语句<code>sum=(1+n)*n/2</code>有 10 句，即：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> sum = <span class="number">0</span>, n = <span class="number">100</span>;	<span class="comment">/* 执行1次 */</span></span><br><span class="line">sum = (<span class="number">1</span> + n) * n / <span class="number">2</span>;	<span class="comment">/* 执行1次 */</span></span><br><span class="line">sum = (<span class="number">1</span> + n) * n / <span class="number">2</span>;	<span class="comment">/* 执行2次 */</span></span><br><span class="line">sum = (<span class="number">1</span> + n) * n / <span class="number">2</span>;	<span class="comment">/* 执行3次 */</span></span><br><span class="line">sum = (<span class="number">1</span> + n) * n / <span class="number">2</span>;	<span class="comment">/* 执行4次 */</span></span><br><span class="line">sum = (<span class="number">1</span> + n) * n / <span class="number">2</span>;	<span class="comment">/* 执行5次 */</span></span><br><span class="line">sum = (<span class="number">1</span> + n) * n / <span class="number">2</span>;	<span class="comment">/* 执行6次 */</span></span><br><span class="line">sum = (<span class="number">1</span> + n) * n / <span class="number">2</span>;	<span class="comment">/* 执行7次 */</span></span><br><span class="line">sum = (<span class="number">1</span> + n) * n / <span class="number">2</span>;	<span class="comment">/* 执行8次 */</span></span><br><span class="line">sum = (<span class="number">1</span> + n) * n / <span class="number">2</span>;	<span class="comment">/* 执行9次 */</span></span><br><span class="line">sum = (<span class="number">1</span> + n) * n / <span class="number">2</span>;	<span class="comment">/* 执行10次 */</span></span><br><span class="line"><span class="built_in">printf</span> (<span class="string">&quot;%d&quot;</span>, sum);		<span class="comment">/* 执行1次 */</span></span><br></pre></td></tr></table></figure>
+<p>  事实上无论<code>n</code>为多少，上面的两段代码就是<code>3</code>次和<code>12</code>次执行的差异。这种与问题的大小无关（<code>n</code>的多少），执行时间恒定的算法，我们称之为具有<code>O(1)</code>的时间复杂度，又叫常数阶。<br>
+  <strong>注意：不管这个常数是多少，我们都记作O(1)，而不能是O(3)、O(12)等其他任何数字，这是初学者常常犯的错误。</strong><br>
+  对于分支结构而言，无论是真，还是假，执行的次数都是恒定的，不会随着<code>n</code>的变大而发生变化，所以单纯的分支结构（不包含在循环结构中)，其时间复杂度也是<code>O(1)</code>。</p>
+<h2 id="1-4-线性阶">1.4 线性阶</h2>
+<p>  线性阶的循环结构会复杂很多。要确定某个算法的阶次，我们常常需要确定某个特定语句或某个语句集运行的次数。因此，我们要<strong>分析算法的复杂度，关键就是要分析循环结构的运行情况。</strong><br>
+  下面这段代码，它的循环的时间复杂度为<code>O(n)</code>，因为循环体中的代码须要执行<code>n</code>次。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> i;</span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">/* 时间复杂度为O(1)的程序步骤序列 */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="1-5-对数阶">1.5 对数阶</h2>
+<p>  下面的这段代码，时间复杂度又是多少呢？</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> count = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">while</span> (count &lt; n)</span><br><span class="line">&#123;</span><br><span class="line">	count = count * <span class="number">2</span>;</span><br><span class="line">	<span class="comment">/* 时间复杂度为O(1)的程序步骤序列 */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  由于每次<code>count</code>乘以<code>2</code>之后，就距离<code>n</code>更近了一分。也就是说，有多少个<code>2</code>相乘后大于<code>n</code>，则会退出循环。由<strong>2^x^=n</strong>得到<strong>x=log<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">{_2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>n</strong>。所以这个循环的时间复杂度为<code>O(logn)</code>。</p>
+<h2 id="1-6-平方阶">1.6 平方阶</h2>
+<p>  下面例子是一个循环嵌套，它的内循环刚才我们已经分析过，时间复杂度为<code>O(n)</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> i,j;</span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; n; j++)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">/* 时间复杂度为O(1)的程序步骤序列 */</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  而对于外层的循环，不过是内部这个时间复杂度为<code>O(n)</code>的语句，再循环<code>n</code>次。所以这段代码的时间复杂度为O(n^2^)。<br>
+  如果外循环的循环次数改为了<code>m</code>，时间复杂度就变为<code>O(m×n)</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> i,j;</span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; m; i++)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; n; j++)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">/* 时间复杂度为O(1)的程序步骤序列 */</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  所以我们可以总结得出，循环的时间复杂度等于循环体的复杂度乘以该循环运行的次数。<br>
+  那么下面这个循环嵌套,它的时间复杂度是多少呢?</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> i,j;</span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">for</span> (j = i; j &lt; n; j++)	<span class="comment">/* 注意j = i而不是0 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">/* 时间复杂度为O(1)的程序步骤序列 */</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  由于当<code>i=0</code>时，内循环执行了<code>n</code>次，当<code>i=1</code>时，执行了<code>n-1</code>次，……当<code>i=n-1</code>时，执行了<code>1</code>次。所以总的执行次数为:</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>n</mi><mo>+</mo><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mn>2</mn><mo stretchy="false">)</mo><mo>+</mo><mo>…</mo><mo>+</mo><mn>1</mn><mo>=</mo><mfrac><mrow><mi>n</mi><mo stretchy="false">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><mn>2</mn></mfrac><mo>=</mo><mfrac><msup><mi>n</mi><mn>2</mn></msup><mn>2</mn></mfrac><mo>+</mo><mfrac><mi>n</mi><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">n+(n-1)+(n- 2)+…+1=\frac{n(n+1)} {2}=\frac{n^2}{2}+\frac{n}{2}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.113em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.1771em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.4911em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.7936em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.1076em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
+<p>  用我们推导大О阶的方法，第一条，没有加法常数不予考虑；第二条，只保留最高阶项，因此保留<strong>n^2^/2</strong> ；第三条，去除这个项相乘的常数，也就是去除<code>1/2</code>，最终这段代码的时间复杂度为<strong>O(n^2^)</strong>。<br>
+  从这个例子，我们也可以得到一个经验，其实<strong>理解大О推导不算难，难的是对数列的一些相关运算，这更多的是考察你的数学知识和能力</strong>，所以想考研的朋友，要想在求算法时间复杂度这里不失分，可能需要强化你的数学，特别是数列方面的知识和解题能力。</p>
+<p>  我们继续看例子，对于方法调用的时间复杂度又如何分析。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> i,j;</span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">&#123;</span><br><span class="line">	function (i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  上面这段代码调用一个<code>function()</code>函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">function</span> <span class="params">(<span class="type">int</span> count)</span></span><br><span class="line">&#123;</span><br><span class="line">	print (count);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  函数体是打印<code>count</code>这个参数。其实这很好理解，<code>function()</code>函数的时间复杂度是<code>O(1)</code>。所以整体的时间复杂度为<code>O(1)</code>。<br>
+  假如function()是下面这样的：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">function</span> <span class="params">(<span class="type">int</span> count)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> j;</span><br><span class="line">	<span class="keyword">for</span> (j = count; j &lt; n; j++)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">/* 时间复杂度为O(1)的程序步骤序列 */</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  事实上，这和刚才举的例子是一样的，只不过把嵌套内循环放到了函数中，所以最终的时间复杂度为<strong>O(n^2^)</strong>。<br>
+  下面这段相对复杂的语句:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">n++;						<span class="comment">/* 执行次数为1 */</span></span><br><span class="line">function (n);				<span class="comment">/* 执行次数为n */</span></span><br><span class="line"><span class="type">int</span> i,j;</span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; n; i++)		<span class="comment">/* 执行次数为n×n */</span></span><br><span class="line">&#123;</span><br><span class="line">	function (i);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; n; i++)		<span class="comment">/* 执行次数为n(n+1)/2 */</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">for</span> (j = i; j &lt; n; j++)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">/* 时间复杂度为O(1)的程序步骤序列 */</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  它的执行次数<strong>f(n)=1+n+n^2^+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mi>n</mi><mo stretchy="false">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">\frac{n(n+1)}{2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.355em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.01em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.485em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">1</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span>=<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mn>3</mn><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">\frac{3}{2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.1901em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8451em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">3</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span>n^2^+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mn>3</mn><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">\frac{3}{2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.1901em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8451em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">3</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span>n+1</strong>，根据推导大O阶的方法，最终这段代码的时间复杂度也是<strong>O(n^2^)</strong>。</p>
+<h1 id="2-常见的时间复杂度">2. 常见的时间复杂度</h1>
+<table>
+	<tr align=center>
+		<th>执行次级函数</th>
+		<th>阶</th>
+		<th>非正式术语</th>
+	</tr>
+	<tr align=center>
+		<td>12</td>
+		<td>O(1)</td>
+		<td>常数阶</td>
+	</tr>
+	<tr align=center>
+		<td>2n+3</td>
+		<td>O(n)</td>
+		<td>线性阶</td>
+	</tr>
+	<tr align=center>
+		<td>3n<sup>2</sup>+2n+1</td>
+		<td>O(n<sup>2</sup>)</td>
+		<td>平方阶</td>
+	</tr>
+	<tr align=center>
+		<td>5log<sub>2</sub>n+20</td>
+		<td>O(logn)</td>
+		<td>对数阶</td>
+	</tr>
+	<tr align=center>
+		<td>2n+3nlog<sub>2</sub>n+19</td>
+		<td>O(nlogn)</td>
+		<td>nlogn阶</td>
+	</tr>
+	<tr align=center>
+		<td>6n<sup>3</sup>+2n<sup>2</sup>+3n+4</td>
+		<td>O(N<sup>3</sup>)</td>
+		<td>立方阶</td>
+	</tr>
+	<tr align=center>
+		<td>2<sup>n</sup></td>
+		<td>O(2<sup>n</sup>)</td>
+		<td>指数阶</td>
+	</tr>
+</table>
+<p>  常用的时间复杂度所耗费的时间从小到大依次是：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo><mo>&lt;</mo><mi>O</mi><mo stretchy="false">(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="false">)</mo><mo>&lt;</mo><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo><mo>&lt;</mo><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="false">)</mo><mo>&lt;</mo><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="false">)</mo><mo>&lt;</mo><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mn>3</mn></msup><mo stretchy="false">)</mo><mo>&lt;</mo><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">!</mo><mo stretchy="false">)</mo><mo>&lt;</mo><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mi>n</mi></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)&lt;O(logn)&lt;O(n)&lt;O(nlogn)&lt;O(n^2)&lt;O(n^3)&lt;O(n!)&lt;O(n^n)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.1141em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.1141em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">!)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7144em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span></p>
+<p>  我们前面已经谈到了<strong>O(1)常数阶</strong>、<strong>O(logn)对数阶</strong>、<strong>O(n)线性阶</strong>、<strong>O(n^2^)平方阶</strong>等，至于<strong>O(nlogn)<strong>会在后面介绍，而像</strong>O(n^3^)</strong>，过大的<code>n</code>都会使得结果变得不现实。同样<strong>指数阶O(2^n^)</strong> 和<strong>阶乘阶O(n!)</strong> 等除非是很小的<code>n</code>值，否则哪怕<code>n</code>只是<code>100</code>，都是噩梦般的运行时间。所以这种不切实际的算法时间复杂度，一般我们都不去讨论它。<br>
+<br></p>
+<h1 id="3-最坏情况和平均情况">3. 最坏情况和平均情况</h1>
+<p>  你早晨上班出门后突然想起来，手机忘记带了，这年头，钥匙、钱包、手机三大件，出门哪样也不能少呀。于是回家找。打开门一看，手机就在门口玄关的台子上，原来是出门穿鞋时忘记拿了。这当然是比较好，基本没花什么时间寻找。可如果不是放在那里，你就得进去到处找，找完客厅找卧室、找完卧室找厨房、找完厨房找卫生间，就是找不到，时间一分一秒的过去，你突然想起来，可以用家里座机打一下手机，听着手机铃声来找呀，真是笨。终于找到了，在床上枕头下面。你再去上班，迟到。见鬼，这一年的全勤奖,就因为找手机给黄了。<br>
+  找东西有运气好的时候，也有怎么也找不到的情况。但在现实中,通常我们碰到的绝大多数既不是最好的也不是最坏的，所以算下来是平均情况居多。<br>
+  算法的分析也是类似，我们查找一个有<code>n</code>个随机数字数组中的某个数字，最好的情况是第一个数字就是，那么算法的时间复杂度为<code>O(1)</code>，但也有可能这个数字就在最后一个位置上待着，那么算法的时间复杂度就是<code>O(n)</code>，这是最坏的一种情况了。<br>
+  最坏情况运行时间是一种保证，那就是运行时间将不会再坏了。在应用中，这是一种最重要的需求，通常，除非特别指定，我们提到的运行时间都是最坏情况的运行时间。<br>
+  而平均运行时间也就是从概率的角度看，这个数字在每一个位置的可能性是相同的，所以平均的查找时间为<code>n/2</code>次后发现这个目标元素。<br>
+  <strong>平均运行时间是所有情况中最有意义的，因为它是期望的运行时间。</strong> 也就是说，我们运行一段程序代码时，是希望看到平均运行时间的。可现实中，平均运行时间很难通过分析得到，一般都是通过运行一定数量的实验数据后估算出来的。<br>
+  对算法的分析，一种方法是计算所有情况的平均值，这种时间复杂度的计算方法称为平均时间复杂度。另一种方法是计算最坏情况下的时间复杂度，这种方法称为最坏时间复杂度。<strong>一般在没有特殊说明的情况下，都是指最坏时间复杂度。</strong><br>
+<br></p>
+<h1 id="4-算法空间复杂度">4. 算法空间复杂度</h1>
+<p>  我们在写代码时，完全可以用空间来换取时间，比如说，要判断某某年是不是闰年，你可能会花一点心思写了一个算法，而且由于是一个算法，也就意味着，每次给一个年份，都是要通过计算得到是否是闰年的结果。还有另一个办法就是，事先建立一个有<code>2050</code>个元素的数组（年数略比现实多一点)，然后把所有的年份按下标的数字对应，如果是闰年，此数组项的值就是<code>1</code>，如果不是值为<code>0</code>。这样，所谓的判断某一年是否是闰年，就变成了查找这个数组的某一项的值是多少的问题。此时,我们的运算是最小化了，但是硬盘上或者内存中需要存储这<code>2050</code>个<code>0</code>和<code>1</code>。<br>
+  这是通过一笔空间上的开销来换取计算时间的小技巧。到底哪一个好，其实要看你用在什么地方。<br>
+  算法的空间复杂度通过计算算法所需的存储空间实现，算法空间复杂度的计算公式记作：<code>S(n)=o(f(n))</code>，其中，<code>n</code>为问题的规模，<code>f(n)</code>为语句关于<code>n</code>所占存储空间的函数。<br>
+  一般情况下，一个程序在机器上执行时，除了需要存储程序本身的指令、常数、变量和输入数据外，还需要存储对数据操作的存储单元。若输入数据所占空间只取决于问题本身，和算法无关，这样只需要分析该算法在实现时所需的辅助单元即可。若算法执行时所需的辅助空间相对于输入数据量而言是个常数，则称此算法为原地工作，空间复杂度为<code>O(1)</code>。<br>
+  通常，我们都使用“时间复杂度”来指运行时间的需求，使用“空间复杂度”指空间需求。当不用限定词地使用“复杂度”时，通常都是指时间复杂度。</p>
+<h2 id="4-1-递归情况">4.1 递归情况</h2>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">BinarySearch2</span><span class="params">(<span class="type">const</span> <span class="type">int</span>* ptr,<span class="type">const</span> <span class="type">int</span> x,<span class="type">const</span> <span class="type">int</span> left,<span class="type">const</span> <span class="type">int</span> right)</span>  </span><br><span class="line">&#123;  </span><br><span class="line">    <span class="type">int</span> mid=(left+right)/<span class="number">2</span>;  </span><br><span class="line">    <span class="keyword">while</span>(left&lt;=right)  </span><br><span class="line">    &#123;  </span><br><span class="line">        <span class="keyword">if</span>(x&lt;ptr[mid])  </span><br><span class="line">        &#123;  </span><br><span class="line">            <span class="keyword">return</span> BinarySearch2(ptr,x,left,mid<span class="number">-1</span>);  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(x&gt;ptr[mid])  </span><br><span class="line">        &#123;  </span><br><span class="line">            <span class="keyword">return</span> BinarySearch2(ptr,x,mid+<span class="number">1</span>,right);  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="keyword">return</span> mid;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  <strong>递归情况下的空间复杂度：</strong> 递归深度为<code>N*每次递归的辅助空间大小</code>，如果每次递归的辅助空间为常数，则空间复杂度为<code>O(N)</code>。<br>
+  对于递归的二分查找，递归深度是log2^n^，每次递归的辅助空间为常数，所以空间复杂度为<strong>O(log<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>N)</strong></p>
+<h2 id="4-2-非递归情况">4.2 非递归情况</h2>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">BinarySearch1</span><span class="params">(<span class="type">const</span> <span class="type">int</span>* ptr,<span class="type">const</span> <span class="type">int</span> x,<span class="type">const</span> <span class="type">int</span> len)</span>  </span><br><span class="line">&#123;  </span><br><span class="line">    <span class="type">int</span> left=<span class="number">0</span>;  </span><br><span class="line">    <span class="type">int</span> right=len<span class="number">-1</span>;  </span><br><span class="line">    <span class="type">int</span> mid=(left+right)/<span class="number">2</span>;  </span><br><span class="line">    <span class="keyword">while</span>(left&lt;=right)  </span><br><span class="line">    &#123;  </span><br><span class="line">        <span class="keyword">if</span>(x&lt;ptr[mid])  </span><br><span class="line">        &#123;  </span><br><span class="line">            right=mid<span class="number">-1</span>;  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(x&gt;ptr[mid])  </span><br><span class="line">        &#123;  </span><br><span class="line">            left=mid+<span class="number">1</span>;  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="keyword">else</span>  </span><br><span class="line">        &#123;  </span><br><span class="line">            <span class="keyword">return</span> mid;  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  在这个过程中，辅助空间为常数级别，所以空间复杂度为<code>O(1)</code>。<br>
+<br></p>
+<h1 id="5-总结">5. 总结</h1>
+<p>  推导大O阶的步骤：</p>
+<ul>
+<li>用常数 1 取代运行时间中的所有加法常数。</li>
+<li>在修改后的运行次数函数中，只保留最高阶项。</li>
+<li>如果最高阶项存在且不是1，则去除与这个项相乘的常数。</li>
+</ul>
+<p>  得到的结果就是大О阶。</p>
+<p>  通过这个步骤，我们可以在得到算法的运行次数表达式后，很快得到它的时间复杂度，即大О阶。同时我也提醒了大家，其实推导大О阶很容易，但如何得到运行次数的表达式却是需要数学功底的。</p>
+<p>  常见的时间复杂度所耗时间的大小排列：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo><mo>&lt;</mo><mi>O</mi><mo stretchy="false">(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="false">)</mo><mo>&lt;</mo><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo><mo>&lt;</mo><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="false">)</mo><mo>&lt;</mo><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="false">)</mo><mo>&lt;</mo><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mn>3</mn></msup><mo stretchy="false">)</mo><mo>&lt;</mo><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">!</mo><mo stretchy="false">)</mo><mo>&lt;</mo><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mi>n</mi></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)&lt;O(logn)&lt;O(n)&lt;O(nlogn)&lt;O(n^2)&lt;O(n^3)&lt;O(n!)&lt;O(n^n)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.1141em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.1141em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">!)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7144em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2021/10/11/algorithm_3/">https://program-park.github.io/2021/10/11/algorithm_3/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/">算法</a></div><div class="post_share"><div class="social-share" data-image="/img/algorithm/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/10/13/algorithm_4/"><img class="prev-cover" src="/img/algorithm/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">《数据结构与算法》（四）- 线性表详解</div></div></a></div><div class="next-post pull-right"><a href="/2021/10/11/algorithm_2/"><img class="next-cover" src="/img/algorithm/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">《数据结构与算法》（二）- 算法详解</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/10/11/algorithm_1/" title="《数据结构与算法》（一）- 数据结构详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-11</div><div class="title">《数据结构与算法》（一）- 数据结构详解</div></div></a></div><div><a href="/2021/10/13/algorithm_4/" title="《数据结构与算法》（四）- 线性表详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-13</div><div class="title">《数据结构与算法》（四）- 线性表详解</div></div></a></div><div><a href="/2021/10/11/algorithm_2/" title="《数据结构与算法》（二）- 算法详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-11</div><div class="title">《数据结构与算法》（二）- 算法详解</div></div></a></div><div><a href="/2021/10/18/algorithm_5/" title="《数据结构与算法》（五）- 链表详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-18</div><div class="title">《数据结构与算法》（五）- 链表详解</div></div></a></div><div><a href="/2021/11/01/algorithm_7/" title="《数据结构与算法》（七）- 队列详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-01</div><div class="title">《数据结构与算法》（七）- 队列详解</div></div></a></div><div><a href="/2021/10/31/algorithm_6/" title="《数据结构与算法》（六）- 栈详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-31</div><div class="title">《数据结构与算法》（六）- 栈详解</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">80</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">17</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E7%AE%97%E6%B3%95%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="toc-text">1. 算法时间复杂度</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E7%AE%97%E6%B3%95%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="toc-text">1.1 算法时间复杂度的定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E6%8E%A8%E5%AF%BC%E5%A4%A7O%E9%98%B6%E6%96%B9%E6%B3%95"><span class="toc-text">1.2 推导大O阶方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-%E5%B8%B8%E6%95%B0%E9%98%B6"><span class="toc-text">1.3 常数阶</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-%E7%BA%BF%E6%80%A7%E9%98%B6"><span class="toc-text">1.4 线性阶</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-5-%E5%AF%B9%E6%95%B0%E9%98%B6"><span class="toc-text">1.5 对数阶</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-6-%E5%B9%B3%E6%96%B9%E9%98%B6"><span class="toc-text">1.6 平方阶</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%B8%B8%E8%A7%81%E7%9A%84%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="toc-text">2. 常见的时间复杂度</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%9C%80%E5%9D%8F%E6%83%85%E5%86%B5%E5%92%8C%E5%B9%B3%E5%9D%87%E6%83%85%E5%86%B5"><span class="toc-text">3. 最坏情况和平均情况</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E7%AE%97%E6%B3%95%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="toc-text">4. 算法空间复杂度</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E9%80%92%E5%BD%92%E6%83%85%E5%86%B5"><span class="toc-text">4.1 递归情况</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E9%9D%9E%E9%80%92%E5%BD%92%E6%83%85%E5%86%B5"><span class="toc-text">4.2 非递归情况</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E6%80%BB%E7%BB%93"><span class="toc-text">5. 总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/02/algorithm_8/" title="《数据结构与算法》（八）- 串详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（八）- 串详解"/></a><div class="content"><a class="title" href="/2021/11/02/algorithm_8/" title="《数据结构与算法》（八）- 串详解">《数据结构与算法》（八）- 串详解</a><time datetime="2021-11-02T06:19:16.000Z" title="发表于 2021-11-02 14:19:16">2021-11-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/01/algorithm_7/" title="《数据结构与算法》（七）- 队列详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（七）- 队列详解"/></a><div class="content"><a class="title" href="/2021/11/01/algorithm_7/" title="《数据结构与算法》（七）- 队列详解">《数据结构与算法》（七）- 队列详解</a><time datetime="2021-11-01T12:09:19.000Z" title="发表于 2021-11-01 20:09:19">2021-11-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/31/algorithm_6/" title="《数据结构与算法》（六）- 栈详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（六）- 栈详解"/></a><div class="content"><a class="title" href="/2021/10/31/algorithm_6/" title="《数据结构与算法》（六）- 栈详解">《数据结构与算法》（六）- 栈详解</a><time datetime="2021-10-31T10:28:22.000Z" title="发表于 2021-10-31 18:28:22">2021-10-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/18/algorithm_5/" title="《数据结构与算法》（五）- 链表详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（五）- 链表详解"/></a><div class="content"><a class="title" href="/2021/10/18/algorithm_5/" title="《数据结构与算法》（五）- 链表详解">《数据结构与算法》（五）- 链表详解</a><time datetime="2021-10-18T10:46:16.000Z" title="发表于 2021-10-18 18:46:16">2021-10-18</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/algorithm/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2021/10/11/algorithm_3/'
+    this.page.identifier = '/2021/10/11/algorithm_3/'
+    this.page.title = '《数据结构与算法》（三）- 如何估算时间复杂度'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

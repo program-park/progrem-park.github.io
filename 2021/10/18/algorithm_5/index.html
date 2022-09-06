@@ -1,0 +1,528 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>《数据结构与算法》（五）- 链表详解 | 程序园</title><meta name="keywords" content="数据结构,算法"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是《数据结构与算法》系列，第五篇：链表。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《数据结构与算法》（五）- 链表详解">
+<meta property="og:url" content="https://program-park.github.io/2021/10/18/algorithm_5/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是《数据结构与算法》系列，第五篇：链表。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/algorithm/1.png">
+<meta property="article:published_time" content="2021-10-18T10:46:16.000Z">
+<meta property="article:modified_time" content="2022-09-06T09:42:52.604Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="数据结构">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/algorithm/1.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://program-park.github.io/2021/10/18/algorithm_5/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '《数据结构与算法》（五）- 链表详解',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-06 17:42:52'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">80</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">17</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/algorithm/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">《数据结构与算法》（五）- 链表详解</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-10-18T10:46:16.000Z" title="发表于 2021-10-18 18:46:16">2021-10-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-06T09:42:52.604Z" title="更新于 2022-09-06 17:42:52">2022-09-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">数据结构与算法</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">10.5k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>34分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="《数据结构与算法》（五）- 链表详解"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="前言">前言</h1>
+<p><font color=#999AAA >部分内容摘自程杰的《大话数据结构》</font></p>
+<h1 id="1-线性表链式存储结构">1. 线性表链式存储结构</h1>
+<h2 id="1-1-链表的定义">1.1 链表的定义</h2>
+<p>  线性表的链式存储结构的特点是用一组任意的存储单元存储线性表的数据元素，这组存储单元可以是连续的，也可以是不连续的。这就意味着，这些数据元素可以存在内存未被占用的任意位置。<br>
+  以前在顺序结构中，每个数据元素只需要存数据元素信息就可以了。现在链式结构中，除了要存数据元素信息外，还要存储它的后继元素的存储地址。<br>
+  因此，为了表示每个数据元素 a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4617em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 与其直接后继数据元素 a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub><msub><mrow></mrow><mo>+</mo></msub><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">{_i}{_+}{_1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.52em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span class="mord"><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2583em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">+</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span><span class="mord"><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span> 之间的逻辑关系，对数据元素 a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4617em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 来说，除了存储其本身的信息之外，还需存储一个指示其直接后继的信息（即直接后继的存储位置）。我们把存储数据元素信息的域称为<strong>数据域</strong>，把存储直接后继位置的域称为<strong>指针域</strong>。指针域中存储的信息称做<strong>指针</strong>或<strong>链</strong>。这两部分信息组成数据元素 a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4617em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 的存储映像，称为<strong>结点</strong>（Node）。<br>
+  <strong>n个结点（a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4617em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>的存储映像）链结成一个链表，即为线性表(a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，…，a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">_n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3014em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>)的链式存储结构</strong>，因为此链表的每个结点中只包含一个指针域，所以叫做<strong>单链表</strong>。单链表正是通过每个结点的指针域将线性表的数据元素按其逻辑次序链接在一起。<br>
+<img src="https://img-blog.csdnimg.cn/6da8e56cc42c468897cd8bb1fbb17bc4.png#pic_center" alt="在这里插入图片描述"><br>
+  对于线性表来说，总得有个头有个尾，链表也不例外。我们把<strong>链表中第一个结点的存储位置叫做头指针</strong>，那么整个链表的存取就必须是从头指针开始进行了。之后的每一个结点，其实就是上一个的后继指针指向的位置。想象一下，最后一个结点，它的指针指向哪里？<br>
+  最后一个，当然就意味着直接后继不存在了，所以我们规定，线性链表的最后一个结点指针为“空”（通常用<code>NULL</code>或<code>“^”</code>符号表示，如下图所示）。<br>
+<img src="https://img-blog.csdnimg.cn/ac0e76a5c9d74c0fa1d557a43203b358.png#pic_center" alt="在这里插入图片描述"><br>
+  有时，我们为了更加方便地对链表进行操作，会<strong>在单链表的第一个结点前附设一个结点，称为头结点</strong>。头结点的数据域可以不存储任何信息，谁叫它是第一个呢，有这个特权。也可以存储如线性表的长度等附加信息，头结点的指针域存储指向第一个结点的指针，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/a6b4c896735444fca1450c3cda9193c9.png#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="1-2-头指针与头结点的异同">1.2 头指针与头结点的异同</h2>
+<p><strong>头指针：</strong></p>
+<ul>
+<li>头指针是指链表指向第一个结点的指针，若链表有头结点，则是指向头结点的指针</li>
+<li>头指针具有标识作用，所以常用头指针冠以链表的名字</li>
+<li>无论链表是否为空，头指针均不为空。头指针是链表的必要元素</li>
+</ul>
+<p><strong>头结点：</strong></p>
+<ul>
+<li>头结点是为了操作的统一和方便而设立的，放在第一元素的结点之前，其数据域一般无意义（也可存放链表的长度）</li>
+<li>有了头结点，对在第一元素结点前插入结点和删除第一结点，其操作与其它结点的操作就统一了</li>
+<li>头结点不一定是链表必须要素</li>
+</ul>
+<h2 id="1-3-代码描述">1.3 代码描述</h2>
+<p>  若线性表为空，则头结点的指针域为“空”，如下图：<br>
+<img src="https://img-blog.csdnimg.cn/a3e6bb83ecbd41ff9954217fb4eec94a.png#pic_center" alt="在这里插入图片描述"><br>
+  这里我们大概地用图示表达了内存中单链表的存储状态。看着满图的省略号 “……”，你就知道是多么不方便。而我们真正关心的：它是在内存中的实际位置吗？不是的，这只是它所表示的线性表中的数据元素及数据元素之间的逻辑关系。所以我们改用更方便的存储示意图来表示单链表，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/73bd49e4b129461a9159e46c7064f6fe.png#pic_center" alt="在这里插入图片描述"><br>
+  若带有头结点的单链表，则如下图所示：<br>
+<img src="https://img-blog.csdnimg.cn/368e7e6ef940468a9f790839f39c20e0.png#pic_center" alt="在这里插入图片描述"><br>
+  空链表如下图所示：<br>
+<img src="https://img-blog.csdnimg.cn/2f199735ec6e493794af61d3f4d851f2.png#pic_center" alt="在这里插入图片描述"><br>
+  单链表中，我们在C语言中可用结构指针来描述：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 线性表的单链表存储结构 */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">Node</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	ElemType data;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">Node</span> *<span class="title">next</span>;</span></span><br><span class="line">&#125;Node;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">Node</span> *<span class="title">LinkList</span>;</span>	<span class="comment">/* 定义LinkList */</span> </span><br></pre></td></tr></table></figure>
+<p>  从这个结构定义中，我们也就知道，<strong>结点由存放数据元素的数据域存放后继结点地址的指针域组成</strong>。假设<code>p</code>是指向线性表第<code>i</code>个元素的指针，则该结点 a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4617em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 的数据域我们可以用<code>p-&gt;data</code>来表示，<code>p-&gt;data</code>的值是一个数据元素，结点 a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4617em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 的指针域可以用<code>p-&gt;next</code>来表示，<code>p-&gt;next</code>的值是一个指针。<code>p-&gt;next</code>指向谁呢？当然是指向第<code>i+1</code>个元素，即指向 a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub><msub><mrow></mrow><mo>+</mo></msub><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">{_i}{_+}{_1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.52em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span class="mord"><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2583em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">+</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span><span class="mord"><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span> 的指针。也就是说，如果<code>p-&gt;data</code>等于 a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4617em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，那么<code>p-&gt;next&gt;data</code>等于 a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4617em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>（如下图所示）<br>
+<img src="https://img-blog.csdnimg.cn/21ad8ee3367e4ee985d5e7ff4bd806be.png#pic_center" alt="在这里插入图片描述"><br>
+<br></p>
+<h1 id="2-单链表的读取">2. 单链表的读取</h1>
+<p>  在线性表的顺序存储结构中，计算任意一个元素的存储位置是很容易的。但在单链表中，由于第<code>i</code>个元素到底在哪？没办法一开始就知道，必须得从头开始找。因此，对于单链表实现获取第<code>i</code>个元素的数据的操作<code>GetElem</code>，在算法上，相对要麻烦一些。<br>
+  获得链表第<code>i</code>个数据的算法思路：</p>
+<ol>
+<li>声明一个结点<code>p</code>指向链表第一个结点，初始化<code>j</code>从<code>1</code>开始；</li>
+<li>当<code>j&lt;i</code>时，就遍历链表，让<code>p</code>的指针向后移动，不断指向下一结点，<code>j</code>累加<code>1</code>；</li>
+<li>若到链表末尾<code>p</code>为空，则说明第<code>i</code>个元素不存在；</li>
+<li>否则查找成功，返回结点<code>p</code>的数据。</li>
+</ol>
+<p>  实现代码算法如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 初始条件：链式线性表L已存在，1≤i≤ListLength(L) */</span></span><br><span class="line"><span class="comment">/* 操作结果：用e返回L中第i个数据元素的值 */</span></span><br><span class="line">Status <span class="title function_">GetElem</span><span class="params">(LinkList L,<span class="type">int</span> i,ElemType *e)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> j;</span><br><span class="line">	LinkList p;		<span class="comment">/* 声明一结点p */</span></span><br><span class="line">	p = L-&gt;next;	<span class="comment">/* 让p指向链表L的第一个结点 */</span></span><br><span class="line">	j = <span class="number">1</span>;			<span class="comment">/* j为计数器 */</span></span><br><span class="line">	<span class="keyword">while</span> (p &amp;&amp; j&lt;<span class="number">1</span>)	<span class="comment">/* p不为空或者计数器j还没有等于i时，循环继续 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		p = p-&gt;next;	<span class="comment">/* 让p指向下一个结点 */</span></span><br><span class="line">		++j;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> ( !p || j&gt;i)</span><br><span class="line">		<span class="keyword">return</span> ERROR;	<span class="comment">/* 第i个元素不存在 */</span></span><br><span class="line">	*e = p-&gt;data;		<span class="comment">/* 取第i个元素的数据 */</span></span><br><span class="line">	<span class="keyword">return</span> OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  说白了，就是从头开始找，直到第<code>i</code>个元素为止。由于这个算法的时间复杂度取决于<code>i</code>的位置，当<code>i=1</code>时，则不需遍历，第一个就取出数据了，而当<code>i=n</code>时则遍历<code>n-1</code>次才可以。因此最坏情况的时间复杂度是<strong>O(n)</strong>。<br>
+  由于单链表的结构中没有定义表长，所以不能事先知道要循环多少次，因此也就不方便使用<code>for</code>来控制循环。其主要核心思想就是“工作指针后移&quot;，这其实也是很多算法的常用技术。<br>
+<br></p>
+<h1 id="3-单链表的插入与删除">3. 单链表的插入与删除</h1>
+<h2 id="3-1-单链表的插入">3.1 单链表的插入</h2>
+<p>  假设存储元素<code>e</code>的结点为<code>s</code>，要实现结点<code>p</code>、<code>p-&gt;next</code>和<code>s</code>之间逻辑关系的变化，只需将结点<code>s</code>插入到结点<code>p</code>和<code>p-&gt;next</code>之间即可。可如何插入呢 ?<br>
+<img src="https://img-blog.csdnimg.cn/98b4a7349dde4e8fb540200f69d28ef4.png#pic_center" alt="在这里插入图片描述"><br>
+  根本用不着惊动其他结点，只需要让<code>s-&gt;next</code>和<code>p-&gt;next</code>的指针做一点改变即可。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">s-&gt;next=p-&gt;next;	<span class="comment">/* 将p的后继节点赋值给s的后继 */</span></span><br><span class="line">p-&gt;next=s;			<span class="comment">/* 将s赋值给p的后继 */</span></span><br></pre></td></tr></table></figure>
+<p>  解读这两句代码，也就是说让<code>p</code>的后继结点改成<code>s</code>的后继结点，再把结点<code>s</code>变成<code>p</code>的后继结点。<br>
+<img src="https://img-blog.csdnimg.cn/e48912fa33854f4e9851cb053127bf14.png#pic_center" alt="在这里插入图片描述"><br>
+  考虑一下，这两句的顺序可不可以交换?<br>
+  如果先<code>p-&gt;next=s</code>； 再<code>s-&gt;next=p-&gt;next</code>；会怎么样？因为此时第一句会将·p-&gt;nex·t给覆盖成<code>s</code>的地址了。那么<code>s-&gt;next=p-&gt;next</code>，其实就等于<code>s-&gt;next=s</code>，这样真正的拥有 a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub><msub><mrow></mrow><mo>+</mo></msub><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">{_i}{_+}{_1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.52em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span class="mord"><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2583em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">+</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span><span class="mord"><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span> 数据元素的结点就没了上级。这样的插入操作就是失败的，造成了临场掉链子的尴尬局面。所以这两句是无论如何不能反的，这点初学者一定要注意。<br>
+  插入结点s后，链表如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/b44a582e66fd44888b10f697d3414843.png#pic_center" alt="在这里插入图片描述"><br>
+  对于单链表的表头和表尾的特殊情况，操作是相同的，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/c176d4ea5b594a2887cceab2ab491d2e.png#pic_center" alt="在这里插入图片描述"><br>
+  单链表第<code>i</code>个数据插入结点的算法思路：</p>
+<ol>
+<li>声明一结点<code>p</code>指向链表第-一个结点， 初始化<code>j</code>从<code>1</code>开始；</li>
+<li>当<code>j&lt;i</code>时， 就遍历链表，让<code>p</code>的指针向后移动，不断指向下一结点，<code>j</code>累加<code>1</code>；</li>
+<li>若到链表末尾<code>p</code>为空，则说明第<code>i</code>个元素不存在；</li>
+<li>否则查找成功，在系统中生成-一个空结点<code>s</code>；</li>
+<li>将数据元素<code>e</code>赋值给<code>s-&gt;data</code>；</li>
+<li>单链表的插入标准语句<code>s-&gt;next=p-&gt;next</code>；<code>p-&gt;next=s</code>；</li>
+<li>返回成功。</li>
+</ol>
+<p>  实现代码算法如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 初始条件:链式线性表L已存在，1≤i≤ListLength(L) */</span></span><br><span class="line"><span class="comment">/* 操作结果:在L中第i个位置之前插入新的数据元素e. L的长度加1 */</span></span><br><span class="line">Status <span class="title function_">ListInsert</span><span class="params">(LinkList *L,<span class="type">int</span> i,ElemType e)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> j;</span><br><span class="line">	LinkList p,s;</span><br><span class="line">	P = *L;</span><br><span class="line">	」= <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">while</span> (p &amp;&amp; j &lt; <span class="number">1</span>)	<span class="comment">/* 寻找第i个结点 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		p = p-&gt;next;</span><br><span class="line">		++j;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (!p || j&gt;<span class="number">1</span>)</span><br><span class="line">		<span class="keyword">return</span> ERROR;	<span class="comment">/* 第i个元素不存在 */</span></span><br><span class="line">		</span><br><span class="line">	s = (LinkList)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(Node));	<span class="comment">/* 生成新结点(C语言标准函数) */</span></span><br><span class="line">	s-&gt;data = e;</span><br><span class="line">	S-&gt;next = p-&gt;next;	<span class="comment">/* 将p的后继结点赋值给s的后继 */</span></span><br><span class="line">	p-&gt;next = s;		<span class="comment">/* 将s赋值给p的后继 */</span></span><br><span class="line">	<span class="keyword">return</span> OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  在这段算法代码中，我们用到了C语言的<code>malloc</code>标准函数，它的作用就是生成一个新的结点，其类型与<code>Node</code>是一样的， 其实质就是在内存中找了一小块空地， 准备用来存放数据<code>e</code>的<code>s</code>结点。</p>
+<h2 id="3-2-单链表的删除">3.2 单链表的删除</h2>
+<p>  设存储元素 a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4617em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 的结点为<code>q</code>，要实现将结点<code>q</code>删除单链表的操作，其实就是将它的前继结点的指针绕过，指向它的后继结点即可，如图下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/941e9b3d85224b799182aaefc88ea555.png#pic_center" alt="在这里插入图片描述"><br>
+  我们所要做的，实际上就是一步，<code>p-&gt;next=p-&gt;next-&gt;next</code>，用<code>q</code>来取代<code>p-&gt;next</code>，即</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">q=p-&gt;next;</span><br><span class="line">p-&gt;next=q-&gt;next;	<span class="comment">/* 将q的后继赋值给p的后继 */</span></span><br></pre></td></tr></table></figure>
+<p>  解读这两句代码，也就是说把<code>p</code>的后继结点改成<code>p</code>的后继的后继结点。打个形象的比方：本来是爸爸左手牵着妈妈的手，右手牵着宝宝的手在马路边散步。突然迎面走来一美女，爸爸一下子看呆了 ，此情景被妈妈逮个正着，于是她生气地甩开牵着的爸爸的手，绕过他，扯开父子俩，拉起宝宝的左手就快步朝前走去。此时妈妈是<code>p</code>结点，妈妈的后继是爸爸<code>p-&gt;next</code>，也可以叫<code>q</code>结点，妈妈的后继的后继是儿子<code>p-&gt;next-&gt;next</code>，即<code>q-&gt;next</code>。 当妈妈去牵儿子的手时，这个爸爸就已经与母子俩没有牵手联系了，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/58d6d3c727704eb3a28aeafd39cee541.png#pic_center" alt="在这里插入图片描述"><br>
+  单链表第<code>i</code>个数据删除结点的算法思路：</p>
+<ol>
+<li>声明一指针<code>p</code>指向链表头结点，初始化<code>j</code>从<code>1</code>开始；</li>
+<li>当<code>j&lt;i</code>时，就遍历链表，让<code>p</code>的指针向后移动，不断指向下一个结点，<code>j</code>累加<code>1</code>；<br>
+1;</li>
+<li>若到链表末尾<code>p</code>为空，则说明第<code>i</code>个结点不存在；</li>
+<li>否则查找成功，将欲删除的结点<code>p-&gt;next</code>赋值给<code>q</code>；</li>
+<li>单链表的删除标准语句<code>p-&gt;next=q-&gt;next</code>；</li>
+<li>将<code>q</code>结点中的数据赋值给<code>e</code>，作为返回；</li>
+<li>释放<code>q</code>结点；</li>
+<li>返回成功。</li>
+</ol>
+<p>  实现代码算法如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 初始条件:链式线性表L已存在，1≤i≤ListLength(L) */</span></span><br><span class="line"><span class="comment">/* 操作结果:删除L的第i个数据元素，并用e返回其值，L的长度减1 */</span></span><br><span class="line">Status <span class="title function_">ListDelete</span><span class="params">(LinkList *L, <span class="type">int</span> i, ElemType *e)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> j;</span><br><span class="line">	LinkList p,q;</span><br><span class="line">	p = *L;</span><br><span class="line">	j = <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">while</span> (p-&gt;next &amp;&amp; j &lt; i)	<span class="comment">/* 遍历寻找第i个元素 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		p = p-&gt;next;</span><br><span class="line">		++j;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (!(p-&gt;next) || j &gt; i)</span><br><span class="line">		<span class="keyword">return</span> ERROR;	<span class="comment">/* 第i个元素不存在 */</span></span><br><span class="line">	q = p-&gt;next; .</span><br><span class="line">	p-&gt;next = q-&gt;next;	<span class="comment">/* 将q的后继贼值给p的后继 */</span></span><br><span class="line">	*e = q-&gt;data;		<span class="comment">/* 将q结点中的数据給e */</span></span><br><span class="line">	<span class="built_in">free</span>(q);			<span class="comment">/* 让系统回收此结点，释放内存 */</span></span><br><span class="line">	<span class="keyword">return</span> OK:</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  这段算法代码里，我们又用到了另一个C语言的标准函数<code>free</code>。它的作用就是让系统回收一个<code>Node</code>结点，释放内存。</p>
+<p>  分析一下刚才讲解的单链表插入和删除算法，可以发现，它们其实都是由两部分组成：第一部分就是遍 历查找第<code>i</code>个元素；第二部分就是插入和删除元素。<br>
+  从整个算法来说，我们很容易推导出：它们的时间复杂度都是<strong>O(N)</strong>。如果我们不知道第<code>i</code>个元素的指针位置，单链表数据结构在插入和删除操作上，与线性表的顺序存储结构是没有太大优势的。但如果我们希望从第<code>i</code>个位置，插入<code>10</code>个元素，对于顺序存储结构意味着，每一次插入都需要移动<code>n-i</code>个元素，每次都是<strong>O(n)</strong>。 而单链表，我们只需要在第一次时， 找到第<code>i</code>个位置的指针,此时为<strong>O(n)</strong>，接下来只是简单地通过赋值移动指针而已，时间复杂度都是<strong>O(1)</strong>。显然，<strong>对于插入或删除数据越频繁的操作，单链表的效率优势就越明显</strong>。<br>
+<br></p>
+<h1 id="4-单链表的整表创建">4. 单链表的整表创建</h1>
+<p>  顺序存储结构的创建，其实就是一个数组的初始化，即声明一个类型和大小的数组并赋值的过程。而单链表和顺序存储结构就不一样，它不像顺序存储结构这么集中，它可以很散，是一种动态结构。对于每个链表来说，它所占用空间的大小和位置是不需要预先分配划定的，可以根据系统的情况和实际的需求即时生成。<br>
+  所以创建单链表的过程就是一个动态生成链表的过程。即从“空表”的初始状态起，依次建立各元素结点，并逐个插入链表。<br>
+  单链表整表创建的算法思路：</p>
+<ol>
+<li>声明一指针<code>p</code>和计数器变量<code>i</code>；</li>
+<li>初始化一空链表<code>L</code>；</li>
+<li>让<code>L</code>的头结点的指针指向<code>NULL</code>，即建立一个带头结点的单链表。</li>
+<li>循环：<br>
+①生成一新结点赋值给<code>p</code>；<br>
+②随机生成一数字赋值给<code>p</code>的数据域<code>p-&gt;data</code>；<br>
+③将<code>p</code>插入到头结点与前一新结点之间。</li>
+</ol>
+<p>实现代码算法如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 随机产生n个元素的值，建立带表头姑点的单链线性表L(头插法) */</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">CreateListHead</span><span class="params">(LinkList *L,<span class="type">int</span> n)</span></span><br><span class="line">&#123;</span><br><span class="line">	LinkList p;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	srand(time(<span class="number">0</span>))	<span class="comment">/* 初始化随机数种子 */</span></span><br><span class="line">	*L = (LinkList)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(Node))</span><br><span class="line">	(*L)-&gt;next = <span class="literal">NULL</span>;</span><br><span class="line">	<span class="keyword">for</span> (i=<span class="number">0</span>; i&lt;n; i++)	<span class="comment">/* 先建立一个带头结点的单链表 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		p = (LinkList)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(Node))	<span class="comment">/* 生成新结点 */</span></span><br><span class="line">		p-&gt;data = rand()%<span class="number">100</span>+<span class="number">1</span>;		<span class="comment">/* 随机生成100以内的数字 */</span></span><br><span class="line">		p-&gt;next = (*L)-&gt;next;</span><br><span class="line">		(*L)-&gt;next = p;			<span class="comment">/* 插入到表头 */</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  这段算法代码里，用的其实是插队的办法，就是始终让新结点在第一的位置。我也可以把这种算法简称为头插法。<br>
+<img src="https://img-blog.csdnimg.cn/f56ade1f13ae4449ae938fc23216eff2.png#pic_center" alt="在这里插入图片描述"><br>
+  事实上，我们还可以不这样干，为什么不把新结点都放到最后呢，这才是排队时的正常思维，所谓的先来后到。我们把每次新结点都插在终端结点的后面，这种算法称之为尾插法。<br>
+  实现代码算法如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 随机产生n个元素的值，建立带表头结点的单链线性表L(尾插法) */</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">CreateListTail</span><span class="params">(LinkList *L, <span class="type">int</span> n)</span></span><br><span class="line">&#123;</span><br><span class="line">	LinkList p,r;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	srand(time(<span class="number">0</span>));		<span class="comment">/* 初始化随机数种子 */</span></span><br><span class="line">	*L = (LinkList)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(Node));	<span class="comment">/* L为整个线性表 */</span></span><br><span class="line">	r=*L;	<span class="comment">/* r为指向尾部的结点 */</span></span><br><span class="line">	<span class="keyword">for</span> (i=<span class="number">0</span>; i&lt;n; <span class="number">1</span>++)</span><br><span class="line">	&#123;</span><br><span class="line">		P = (Node *)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(Node)); <span class="comment">/* 生成新结点 */</span></span><br><span class="line">		p-&gt;data = rand()%<span class="number">100</span>+<span class="number">1</span>;		<span class="comment">/* 随机生成100以内的数字 */</span></span><br><span class="line">		r-&gt;next=p;		<span class="comment">/* 将表尾终端结点的指针指向新结点 */</span></span><br><span class="line">		r = p;		<span class="comment">/* 将当前的新结点定义为表尾终端结点 */</span></span><br><span class="line">	&#125;</span><br><span class="line">	r-&gt;next = <span class="literal">NULL</span>;		<span class="comment">/* 表示当前链表结束 */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  注意<code>L</code>与<code>r</code>的关系，<code>L</code>是指整个单链表，而<code>r</code>是指向尾结点的变量，<code>r</code>会随着循环不断地变化结点，而<code>L</code>则是随着循环增长为一个多结点的链表。<br>
+  这里需解释一下，<code>r-&gt;next=p;</code>的意思， 其实就是将刚才的表尾终端结点<code>r</code>的指针指向新结点<code>p</code>，如下图所示，当中①位置的连线就是表示这个意思。<br>
+<img src="https://img-blog.csdnimg.cn/1e716c10e466403db5ae9cbdfdcbdd62.png#pic_center" alt="在这里插入图片描述">  <code>r-&gt;next=p;</code>这一句 应该还好理解，很多人不理解的就是后面这一句<code>r=p;</code>是什么意思，看下图。<br>
+<img src="https://img-blog.csdnimg.cn/3abc18d8fccf4cdfa7db0a0bbd84029a.png#pic_center" alt="在这里插入图片描述"><br>
+  它的意思，就是本来<code>r</code>是在 a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub><msub><mrow></mrow><mo>−</mo></msub><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">{_i}{_-}{_1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.52em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span class="mord"><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2583em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">−</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span><span class="mord"><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span> 元素的结点，可现在它已经不是最后的结点了，现在最后的结点是 a<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4617em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，所以应该要让将<code>p</code>结点这个最后的结点赋值给<code>r</code>。此时<code>r</code>又是最终的尾结点了。<br>
+  循环结束后，那么应该让这个结点的指针域置空，因此有了<code>r-&gt;next=NULL;</code>，以便以后遍历时可以确认其是尾部。<br>
+<br></p>
+<h1 id="5-单链表的整表删除">5. 单链表的整表删除</h1>
+<p>  当我们不打算使用这个单链表时，我们需要把它销毁，其实也就是在内存中将它释放掉，以便于留出空间给其他程序或软件使用。<br>
+  单链表整表删除的算法思路如下：</p>
+<ol>
+<li>声明一指针p和q；</li>
+<li>将第一个结点赋值给p；</li>
+<li>循环：<br>
+①将下一结点赋值给<code>q</code>；<br>
+②释放<code>p</code>；<br>
+③将<code>q</code>赋值给<code>p</code>。</li>
+</ol>
+<p>  实现代码算法如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 初始条件:链式线性表L已存在。操作结果:将L重置为空表 */</span></span><br><span class="line">Status <span class="title function_">ClearList</span><span class="params">(LinkList *L)</span></span><br><span class="line">&#123;</span><br><span class="line">	LinkList p,q;</span><br><span class="line">	p=(*L)-&gt;next;	<span class="comment">/* p指向第一个结点 */</span></span><br><span class="line">	<span class="keyword">while</span>(p)	<span class="comment">/* 没到表尾 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		</span><br><span class="line">		q=p-&gt;next;</span><br><span class="line">		<span class="built_in">free</span>(p);</span><br><span class="line">		p=q;</span><br><span class="line">	&#125;</span><br><span class="line">	(*L)-&gt;next=<span class="literal">NULL</span>;	<span class="comment">/* 头结点指针城为空 */</span></span><br><span class="line">	<span class="keyword">return</span> OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  这段算法代码里，常见的错误就是有人会觉得<code>q</code>变量没有存在的必要。在循环体内直接写<code>free(p);p=p-&gt;next</code>即可。可这样会带来什么问题?<br>
+  要知道<code>p</code>是一个结点，它除了有数据域，还有指针域。你在做<code>free(p);</code>时， 其实是在对它整个结点进行删除和内存释放的工作。这就好比皇帝快要病死了，却还没有册封太子，他儿子五六个，你说要是你脚一蹬倒是解脱了，这国家咋办，你那几个儿子咋办？这要是为了皇位，什么亲兄弟血肉情都成了浮云，一定会打起来。所以不行，皇帝不能马上死，得先把遗嘱写好，说清楚，哪个儿子做太子才行。而这个遗嘱就是变量<code>q</code>的作用，它使得下一个结点是谁得到了记录，以便于等当前结点释放后，把下一-结点拿回来补充。<br>
+<br></p>
+<h1 id="6-单链表结构与顺序存储结构的优缺点">6. 单链表结构与顺序存储结构的优缺点</h1>
+<p>简单地对单链表结构和顺序存储结构做对比：</p>
+<ul>
+<li><strong>存储分配方式：</strong>
+<ul>
+<li>顺序存储结构用一段连续的存储单元依次存储线性表的数据元素</li>
+<li>单链表采用链式存储结构，用一组任意的存储单元存放线性表的元素</li>
+</ul>
+</li>
+<li><strong>时间性能</strong>
+<ul>
+<li>查找
+<ul>
+<li>顺序存储结构O(1)</li>
+<li>单链表O(n)</li>
+</ul>
+</li>
+<li>插入和删除
+<ul>
+<li>顺序存储结构需要平均移动表长一半的元素，时间为O(n)</li>
+<li>单链表在找出某位置的指针后，插入和删除时间复杂度仅为O(1)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>空间性能</strong>
+<ul>
+<li>顺序存储结构需要预分配存储空间，分大了，浪费，分小了易发生上溢</li>
+<li>单链表不需要分配存储空间，只要有就可以分配，元素个数也不受限制</li>
+</ul>
+</li>
+</ul>
+<p>通过上面的对比，我们可以得出一些经验性的结论：</p>
+<ul>
+<li><strong>若线性表需要频繁查找，很少进行插入和删除操作时，宜采用顺序存储结构</strong>。若需要频繁插入和删除时，宜采用单链表结构。比如说游戏开发中，对于用户注册的个人信息，除了注册时插入数据外，绝大多数情况都是读取，所以应该考虑用顺序存储结构。而游戏中的玩家的武器或者装备列表，随着玩家的游戏过程中，可能会随时增加或删除，此时再用顺序存储就不太合适了，单链表结构就可以大展拳脚。当然，这只是简单的类比，现实中的软件开发，要考虑的问题会复杂得多。</li>
+<li><strong>当线性表中的元素个数变化较大或者根本不知道有多大时，最好用单链表结构</strong>。这样可以不需要考虑存储空间的大小问题。而如果事先知道线性表的大致长度，比如一年12个月，一周就是星期一至星期日共七天，这种用顺序存储结构效率会高很多。</li>
+</ul>
+<p>  总之，线性表的顺序存储结构和单链表结构各有其优缺点，不能简单的说哪个好，哪个不好，需要根据实际情况，来综合平衡采用哪种数据结构更能满足和达到需求和性能。<br>
+<br></p>
+<h1 id="7-静态链表">7. 静态链表</h1>
+<p>  C语言具有的指针能力，使得它可以非常容易地操作内存中的地址和数据，这比其他高级语言更加灵活方便。后来的面向对象语言，如<code>Java</code>、 <code>C#</code>等，虽不使用指针，但因为启用了对象引用机制，从某种角度也间接实现了指针的某些作用。但对于一些语言，如<code>Basic</code>、<code>Fortran</code>等早期的编程高级语言，由于没有指针，链表结构按照前面我们的讲法，它就没法实现了。怎么办呢?<br>
+  有人就想出来用数组来代替指针描述单链表。真是不得不佩服他们的智慧，我们来看看他是怎么做到的。<br>
+  首先我们让数组的元素都是由两个数据域组成，<code>data</code>和<code>cur</code>。也就是说，数组的每个下标都对应一个<code>data</code>和一个<code>cur</code>。数据域<code>data</code>，用来存放数据元素，也就是通常我们要处理的数据；而<code>cur</code>相当于单链表中的<code>next</code>指针，存放该元素的后继在数组中的下标，我们把<code>cur</code>叫做游标。<br>
+  我们把这种<strong>用数组描述的链表叫做静态链表</strong>，这种描述方法还有起名叫做游标实现法。<br>
+  为了方便插入数据，我们通常会把数组建立得大一些，以便有一些空闲空间可以便于插入时不至于溢出。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> MAXSIZE 1000	<span class="comment">/* 存储空间初始分配量*/</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 线性表的静态链表存储结构 */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	ElemType data;</span><br><span class="line">	<span class="type">int</span> cur;	<span class="comment">/* 游标（Cursor），为0时表示无指向 */</span></span><br><span class="line">&#125; Component,StaticLinkList[MAXSIZE];</span><br></pre></td></tr></table></figure>
+<p>  另外我们对数组第一个和最后一 个元素作为特殊元素处理，不存数据。我们通常把未被使用的数组元素称为备用链表。而数组第一个元素，即下标为<code>0</code>的元素的<code>cur</code>就存放备用链表的第一个结点的下标；而数组的最后一个元素的<code>cur</code>则存放第一个有数值的元素的下标，相当于单链表中的头结点作用，当整个链表为空时，则为0。如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/92e8c5f45d494430a37b524b88e86376.png#pic_center" alt="在这里插入图片描述"><br>
+  此时的图示相当于初始化的数组状态，见下面代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 将一维数组space中各分量链成一个备用链表，space[0].cur为头指针，&quot;0&quot;表示空指针 */</span></span><br><span class="line">Status <span class="title function_">InitList</span><span class="params">(StaticLinkList space)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	<span class="keyword">for</span> (i=<span class="number">0</span>; i&lt;MAXSIZE<span class="number">-1</span>; i++ )</span><br><span class="line">		space[i].cur = i+<span class="number">1</span>:</span><br><span class="line">	space[MAXSIZE<span class="number">-1</span>].cur = <span class="number">0</span>; <span class="comment">/* 目前静态链表为空，最后一个元素的cur为0 */</span></span><br><span class="line">	<span class="keyword">return</span> OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  假设我们已经将数据存入静态链表，比如分别存放着“甲”、“乙”、丁”、“戊”、“已&quot;、庚”等数据，则它将处于如下图所示这种状态。<br>
+<img src="https://img-blog.csdnimg.cn/547bcd0df31b4d6f871f26354ed8e9af.png#pic_center" alt="在这里插入图片描述"><br>
+  此时“甲”这里就存有下一元素“乙&quot;的游标 2,，&quot;乙&quot;则存有下一元素“丁”的下标 3。而“庚&quot;是最后一个有值元素，所以它的<code>cur</code>设置为 0。而最后一个元素的<code>cur</code>则因“甲”是第一有值元素而存有它的下标为 1。而第一个元素则因空闲空间的第一个元素下标为 7，所以它的<code>cur</code>存有 7。</p>
+<h2 id="7-1-静态链表的插入操作">7.1 静态链表的插入操作</h2>
+<p>  现在我们来看看如何实现元素的插入。<br>
+  静态链表中要解决的是：如何用静态模拟动态链表结构的存储空间的分配，需要时申请，无用时释放。<br>
+  前面说过，在动态链表中，结点的申请和释放分别借用<code>malloc ()</code>和<code>free()</code>两个函数来实现。在静态链表中，操作的是数组，不存在像动态链表的结点申请和释放问题，所以我们需要自己实现这两个函数，才可以做插入和删除的操作。<br>
+  为了辨明数组中哪些分量未被使用，解决的办法是将所有未被使用过的及已被删除的分量用游标链成一个备用的链表，每当进行插入时，便可以从备用链表上取得第一个结点作为待插入的新结点。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 若备用空间链表非空，则返回分配的结点下标，否则返回0 */</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">Malloc_SLL</span><span class="params">(StaticlinkList space)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> i = space[<span class="number">0</span>].cur; 	<span class="comment">/* 当前数组第一个元素的cur存的值 */</span></span><br><span class="line">							<span class="comment">/* 就是要返回的第一个备用空闲的下标 */</span></span><br><span class="line">	<span class="keyword">if</span> (space[<span class="number">0</span>].cur)</span><br><span class="line">		space[<span class="number">0</span>].cur = space[i].cur;	<span class="comment">/* 由于要拿出一个分量来使用 */</span></span><br><span class="line">										<span class="comment">/* 所以我们就得把它的下一个分量用来做备用*/</span></span><br><span class="line">	<span class="keyword">return</span> i;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  这段代码有意思，一方面它的作用就是返回一个下标值，这个值就是数组头元素的<code>cur</code>存的第一个空闲的下标。从上面的图示例子来看,其实就是返回<code>7</code>。<br>
+  那么既然下标为<code>7</code>的分量准备要使用了，就得有接替者，所以就把分量<code>7</code>的<code>cur</code>值赋值给头元素，也就是把<code>8</code>给<code>space[0].cur</code>, 之后就可以继续分配新的空闲分量，实现类似<code>malloc()</code>函数的作用。<br>
+  现在我们如果需要在“乙&quot;和“丁”之间，插入一个值为“丙&quot;的元素，按照以前顺序存储结构的做法，应该要把“丁”、“戊&quot;、“己”、“庚&quot;这些元素都往后移一位。但目前不需要，因为我们有了新的手段。<br>
+  新元素“丙”， 想插队是吧？可以，你先悄悄地在队伍最后一排第<code>7</code>个游标位置待着，我一会就能帮你搞定。我接着找到了“乙”， 告诉他，你的<code>cur</code>不是游标为<code>3</code>的“丁”了，这点小钱，意思意思，你把你的下一位的游标改为<code>7</code>就可以了。&quot;乙”把<code>cur</code>值改了。此时再回到“丙&quot;那里，说你把你的<code>cur</code>改为<code>3</code>。就这样，在绝大多数人都不知道的情况下，整个排队的次序发生了改变(如下图所示)。<br>
+  实现代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Status <span class="title function_">ListInsert</span><span class="params">(StaticLinkList L, <span class="type">int</span> i, ElemType e)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> j, k, l;</span><br><span class="line">	k = MAXSIZE - <span class="number">1</span>;	<span class="comment">/* 注意k首先是最后一个元素的下标 */</span></span><br><span class="line">	<span class="keyword">if</span> (i &lt; <span class="number">1</span> || i &gt; ListLength(L) + <span class="number">1</span>)</span><br><span class="line">		<span class="keyword">return</span> ERROR;</span><br><span class="line">	j = Malloc_SSL(L);	<span class="comment">/* 获得空闲分量的下标 */</span></span><br><span class="line">	<span class="keyword">if</span> (j)</span><br><span class="line">	&#123;</span><br><span class="line">		L[j].data = e;	<span class="comment">/* 将数据赋值给此分量的data */</span></span><br><span class="line">		<span class="keyword">for</span>(l = <span class="number">1</span>; l &lt;= i <span class="number">-1</span>; l++)	<span class="comment">/* 找到第i个元素之前的位置 */</span></span><br><span class="line">			k = L[k].cur;</span><br><span class="line">		L[j].cur = L[k].cur;	<span class="comment">/* 把第i个元素之前的cur赋值给新元素的cur */</span></span><br><span class="line">		L[k].cur = j;	<span class="comment">/* 把新元素的下标赋值给第i个元素之前元素的cur */</span></span><br><span class="line">		<span class="keyword">return</span> OK;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> ERROR;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>当我们执行插入语句时，我们的目的是要在“乙&quot;和“丁”之间插入“丙&quot;。调用代码时，输入<code>i</code>值为3。</li>
+<li>第 4 行让<code>k=MAX_SIZE- 1=999</code>。</li>
+<li>第 7 行，<code>j=Malloc._SSL (L) =7</code>。此时下标为 0 的<code>cur</code>也因为 7 要被占用而更改备用链表的值为 8。</li>
+<li>第 11~12 行，<code>for</code>循环由 1 到 2，执行两次。代码<code>k = L[k].cur;</code>使得<code>k=999</code>，得到<code>k=L[999].cur=1</code>,再得到<code>k=L[1].cur=2</code>。</li>
+<li>第 13 行，<code>L[j].cur = L[k].cur;</code>，因<code>j=7</code>，而<code>k=2</code>得到<code>L[7].cur=L[2].cur=3</code>。这就是刚才我说的让“丙&quot;把它的<code>cur</code>改为 3 的意思。</li>
+<li>第 14 行，<code>L[k].cur = j;</code>意思就是<code>L[2].cur=7</code>。 也就是让“乙”把它的<code>cur</code>改为指向“丙&quot;的下标 7。</li>
+</ol>
+<p>  就这样，我们实现了在数组中，实现不移动元素，却插入了数据的操作(如下图所示)。没理解可能觉得有些复杂，理解了，也就那么回事。<br>
+<img src="https://img-blog.csdnimg.cn/32854f070a714ae8a22dd283346904fb.png#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="7-2-静态链表的删除操作">7.2 静态链表的删除操作</h2>
+<p>  和前面一样，删除元素时，原来是需要释放结点的函数<code>free()</code>。 现在我们也得自己实现它：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 删除在L中第i个数据元素e */</span></span><br><span class="line">Status <span class="title function_">ListDelete</span><span class="params">(StaticLinkList L, <span class="type">int</span> i)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> j, k;</span><br><span class="line">	<span class="keyword">if</span> (i &lt; <span class="number">1</span> || i &gt; ListLength(L))</span><br><span class="line">		<span class="keyword">return</span> ERROR;</span><br><span class="line">	k = MAXSIZE - <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">for</span> (j = <span class="number">1</span>; j &lt;= i - <span class="number">1</span>; j++)</span><br><span class="line">		k = L[k].cur;</span><br><span class="line">	j = L[k].cur;</span><br><span class="line">	L[k].cur = L[j].cur;</span><br><span class="line">	Free_SSL(L, j);</span><br><span class="line">	<span class="keyword">return</span> OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  有了刚才的基础，这段代码就很容易理解了。前面代码都一样，<code>for</code>循环因为<code>i=1</code>而不操作，<code>j=k[999].cur=1</code>，<code>L[k].cur=L[j].cur</code>也就是<code>L[999]cur=L[1].cur=2</code>。 这其实就是告诉计算机现在“甲” 已经离开了，“乙”才是第一个元素。<code>FreSSL(L, j);</code>是什么意思呢？来看代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 将下标为k的空闲结点回收到备用链表 */</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">Free_SSL</span><span class="params">(StaticLinkList space, <span class="type">int</span> k)</span></span><br><span class="line">&#123;</span><br><span class="line">	space[k].cur = space[<span class="number">0</span>].cur;	<span class="comment">/* 把第一个元素的cur值赋给要删除的分量cur */</span></span><br><span class="line">	space[<span class="number">0</span>].cur = k;	<span class="comment">/* 把要删除的分量下标赋值给第一个元素的cur */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  意思就是“甲”现在要走，这个位置就空出来了，也就是，未来如果有新人来，最优先考虑这里，所以原来的第一一个空位分量，即下标是 8 的分量，它降级了，把 8 给“甲”所在下标为 1 的分量的<code>cur</code>，也就是<code>space[1].cur=space[0].cur=8</code>，而<code>space[0].cur=k=1</code>其实就是让这个删除的位置成为第一个优先空位，把它存入第一个元素的<code>cu</code>r中，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/218b9d0d583e4d05bb3bd3de68a7e106.png#pic_center" alt="在这里插入图片描述"><br>
+  当然，静态链表也有相应的其他操作的相关实现。比如我们代码中的<code>ListLength</code>就是一个，来看代码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 初始条件：静态链表L已存在。操作结果：返回L中数据元素的个数 */</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">ListLength</span><span class="params">(StaticLinkList L)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> j=<span class="number">0</span>;</span><br><span class="line">	<span class="type">int</span> i=L[MAXSIZE<span class="number">-1</span>].cur;</span><br><span class="line">	<span class="keyword">while</span>(i)</span><br><span class="line">	&#123;</span><br><span class="line">		i=L[i].cur;</span><br><span class="line">		j++;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> j;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  另外一些操作和线性表的基本操作相同，实现也不复杂，在这里就不讲解了。</p>
+<h2 id="7-3-静态链表的优缺点">7.3 静态链表的优缺点</h2>
+<p><strong>优点：</strong></p>
+<ul>
+<li>在插入和删除操作时，只需要修改游标，不需要移动元素，从而改进了在顺序存储结构中的插入和删除操作需要移动大量元素的缺点</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>没有解决连续存储分配带来的表长难以确定的问题</li>
+<li>失去了顺序存储结构随机存取的特性</li>
+</ul>
+<p>  总的来说，静态链表其实是为了给没有指针的高级语言设计的一种实现单链表能力的方法。尽管大家不一定会用得上，但这样的思考方式是非常巧妙的，应该理解其思想，以备不时之需。<br>
+<br></p>
+<h1 id="8-循环链表">8. 循环链表</h1>
+<p>  对于单链表，由于每个结点只存储了向后的指针，到了尾标志就停止了向后链的操作，这样，当中某一结点就无法找到它的前驱结点了，就像我们刚才说的，不能回到从前。<br>
+  比如，你是一业务员，家在上海。需要经常出差，行程就是上海到北京一路上的城市，找客户谈生意或分公司办理业务。你从上海出发，乘火车路经多个城市停留后，再乘飞机返回上海，以后，每隔一段时间，你基本还要按照这样的行程开展业务，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/501761f2a18441d3852ae40139b1d816.png#pic_center" alt="在这里插入图片描述"><br>
+  有一次，你先到南京开会，接下来要对以上的城市走一遍， 此时有人对你说，不行，你得从上海开始，因为上海是第一站。你会对这人说什么？神经病。哪有这么傻的，直接回上海根本没有必要，你可以从南京开始，下一站蚌埠，直到北京，之后再考虑走完上海及苏南的几个城市。显然这表示你是从当中一结点开始遍历整个链表，这都是原来的单链表结构解决不了的问题。<br>
+  事实上，把北京和上海之间连起来，形成一个环就解决了前面所面临的困难。这就是我们现在要讲的循环链表。<br>
+  <strong>将单链表中终端结点的指针端由空指针改为指向头结点，就使整个单链表形成一个环，这种头尾相接的单链表称为单循环链表，简称循环链表(circular linked list)。</strong><br>
+  从刚才的例子可以总结出，循环链表解决了一个很麻烦的问题。如何从当中一个结点出发，访问到链表的全部结点。<br>
+  为了使空链表与非空链表处理一致， 我们通常设一个头结点，当然，这并不是说，循环链表一定要头结点，这需要注意。循环链表带有头结点的空链表如下图所示：<br>
+<img src="https://img-blog.csdnimg.cn/df59aecee6c14cf3a5a36ad3d50ebd9f.png#pic_center" alt="在这里插入图片描述"><br>
+  对于非空的循环链表就如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/ff08538058bd4449a074ce80e7e05fd2.png#pic_center" alt="在这里插入图片描述">  其实循环链表和单链表的主要差异就在于循环的判断条件上，原来是判断<code>p-&gt;next</code>是否为空，现在则是<code>p-&gt;next</code>不等于头结点，则循环未结束。<br>
+  在单链表中，我们有了头结点时，我们可以用 <strong>O(1)</strong> 的时间访问第一个结点，但对于要访问到最后一个结点，却需要 <strong>O(n)</strong> 时间，因为我们需要将单链表全部扫描一遍。<br>
+  有没有可能用 <strong>O(1)</strong> 的时间由链表指针访问到最后一一个结点呢？当然可以。<br>
+  不过我们需要改造一下这个循环链表，不用头指针，而是用指向终端结点的尾指针来表示循环链表（如下图所示），此时查找开始结点和终端结点都很方便了。<br>
+<img src="https://img-blog.csdnimg.cn/5e927c0f914c4d129c3ee24057e68604.png#pic_center" alt="在这里插入图片描述"><br>
+  从上图中可以看到，终端结点用尾指针<code>rear</code>指示，则查找终端结点的时间复杂度是<strong>O(1)</strong>，而开始结点，其实就是<code>rear-&gt;next-&gt;next</code>，其时间复杂也为<strong>O(1)</strong>。<br>
+  举个程序的例子，要将两个循环链表合并成一个表时， 有了尾指针就非常简单了。比如下面的这两个循环链表，它们的尾指针分别是<code>rearA</code>和<code>rearB</code>，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/121afc909cdf4ec198774bfa353c1612.png#pic_center" alt="在这里插入图片描述"><br>
+  要想把它们合并，只需要如下的操作即可，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/68b6f54bfde54d3ab410e9de2d9060d0.png#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">p=rearA-&gt;next;					<span class="comment">/* 保存A表的头结点，即 ① */</span></span><br><span class="line">rearA-&gt;next=rearB-&gt;next-&gt;next;	<span class="comment">/* 将本是指向B表的第一个结点(不是头结点) */</span></span><br><span class="line">								<span class="comment">/* 赋值给reaA-&gt;next,即 ② */</span></span><br><span class="line">rearB-&gt;next-p;					<span class="comment">/* 将原A表的头结点赋值给rearB-&gt;next,即 ③ */</span></span><br><span class="line"><span class="built_in">free</span> (p);						<span class="comment">/* 释放q */</span></span><br></pre></td></tr></table></figure>
+<br>
+<h1 id="9-双向链表">9. 双向链表</h1>
+<p>  继续我们刚才的例子，你平时都是从上海一路停留到北京的，可是这一次，你得先到北京开会，谁叫北京是首都呢，会就是多。开完会后，你需要例行公事，走访各个城市，此时你怎么办？<br>
+  有人又出主意了，你可以先飞回上海，一路再乘火车走遍这几个城市，到了北京后，你再飞回上海。<br>
+<img src="https://img-blog.csdnimg.cn/dd6f86156bc84472821f8f7abc02a995.png#pic_center" alt="在这里插入图片描述"><br>
+  你会感慨，人生中为什么总会有这样出馊主意的人存在呢？真要气死人才行。哪来这么麻烦，我一路从北京坐火车或汽车回去不就完了吗。如下图所示：<br>
+<img src="https://img-blog.csdnimg.cn/2bc3c0e80bc94c059735c96f7c9d65c1.png#pic_center" alt="在这里插入图片描述"><br>
+  对呀，其实生活中类似的小智慧比比皆是，并不会那么的死板教条。我们的单链表，总是从头到尾找结点，难道就不可以正反遍历都可以吗？当然可以，只不过需要加点东西而已。<br>
+  我们在单链表中，有了<code>next</code>指针，这就使得我们要查找下一结点的时间复杂度为<strong>O(1)</strong>。可是如果我们要查找的是上一结点的话，那最坏的时间复杂度就是 <strong>O(n)</strong> 了，因为我们每次都要从头开始遍历查找。<br>
+  <strong>双向链表（double linked list）是在单链表的每个结点中，再设置一个指向其前驱结点的指针域。</strong> 所以在双向链表中的结点都有两个指针域，一个指向直接后继，另一个指向直接前驱。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 线性表的双向链表存储结构 */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">DulNode</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	ElemType data;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">DulNode</span> *<span class="title">prior</span>;</span>	<span class="comment">/* 直接前驱指针 */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">DulNode</span> *<span class="title">next</span>;</span>	<span class="comment">/* 直接后驱指针 */</span></span><br><span class="line">&#125; DulNode, *DuLinkList;</span><br></pre></td></tr></table></figure>
+<p>  既然单链表也可以有循环链表，那么双向链表当然也可以是循环表。<br>
+  双向链表的循环带头结点的空链表如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/efdf5e2297d5444ba5cbab24d5ef70ac.png#pic_center" alt="在这里插入图片描述"><br>
+  非空的循环的带头结点的双向链表如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/d810b472f851467cbdb9dd30cd1961be.png#pic_center" alt="在这里插入图片描述"><br>
+  由于这是双向链表，那么对于链表中的某一个结点<code>p</code>，它的后继的前驱是谁？当然还是它自已。它的前驱的后继自然也是它自己，即：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">p-&gt;next-&gt;prior = p = p-&gt;prior-&gt;next</span><br></pre></td></tr></table></figure>
+<p>  这就如同上海的下一站是苏州，那么上海的下一站的前一站是哪里? 这里有点废话的感觉。<br>
+  双向链表是单链表中扩展出来的结构，所以它的很多操作是和单链表相同的，比如求长度的<code>ListLength</code>，查找元素的<code>GetElem</code>，获得元素位置的<code>LocateElem</code>等，这些操作都只要涉及一个方向的指针即可，另一指针多了也不能提供什么帮助。<br>
+  就像人生一样，想享乐就得先努力，欲收获就得付代价。双向链表既然是比单链表多了如可以反向遍历查找等数据结构，那么也就需要付出一些小的代价：在插入和删除时，需要更改两个指针变量。<br>
+  插入操作时，其实并不复杂，不过顺序很重要，千万不能写反了。<br>
+  我们现在假设存储元素<code>e</code>的结点为<code>s</code>，要实现将结点<code>s</code>插入到结点<code>p</code>和<code>p-&gt;next</code>之间需要下面几步，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/36b388eb689f4f20b77b047e616b8832.png#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">s -&gt; prior = p;			<span class="comment">/* 把p赋值給s的前驱，如图中 ① */</span></span><br><span class="line">s -&gt; next = p-&gt; next;	<span class="comment">/* 把p-&gt;next赋值给s的后继，如图中 ② */</span></span><br><span class="line">p -&gt; next-&gt; prior = s;	<span class="comment">/* 把s赋值给p-&gt;next的前驱，如图中 ③ */</span></span><br><span class="line">p -&gt; next = s;			<span class="comment">/* 把s赋值給p的后继，如图中 ④ */</span></span><br></pre></td></tr></table></figure>
+<p>  关键在于它们的顺序，由于第②步和第③步都用到了<code>p-&gt;next</code>。如果第④步先执行，则会使得<code>p-&gt;next</code>提前变成了<code>s</code>，使得插入的工作完不成。所以我们不妨把上面这张图在理解的基础上记忆，顺序是先搞定<code>s</code>的前驱和后继，再搞定后结点的前驱，最后解决前结点的后继。<br>
+  如果插入操作理解了，那么删除操作，就比较简单了。<br>
+  若要删除结点<code>p</code>，只需要下面两步骤，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/6c1f2bb0b16a4c57a10a4121d48ee4a4.png#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">p-&gt;prior-&gt;next=p-&gt;next;	<span class="comment">/* 把p-&gt;next赋值给p-&gt;prior的后继，如图中 ① */</span></span><br><span class="line">p-&gt;next- -&gt;prior=p-&gt;prior;	<span class="comment">/* 把p-&gt;prior赋值给p-&gt;next的前驱，如图中 ② */</span></span><br><span class="line"><span class="built_in">free</span>(p);				<span class="comment">/* 释放结点 */</span></span><br></pre></td></tr></table></figure>
+<p>  双向链表相对于单链表来说，要更复杂一些，毕竟它多了<code>prior</code>指针，对于插入和删除时，需要格外小心。另外它由于每个结点都需要记录两份指针，所以在空间上是要占用略多一些的。 不过，由于它良好的对称性，使得对某个结点的前后结点的操作带来了方便，可以有效提高算法的时间性能。说白了，就是用空间来换时间。<br>
+<br></p>
+<h1 id="10-总结">10. 总结</h1>
+<p>  链式存储结构具有不受固定的存储空间限制，可以比较快捷的插入和删除。<br>
+  线性表的这两种结构其实是后面其他数据结构的基础，把它们学明白了，对后面的学习有着至关重要的作用。<br>
+<img src="https://img-blog.csdnimg.cn/c465b3cb322843d998a313a97feadead.png#pic_center" alt="在这里插入图片描述"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2021/10/18/algorithm_5/">https://program-park.github.io/2021/10/18/algorithm_5/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/">算法</a></div><div class="post_share"><div class="social-share" data-image="/img/algorithm/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/10/31/algorithm_6/"><img class="prev-cover" src="/img/algorithm/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">《数据结构与算法》（六）- 栈详解</div></div></a></div><div class="next-post pull-right"><a href="/2021/10/13/algorithm_4/"><img class="next-cover" src="/img/algorithm/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">《数据结构与算法》（四）- 线性表详解</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/10/11/algorithm_1/" title="《数据结构与算法》（一）- 数据结构详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-11</div><div class="title">《数据结构与算法》（一）- 数据结构详解</div></div></a></div><div><a href="/2021/10/11/algorithm_3/" title="《数据结构与算法》（三）- 如何估算时间复杂度"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-11</div><div class="title">《数据结构与算法》（三）- 如何估算时间复杂度</div></div></a></div><div><a href="/2021/10/13/algorithm_4/" title="《数据结构与算法》（四）- 线性表详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-13</div><div class="title">《数据结构与算法》（四）- 线性表详解</div></div></a></div><div><a href="/2021/10/11/algorithm_2/" title="《数据结构与算法》（二）- 算法详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-11</div><div class="title">《数据结构与算法》（二）- 算法详解</div></div></a></div><div><a href="/2021/11/01/algorithm_7/" title="《数据结构与算法》（七）- 队列详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-01</div><div class="title">《数据结构与算法》（七）- 队列详解</div></div></a></div><div><a href="/2021/10/31/algorithm_6/" title="《数据结构与算法》（六）- 栈详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-31</div><div class="title">《数据结构与算法》（六）- 栈详解</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">80</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">17</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E7%BA%BF%E6%80%A7%E8%A1%A8%E9%93%BE%E5%BC%8F%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84"><span class="toc-text">1. 线性表链式存储结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E9%93%BE%E8%A1%A8%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="toc-text">1.1 链表的定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E5%A4%B4%E6%8C%87%E9%92%88%E4%B8%8E%E5%A4%B4%E7%BB%93%E7%82%B9%E7%9A%84%E5%BC%82%E5%90%8C"><span class="toc-text">1.2 头指针与头结点的异同</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-%E4%BB%A3%E7%A0%81%E6%8F%8F%E8%BF%B0"><span class="toc-text">1.3 代码描述</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%8D%95%E9%93%BE%E8%A1%A8%E7%9A%84%E8%AF%BB%E5%8F%96"><span class="toc-text">2. 单链表的读取</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%8D%95%E9%93%BE%E8%A1%A8%E7%9A%84%E6%8F%92%E5%85%A5%E4%B8%8E%E5%88%A0%E9%99%A4"><span class="toc-text">3. 单链表的插入与删除</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E5%8D%95%E9%93%BE%E8%A1%A8%E7%9A%84%E6%8F%92%E5%85%A5"><span class="toc-text">3.1 单链表的插入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E5%8D%95%E9%93%BE%E8%A1%A8%E7%9A%84%E5%88%A0%E9%99%A4"><span class="toc-text">3.2 单链表的删除</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E5%8D%95%E9%93%BE%E8%A1%A8%E7%9A%84%E6%95%B4%E8%A1%A8%E5%88%9B%E5%BB%BA"><span class="toc-text">4. 单链表的整表创建</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E5%8D%95%E9%93%BE%E8%A1%A8%E7%9A%84%E6%95%B4%E8%A1%A8%E5%88%A0%E9%99%A4"><span class="toc-text">5. 单链表的整表删除</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-%E5%8D%95%E9%93%BE%E8%A1%A8%E7%BB%93%E6%9E%84%E4%B8%8E%E9%A1%BA%E5%BA%8F%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-text">6. 单链表结构与顺序存储结构的优缺点</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#7-%E9%9D%99%E6%80%81%E9%93%BE%E8%A1%A8"><span class="toc-text">7. 静态链表</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#7-1-%E9%9D%99%E6%80%81%E9%93%BE%E8%A1%A8%E7%9A%84%E6%8F%92%E5%85%A5%E6%93%8D%E4%BD%9C"><span class="toc-text">7.1 静态链表的插入操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-2-%E9%9D%99%E6%80%81%E9%93%BE%E8%A1%A8%E7%9A%84%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C"><span class="toc-text">7.2 静态链表的删除操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-3-%E9%9D%99%E6%80%81%E9%93%BE%E8%A1%A8%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-text">7.3 静态链表的优缺点</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#8-%E5%BE%AA%E7%8E%AF%E9%93%BE%E8%A1%A8"><span class="toc-text">8. 循环链表</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#9-%E5%8F%8C%E5%90%91%E9%93%BE%E8%A1%A8"><span class="toc-text">9. 双向链表</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#10-%E6%80%BB%E7%BB%93"><span class="toc-text">10. 总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/02/algorithm_8/" title="《数据结构与算法》（八）- 串详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（八）- 串详解"/></a><div class="content"><a class="title" href="/2021/11/02/algorithm_8/" title="《数据结构与算法》（八）- 串详解">《数据结构与算法》（八）- 串详解</a><time datetime="2021-11-02T06:19:16.000Z" title="发表于 2021-11-02 14:19:16">2021-11-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/01/algorithm_7/" title="《数据结构与算法》（七）- 队列详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（七）- 队列详解"/></a><div class="content"><a class="title" href="/2021/11/01/algorithm_7/" title="《数据结构与算法》（七）- 队列详解">《数据结构与算法》（七）- 队列详解</a><time datetime="2021-11-01T12:09:19.000Z" title="发表于 2021-11-01 20:09:19">2021-11-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/31/algorithm_6/" title="《数据结构与算法》（六）- 栈详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（六）- 栈详解"/></a><div class="content"><a class="title" href="/2021/10/31/algorithm_6/" title="《数据结构与算法》（六）- 栈详解">《数据结构与算法》（六）- 栈详解</a><time datetime="2021-10-31T10:28:22.000Z" title="发表于 2021-10-31 18:28:22">2021-10-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/18/algorithm_5/" title="《数据结构与算法》（五）- 链表详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（五）- 链表详解"/></a><div class="content"><a class="title" href="/2021/10/18/algorithm_5/" title="《数据结构与算法》（五）- 链表详解">《数据结构与算法》（五）- 链表详解</a><time datetime="2021-10-18T10:46:16.000Z" title="发表于 2021-10-18 18:46:16">2021-10-18</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/algorithm/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2021/10/18/algorithm_5/'
+    this.page.identifier = '/2021/10/18/algorithm_5/'
+    this.page.title = '《数据结构与算法》（五）- 链表详解'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

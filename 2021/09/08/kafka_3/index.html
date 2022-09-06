@@ -1,0 +1,451 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>消息队列及 Kafka 简介 | 程序园</title><meta name="keywords" content="Kafka"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是对消息队列的介绍和剖析，以及 Kafka 的简介。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="消息队列及 Kafka 简介">
+<meta property="og:url" content="https://program-park.github.io/2021/09/08/kafka_3/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是对消息队列的介绍和剖析，以及 Kafka 的简介。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/kafka/1.png">
+<meta property="article:published_time" content="2021-09-08T04:45:12.000Z">
+<meta property="article:modified_time" content="2022-09-06T08:33:04.002Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/kafka/1.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://program-park.github.io/2021/09/08/kafka_3/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '消息队列及 Kafka 简介',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-06 16:33:04'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">80</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">17</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/kafka/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">消息队列及 Kafka 简介</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-09-08T04:45:12.000Z" title="发表于 2021-09-08 12:45:12">2021-09-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-06T08:33:04.002Z" title="更新于 2022-09-06 16:33:04">2022-09-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Kafka/">Kafka</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>5分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="消息队列及 Kafka 简介"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="前言">前言</h1>
+<p><font color=#999AAA >本文记录消息队列基本概念、使用场景，以及Kafka的简介，仅供学习参考。</font><br>
+<font color=#999AAA >文章部分内容来自黑马课件。</font></p>
+<h1 id="1-消息队列简介">1. 消息队列简介</h1>
+<p><code>消息队列（Message Queue）</code>，也就是我们常说的 MQ。从字面上来理解，消息队列是一种用来存储消息的队列。</p>
+<p>消息队列中间件就是用来存储消息的软件（组件）。举个例子来理解，为了分析网站的用户行为，我们需要记录用户的访问日志。这些一条条的日志，可以看成是一条条的消息，我们可以将它们保存到消息队列中。将来有一些应用程序需要处理这些日志，就可以随时将这些消息取出来处理。<br>
+目前市面上的消息队列有很多，例如：Kafka、RabbitMQ、ActiveMQ、RocketMQ、ZeroMQ 等。</p>
+<h1 id="2-消息队列的应用场景">2. 消息队列的应用场景</h1>
+<ul>
+<li>
+<p><strong>异步处理</strong></p>
+<ul>
+<li>电商网站中，新的用户注册时，需要将用户的信息保存到数据库中，同时还需要额外发送注册的邮件通知、以及短信注册码给用户。但因为发送邮件、发送注册短信需要连接外部的服务器，需要额外等待一段时间，此时，就可以使用消息队列来进行异步处理，从而实现快速响应。</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/3b0f765a62104b54a1fcd3ad53078f89.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"></p>
+</li>
+<li>
+<p><strong>系统解耦</strong><br>
+<img src="https://img-blog.csdnimg.cn/45812c519e3a4f5bbd8af949990d1395.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_11,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"></p>
+</li>
+<li>
+<p><strong>流量削峰</strong><br>
+<img src="https://img-blog.csdnimg.cn/f7132de48f564f54b284681b07808073.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_11,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"></p>
+</li>
+<li>
+<p><strong>日志处理</strong><br>
+<img src="https://img-blog.csdnimg.cn/bee9ef3cb16b4ff89eddefb07a9a6030.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_11,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"></p>
+</li>
+</ul>
+<h1 id="3-生产者、消费者模型">3. 生产者、消费者模型</h1>
+<p>Java服务器端开发的交互模型是这样的：<br>
+<img src="https://img-blog.csdnimg.cn/edcade035eb6465c9123f2d860f27c3c.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_9,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"><br>
+使用Java JDBC来访问操作 MySQL 数据库的交互模型是这样的：<br>
+<img src="https://img-blog.csdnimg.cn/19936c69033c40c1bf28e4ed11178801.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"><br>
+这也是一种请求响应模型，只不过它不再是基于 http 协议，而是基于 MySQL 数据库的通信协议。<br>
+而如果我们基于消息队列来编程，此时的交互模式成为：生产者、消费者模型：<br>
+<img src="https://img-blog.csdnimg.cn/8a979535bc514dcfafc67a1ba945e5e5.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_9,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"></p>
+<h1 id="4-消息队列的两种模式">4. 消息队列的两种模式</h1>
+<h2 id="4-1-点对点模式">4.1 点对点模式</h2>
+<p><img src="https://img-blog.csdnimg.cn/c2d406455998456cbfa751ec5baea688.png#pic_center" alt="在这里插入图片描述"><br>
+消息发送者生产消息发送到消息队列中，然后消息接收者从消息队列中取出并且消费消息。消息被消费以后，消息队列中不再有存储，所以消息接收者不可能消费到已经被消费的消息。<br>
+消息队列支持存在多个消费者， 但是对一个消息而言， 只会有一个消费者可以消费。</p>
+<p><strong>点对点模式的特点：</strong></p>
+<ul>
+<li>每个消息只有一个接收者（Consumer）(即一旦被消费，消息就不再在消息队列中)</li>
+<li>发送者和接收者间没有依赖性，发送者发送消息之后，不管有没有接收者在运行，都不会影响到发送者下次发送消息</li>
+<li>接收者在成功接收消息之后需向队列应答成功，以便消息队列删除当前接收的消息</li>
+</ul>
+<h2 id="4-2-发布订阅模式">4.2 发布订阅模式</h2>
+<p><img src="https://img-blog.csdnimg.cn/0727b190193f4dfa9d6f68af71ed4d2c.png#pic_center" alt="在这里插入图片描述"><br>
+消息生产者（发布）将消息发布到消息队列中，同时有多个消息消费者（订阅）消费该消息。和点对点方式不同，发布到消息队列的消息会被所有订阅者消费。</p>
+<p><strong>发布/订阅模式特点：</strong></p>
+<ul>
+<li>每个消息可以有多个订阅者</li>
+<li>发布者和订阅者之间有时间上的依赖性，针对某个主题（Topic）的订阅者，它必须创建一个订阅者之后，才能消费发布者的消息</li>
+<li>为了消费消息，订阅者需要提前订阅该角色主题，并保持在线运行</li>
+</ul>
+<h1 id="5-使用消息队列的好处">5. 使用消息队列的好处</h1>
+<ul>
+<li><strong>解耦</strong>
+<ul>
+<li>允许独立的扩展或修改两边的处理过程，只要确保它们遵守同样的接口约束</li>
+</ul>
+</li>
+<li><strong>可恢复性</strong>
+<ul>
+<li>系统的一部分组件失效时，不会影响到整个系统。消息队列降低了进程间的耦合度，所以即使一个处理消息的进程挂掉，加入队列中的消息仍然可以在系统恢复后被处理</li>
+</ul>
+</li>
+<li><strong>缓冲</strong>
+<ul>
+<li>有助于控制和优化数据流经过系统的速度，解决生产消息和消费消息的处理速度不一致的情况</li>
+</ul>
+</li>
+<li><strong>灵活性、峰值处理能力</strong>
+<ul>
+<li>在访问量剧增的情况下，应用仍然需要继续发挥作用，但是这样的突发流量并不常见。如果为以能处理这类峰值访问为标准来投入资源随时待命无疑是巨大的浪费。使用消息队列能够使关键组件顶住突发的访问压力，而不会因为突发的超负荷的请求而完全崩溃</li>
+</ul>
+</li>
+<li><strong>异步通信</strong>
+<ul>
+<li>很多时候，用户不想也不需要立即处理消息。消息队列提供了异步处理机制，允许用户把一个消息放入队列，但并不立即处理它。想向队列中放入多少消息就放多少，然后在需要的时候再去处理它们。</li>
+</ul>
+</li>
+</ul>
+<h1 id="6-Kafka简介">6. Kafka简介</h1>
+<p>Kafka 是一个<code>分布式</code>的基于<code>发布/订阅模式</code>的消息队列（Message Queue），由 Scala 和 Java 编写，主要应用于大数据实时处理领域。</p>
+<p>Apache Kafka是一个分布式流平台。一个分布式的流平台应该包含3点关键的能力（官网介绍）：</p>
+<ol>
+<li>发布和订阅流数据流，类似于消息队列或者是企业消息传递系统</li>
+<li>以容错的持久化方式存储数据流</li>
+<li>处理数据流</li>
+</ol>
+<h1 id="7-Kafka的应用场景">7. Kafka的应用场景</h1>
+<p>Kafka通常用在两类程序中：</p>
+<ol>
+<li>建立实时数据管道，以可靠地在系统或应用程序之间获取数据</li>
+<li>构建实时流应用程序，以转换或响应数据流</li>
+</ol>
+<p><img src="https://img-blog.csdnimg.cn/578cb7b8c0f04468b7d36dd8855658b5.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_7,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"><br>
+从上图可以看到：</p>
+<ol>
+<li>Producers：可以有很多的应用程序，将消息数据放入到Kafka集群中。</li>
+<li>Consumers：可以有很多的应用程序，将消息数据从Kafka集群中拉取出来。</li>
+<li>Connectors：Kafka的连接器可以将数据库中的数据导入到Kafka，也可以将Kafka的数据导出到<br>
+数据库中。</li>
+<li>Stream Processors：流处理器可以Kafka中拉取数据，也可以将数据写入到Kafka中。</li>
+</ol>
+<h1 id="8-Kafka的优势">8. Kafka的优势</h1>
+<table>
+	<tr align=center>
+		<th>特性</th>
+		<th>ActiveMQ</th>
+		<th>RabbitMQ</th>
+		<th>Kafka</th>
+		<th>RocketMQ</th>
+	</tr>
+	<tr align=center>
+		<th>所属社区/公司</th>
+		<td>Apache</td>
+		<td>Mozilla Public License</td>
+		<td>Apache</td>
+		<td>Apache/Ali</td>
+	</tr>
+	<tr align=center>
+		<th>成熟度</th>
+		<td>成熟</td>
+		<td>成熟</td>
+		<td>成熟</td>
+		<td>比较成熟</td>
+	</tr>
+	<tr align=center>
+		<th>生产者-消费者模式</th>
+		<td>支持</td>
+		<td>支持</td>
+		<td>支持</td>
+		<td>支持</td>
+	</tr>
+	<tr align=center>
+		<th>发布-订阅</th>
+		<td>支持</td>
+		<td>支持</td>
+		<td>支持</td>
+		<td>支持</td>
+	</tr>
+	<tr align=center>
+		<th>REQUEST-REPLY</th>
+		<td>支持</td>
+		<td>支持</td>
+		<td>-</td>
+		<td>支持</td>
+	</tr>
+	<tr align=center>
+		<th>API完备性</th>
+		<td>高</td>
+		<td>高</td>
+		<td>高</td>
+		<td>低（静态配置）</td>
+	</tr>
+	<tr align=center>
+		<th>多语言支持</th>
+		<td>支持，JAVA优先</td>
+		<td>语言无关</td>
+		<td>支持，JAVA优先</td>
+		<td>支持</td>
+	</tr>
+	<tr align=center>
+		<th>单机呑吐量</th>
+		<td>万级（最差）</td>
+		<td>万级</td>
+		<td>十万级</td>
+		<td>十万级（最高）</td>
+	</tr>
+	<tr align=center>
+		<th>消息延迟</th>
+		<td>-</td>
+		<td>微秒级</td>
+		<td>毫秒级</td>
+		<td>-</td>
+	</tr>
+	<tr align=center>
+		<th>可用性</th>
+		<td>高（主从）</td>
+		<td>高（主从）</td>
+		<td>非常高（分布式）</td>
+		<td>高</td>
+	</tr>
+	<tr align=center>
+		<th>消息丢失</th>
+		<td>-</td>
+		<td>低</td>
+		<td>理论上不会丢失</td>
+		<td>-</td>
+	</tr>
+	<tr align=center>
+		<th>消息重复</th>
+		<td>-</td>
+		<td>可控制</td>
+		<td>理论上会有重复</td>
+		<td>-</td>
+	</tr>
+	<tr align=center>
+		<th>事务</th>
+		<td>支持</td>
+		<td>不支持</td>
+		<td>支持</td>
+		<td>支持</td>
+	</tr>
+	<tr align=center>
+		<th>文档的完备性</th>
+		<td>高</td>
+		<td>高</td>
+		<td>高</td>
+		<td>中</td>
+	</tr>
+	<tr align=center>
+		<th>提供快速入门</th>
+		<td>有</td>
+		<td>有</td>
+		<td>有</td>
+		<td>无</td>
+	</tr>
+	<tr align=center>
+		<th>首次部署难度</th>
+		<td>-</td>
+		<td>低</td>
+		<td>中</td>
+		<td>高</td>
+	</tr>
+</table></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2021/09/08/kafka_3/">https://program-park.github.io/2021/09/08/kafka_3/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Kafka/">Kafka</a></div><div class="post_share"><div class="social-share" data-image="/img/kafka/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/09/08/kafka_4/"><img class="prev-cover" src="/img/kafka/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Kafka 基础架构及命令行操作</div></div></a></div><div class="next-post pull-right"><a href="/2021/09/07/linux_3/"><img class="next-cover" src="/img/linux/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Win10 下 VMware15 安装 CentOS7 虚拟机</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/05/21/flink_2/" title="Flink 接收 kafka source 数据"><img class="cover" src="/img/flink/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-05-21</div><div class="title">Flink 接收 kafka source 数据</div></div></a></div><div><a href="/2021/05/21/flink_3/" title="Flink 发送数据到 Kafka sink"><img class="cover" src="/img/flink/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-05-21</div><div class="title">Flink 发送数据到 Kafka sink</div></div></a></div><div><a href="/2021/06/02/flink_8/" title="Flink 实时消费多个 topic 数据"><img class="cover" src="/img/flink/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-02</div><div class="title">Flink 实时消费多个 topic 数据</div></div></a></div><div><a href="/2021/06/01/flink_7/" title="基于 Flink &amp; Kafka 完成的流式模块"><img class="cover" src="/img/flink/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-01</div><div class="title">基于 Flink &amp; Kafka 完成的流式模块</div></div></a></div><div><a href="/2021/09/18/kafka_10/" title="Kafka 高级&amp;低级 API、同异步发送及拦截器原理"><img class="cover" src="/img/kafka/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-18</div><div class="title">Kafka 高级&amp;低级 API、同异步发送及拦截器原理</div></div></a></div><div><a href="/2021/06/03/kafka_1/" title="Kafka 集群部署教程"><img class="cover" src="/img/kafka/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-06-03</div><div class="title">Kafka 集群部署教程</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">80</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">17</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%AE%80%E4%BB%8B"><span class="toc-text">1. 消息队列简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-text">2. 消息队列的应用场景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E7%94%9F%E4%BA%A7%E8%80%85%E3%80%81%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%9E%8B"><span class="toc-text">3. 生产者、消费者模型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%A8%A1%E5%BC%8F"><span class="toc-text">4. 消息队列的两种模式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E7%82%B9%E5%AF%B9%E7%82%B9%E6%A8%A1%E5%BC%8F"><span class="toc-text">4.1 点对点模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E5%8F%91%E5%B8%83%E8%AE%A2%E9%98%85%E6%A8%A1%E5%BC%8F"><span class="toc-text">4.2 发布订阅模式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E4%BD%BF%E7%94%A8%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%9A%84%E5%A5%BD%E5%A4%84"><span class="toc-text">5. 使用消息队列的好处</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-Kafka%E7%AE%80%E4%BB%8B"><span class="toc-text">6. Kafka简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#7-Kafka%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-text">7. Kafka的应用场景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#8-Kafka%E7%9A%84%E4%BC%98%E5%8A%BF"><span class="toc-text">8. Kafka的优势</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/02/algorithm_8/" title="《数据结构与算法》（八）- 串详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（八）- 串详解"/></a><div class="content"><a class="title" href="/2021/11/02/algorithm_8/" title="《数据结构与算法》（八）- 串详解">《数据结构与算法》（八）- 串详解</a><time datetime="2021-11-02T06:19:16.000Z" title="发表于 2021-11-02 14:19:16">2021-11-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/01/algorithm_7/" title="《数据结构与算法》（七）- 队列详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（七）- 队列详解"/></a><div class="content"><a class="title" href="/2021/11/01/algorithm_7/" title="《数据结构与算法》（七）- 队列详解">《数据结构与算法》（七）- 队列详解</a><time datetime="2021-11-01T12:09:19.000Z" title="发表于 2021-11-01 20:09:19">2021-11-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/31/algorithm_6/" title="《数据结构与算法》（六）- 栈详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（六）- 栈详解"/></a><div class="content"><a class="title" href="/2021/10/31/algorithm_6/" title="《数据结构与算法》（六）- 栈详解">《数据结构与算法》（六）- 栈详解</a><time datetime="2021-10-31T10:28:22.000Z" title="发表于 2021-10-31 18:28:22">2021-10-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/18/algorithm_5/" title="《数据结构与算法》（五）- 链表详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（五）- 链表详解"/></a><div class="content"><a class="title" href="/2021/10/18/algorithm_5/" title="《数据结构与算法》（五）- 链表详解">《数据结构与算法》（五）- 链表详解</a><time datetime="2021-10-18T10:46:16.000Z" title="发表于 2021-10-18 18:46:16">2021-10-18</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/kafka/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2021/09/08/kafka_3/'
+    this.page.identifier = '/2021/09/08/kafka_3/'
+    this.page.title = '消息队列及 Kafka 简介'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

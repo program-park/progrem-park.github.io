@@ -1,0 +1,342 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Redis 的事务操作、乐观锁 | 程序园</title><meta name="keywords" content="Redis"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是对 Redis 事务性的详细解析，包含事务冲突、事务的三大特性，以及 Redis 事务秒杀案例。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis 的事务操作、乐观锁">
+<meta property="og:url" content="https://program-park.github.io/2021/08/17/redis_9/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是对 Redis 事务性的详细解析，包含事务冲突、事务的三大特性，以及 Redis 事务秒杀案例。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/redis/1.png">
+<meta property="article:published_time" content="2021-08-17T06:25:19.000Z">
+<meta property="article:modified_time" content="2022-09-06T07:26:29.798Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/redis/1.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://program-park.github.io/2021/08/17/redis_9/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Redis 的事务操作、乐观锁',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-06 15:26:29'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">80</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">17</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/redis/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Redis 的事务操作、乐观锁</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-08-17T06:25:19.000Z" title="发表于 2021-08-17 14:25:19">2021-08-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-06T07:26:29.798Z" title="更新于 2022-09-06 15:26:29">2022-09-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Redis/">Redis</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Redis 的事务操作、乐观锁"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="1-事务的定义">1. 事务的定义</h1>
+<p>Redis事务是一个单独的隔离操作：事务中的所有命令都会序列化、按顺序地执行。事务在执行的过程中，不会被其他客户端发送来的命令请求所打断。<br>
+本质上就是一组命令的集合，一个事务中的所有命令都会被序列化，按顺序执行。<br>
+Redis事务的主要作用就是<code>串联多个命令</code>防止别的命令插队。<br>
+所有的命令在事务中，并没有直接执行，二是发起执行命令<code>Exec</code>的时候才会执行。<br>
+<strong>Redis 事务没有隔离级别的概念。</strong><br>
+<strong>Redis 单条命令是保证原子性的，但是事务不保证原子性。</strong></p>
+<h1 id="2-事务的提交">2. 事务的提交</h1>
+<p>从输入<code>Multi</code>命令开始，输入的命令都会依次进入命令队列中，但不会执行，直到输入<code>Exec</code>后，Redis 会将之前的命令队列中的命令依次执行。<br>
+组队的过程中可以通过<code>discard</code>来放弃组队。<br>
+<img src="https://img-blog.csdnimg.cn/ba0f00e2461641828a89a7c609af84ea.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDc1ODg3Ng==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>
+<strong>案例：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; multi</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379(TX)&gt; set k1 v1</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379(TX)&gt; set k2 v2</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379(TX)&gt; get k2</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379(TX)&gt; set k3 v3</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379(TX)&gt; exec</span><br><span class="line">1) OK</span><br><span class="line">2) OK</span><br><span class="line">3) &quot;v2&quot;</span><br><span class="line">4) OK</span><br></pre></td></tr></table></figure>
+<h1 id="3-事务的错误处理">3. 事务的错误处理</h1>
+<p>组队中某个命令出现了报告错误，也就是<code>编译型异常</code>（代码有问题，命令报错），执行时整个的所有队列都会被取消。<br>
+<img src="https://img-blog.csdnimg.cn/b1970196a9144c2d8a4ea99310437514.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDc1ODg3Ng==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述">如果执行阶段某个命令报出了错误，也就是<code>运行时异常</code>，则只有报错的命令不会被执行，而其他的命令都会执行，不会回滚。<br>
+<img src="https://img-blog.csdnimg.cn/eb036751f9eb41fcb65be840d3f6ad53.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDc1ODg3Ng==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="4-为什么要做成事务">4. 为什么要做成事务</h1>
+<p>场景：有很多人同时操作你的账户,同时去参加双十一抢购，没有事务性的后果…</p>
+<h1 id="5-事务冲突的问题">5. 事务冲突的问题</h1>
+<h2 id="5-1-举例">5.1 举例</h2>
+<p>一个请求想给金额减8000<br>
+一个请求想给金额减5000<br>
+一个请求想给金额减1000<br>
+<img src="https://img-blog.csdnimg.cn/18532710c8fb4a70ae4324061366b83f.png#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="5-2-悲观锁">5.2 悲观锁</h2>
+<p><img src="https://img-blog.csdnimg.cn/fe9ca0bc15b44ec9998e0e23527aa04a.png#pic_center" alt="在这里插入图片描述"><br>
+<code>悲观锁(Pessimistic Lock)</code>, 顾名思义，就是很悲观，每次去拿数据的时候都认为别人会修改，所以每次在拿数据的时候都会上锁，这样别人想拿这个数据就会block直到它拿到锁。<code>传统的关系型数据库里边就用到了很多这种锁机制</code>，比如<code>行锁</code>，<code>表锁</code>等，<code>读锁</code>，<code>写锁</code>等，都是在做操作之前先上锁。</p>
+<h2 id="5-3-乐观锁">5.3 乐观锁</h2>
+<p><img src="https://img-blog.csdnimg.cn/0a9307c7bad34e7ba6a7a249888db6d8.png#pic_center" alt="在这里插入图片描述"><br>
+<code>乐观锁(Optimistic Lock)</code>, 顾名思义，就是很乐观，每次去拿数据的时候都认为别人不会修改，所以不会上锁，但是在更新的时候会判断一下在此期间别人有没有去更新这个数据，可以使用版本号等机制。<code>乐观锁适用于多读的应用类型，这样可以提高吞吐量</code>。<code>Redis就是利用这种check-and-set机制实现事务的</code>。</p>
+<h2 id="5-4-watch监视">5.4 watch监视</h2>
+<p>在执行<code>multi</code>之前，先执行<code>watch key1 [key2]</code>，可以监视一个(或多个) key ，如果在事务执行之前这个（或这些） key 被其他命令所改动，那么事务将被打断。</p>
+<p><strong>正常执行：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set money 100</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; set out 0</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; watch money</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; multi</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379(TX)&gt; decrby money 20</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379(TX)&gt; incrby out 20</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379(TX)&gt; exec</span><br><span class="line">1) (integer) 80</span><br><span class="line">2) (integer) 20</span><br></pre></td></tr></table></figure>
+<p><strong>利用多线程修改值，使用<code>watch</code>可以当做 redis 的乐观锁操作：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set money 100</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; set out 0</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; watch money</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; multi</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379(TX)&gt; decrby money 10</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379(TX)&gt; incrby out 10</span><br><span class="line">QUEUED</span><br></pre></td></tr></table></figure>
+<p>此时先不执行<code>exec</code>，重新开启另一个客户端：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; get money</span><br><span class="line">&quot;100&quot;</span><br><span class="line">127.0.0.1:6379&gt; set money 1000</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
+<p>这时再回到客户端一继续执行<code>exec</code>，可以看到事务执行失败：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379(TX)&gt; exec</span><br><span class="line">(nil)</span><br></pre></td></tr></table></figure>
+<p>使用<code>unwatch</code>命令可以取消<code>watch</code>命令对所有 key 的监视。<br>
+如果在执行 <code>watch</code>命令之后，<code>exec</code>命令或<code>discard</code>命令先被执行了的话，那么就不需要再执行<code>unwatch</code>了。</p>
+<h1 id="6-Redis事务的三大特性">6. Redis事务的三大特性</h1>
+<ul>
+<li><strong>单独的隔离操作</strong>
+<ul>
+<li>事务中的所有命令都会序列化、按顺序地执行。事务在执行的过程中，不会被其他客户端发送来的命令请求所打断。</li>
+</ul>
+</li>
+<li><strong>没有隔离级别的概念</strong>
+<ul>
+<li>队列中的命令没有提交之前都不会实际被执行，因为事务提交前任何指令都不会被实际执行。</li>
+</ul>
+</li>
+<li><strong>不保证原子性</strong>
+<ul>
+<li>事务中如果有一条命令执行失败，其后的命令仍然会被执行，没有回滚</li>
+</ul>
+</li>
+</ul>
+<h1 id="7-Redis事务秒杀案例">7. Redis事务秒杀案例</h1>
+<h2 id="7-1-解决计数器和人员记录的事务操作">7.1 解决计数器和人员记录的事务操作</h2>
+<p><img src="https://img-blog.csdnimg.cn/8682b6505fb74a28861c5475386bb521.png#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="7-2-秒杀并发模拟">7.2 秒杀并发模拟</h2>
+<p>使用工具ab模拟测试：</p>
+<ol>
+<li>yum install httpd-tools</li>
+<li>vim postfile 模拟表单提交参数,以&amp;符号结尾，存放在当前目录</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prodid=0101&amp;</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>执行<code>ab -n 2000 -c 200 -k -p ~/postfile -T application/x-www-form-urlencoded</code><br>
+<img src="https://img-blog.csdnimg.cn/54b7a0ba51a74a4c9d639052f4509e44.png" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/0cd6bbe0697c44e78c60b6e1a52c5d18.png" alt="在这里插入图片描述"></li>
+</ol>
+<h2 id="7-3-超卖问题">7.3 超卖问题</h2>
+<p><img src="https://img-blog.csdnimg.cn/6f2654e6d03c443397629049ee30e1db.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDc1ODg3Ng==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="7-4-利用乐观锁淘汰用户，解决超卖问题">7.4 利用乐观锁淘汰用户，解决超卖问题</h2>
+<p><img src="https://img-blog.csdnimg.cn/c46505e89eff4bf7893d6c35f45be1c0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDc1ODg3Ng==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//增加乐观锁</span></span><br><span class="line">jedis.watch(qtkey);</span><br><span class="line"> </span><br><span class="line"><span class="comment">//3.判断库存</span></span><br><span class="line"><span class="type">String</span> <span class="variable">qtkeystr</span> <span class="operator">=</span> jedis.get(qtkey);</span><br><span class="line"><span class="keyword">if</span>(qtkeystr==<span class="literal">null</span> || <span class="string">&quot;&quot;</span>.equals(qtkeystr.trim())) &#123;</span><br><span class="line">	System.out.println(<span class="string">&quot;未初始化库存&quot;</span>);</span><br><span class="line">	jedis.close();</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span> ;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="type">int</span> <span class="variable">qt</span> <span class="operator">=</span> Integer.parseInt(qtkeystr);</span><br><span class="line"><span class="keyword">if</span>(qt&lt;=<span class="number">0</span>) &#123;</span><br><span class="line">	System.err.println(<span class="string">&quot;已经秒光&quot;</span>);</span><br><span class="line">	jedis.close();</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//增加事务</span></span><br><span class="line"><span class="type">Transaction</span> <span class="variable">multi</span> <span class="operator">=</span> jedis.multi();</span><br><span class="line"> </span><br><span class="line"><span class="comment">//4.减少库存</span></span><br><span class="line"><span class="comment">//jedis.decr(qtkey);</span></span><br><span class="line">multi.decr(qtkey);</span><br><span class="line"> </span><br><span class="line"><span class="comment">//5.加人</span></span><br><span class="line"><span class="comment">//jedis.sadd(usrkey, uid);</span></span><br><span class="line">multi.sadd(usrkey, uid);</span><br><span class="line"> </span><br><span class="line"><span class="comment">//执行事务</span></span><br><span class="line">List&lt;Object&gt; list = multi.exec();</span><br><span class="line"> </span><br><span class="line"><span class="comment">//判断事务提交是否失败</span></span><br><span class="line"><span class="keyword">if</span>(list==<span class="literal">null</span> || list.size()==<span class="number">0</span>) &#123;</span><br><span class="line">	System.out.println(<span class="string">&quot;秒杀失败&quot;</span>);</span><br><span class="line">	jedis.close();</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line">System.err.println(<span class="string">&quot;秒杀成功&quot;</span>);</span><br><span class="line">jedis.close();</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/f3c19f14fedf4d4dbd14dce1ed5de16c.png" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/05e5afa1d1fa476ca068136fdb59400b.png" alt="在这里插入图片描述"></p>
+<h2 id="7-5-继续增加并发测试">7.5 继续增加并发测试</h2>
+<h3 id="7-5-1-连接有限制">7.5.1 连接有限制</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ab -n 2000 -c 200 -k -p postfile -T &#x27;application/x-www-form-urlencoded&#x27; </span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/c717ecddf2544b6ca520552ee9bda223.png#pic_center" alt="在这里插入图片描述">增加<code>-r</code>参数，<code>-r</code>   <code>Don't exit on socket receive errors.</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ab -n 2000 -c 100 -r -p postfile -T &#x27;application/x-www-form-urlencoded&#x27; </span><br></pre></td></tr></table></figure>
+<h3 id="7-5-2-已经秒光，可是还有库存">7.5.2 已经秒光，可是还有库存</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ab -n 2000 -c 100 -p postfile -T &#x27;application/x-www-form-urlencoded&#x27; </span><br></pre></td></tr></table></figure>
+<p>已经秒光，可是还有库存。原因就是乐观锁导致很多请求都失败。先点的没秒到，后点的可能秒到了。<br>
+<img src="https://img-blog.csdnimg.cn/6a1c4ebef25044109a798fb8d16b74e2.png#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="7-5-3-连接超时，通过连接池解决">7.5.3 连接超时，通过连接池解决</h3>
+<p><img src="https://img-blog.csdnimg.cn/bc80bd824d344937b83361e4684f9250.png#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="7-5-4-连接池">7.5.4 连接池</h3>
+<p>节省每次连接redis服务带来的消耗，把连接好的实例反复利用。<br>
+通过参数管理连接的行为</p>
+<ul>
+<li>连接池参数
+<ul>
+<li>MaxTotal：控制一个 pool 可分配多少个 jedis 实例，通过<code>pool.getResource()</code>来获取；如果赋值为 -1 ，则表示不限制；如果 pool 已经分配了 MaxTotal 个 jedis 实例，则此时 pool 的状态为 exhausted</li>
+<li>maxIdle：控制一个 pool 最多有多少个状态为 idle (空闲)的 jedis 实例</li>
+<li>MaxWaitMillis：表示当 borrow 一个 jedis 实例时，最大的等待毫秒数，如果超过等待时间，则直接抛<code>JedisConnectionException</code></li>
+<li>testOnBorrow：获得一个 jedis 实例的时候是否检查连接可用性（ping()）；如果为 true ，则得到的 jedis 实例均是可用的</li>
+</ul>
+</li>
+</ul>
+<h2 id="7-6-解决库存遗留问题">7.6 解决库存遗留问题</h2>
+<h3 id="7-6-1-LUA脚本">7.6.1 LUA脚本</h3>
+<p><img src="https://img-blog.csdnimg.cn/81fb72f1c3af44a8bd361e720831e62a.png" alt="在这里插入图片描述"><br>
+Lua 是一个小巧的脚本语言，Lua脚本可以很容易的被C/C++ 代码调用，也可以反过来调用C/C++的函数，Lua并没有提供强大的库，一个完整的Lua解释器不过200k，所以Lua不适合作为开发独立应用程序的语言，而是作为嵌入式脚本语言。<br>
+很多应用程序、游戏使用LUA作为自己的嵌入式脚本语言，以此来实现可配置性、可扩展性。<br>
+这其中包括魔兽争霸地图、魔兽世界、博德之门、愤怒的小鸟等众多游戏插件或外挂。</p>
+<h3 id="7-6-2-LUA脚本在Redis中的优势">7.6.2 LUA脚本在Redis中的优势</h3>
+<p><strong>将复杂的或者多步的redis操作，写为一个脚本，一次提交给redis执行，减少反复连接redis的次数。提升性能。</strong><br>
+LUA脚本是类似redis事务，有一定的原子性，不会被其他命令插队，可以完成一些redis事务性的操作。<br>
+但是注意redis的lua脚本功能，只有在Redis 2.6以上的版本才可以使用。<br>
+利用lua脚本淘汰用户，解决超卖问题。<br>
+redis 2.6版本以后，通过lua脚本解决<code>争抢问题</code>，实际上是<code>redis 利用其单线程的特性，用任务队列的方式解决多任务并发问题</code>。<br>
+<img src="https://img-blog.csdnimg.cn/224ddedcb783401db304949350ab00f7.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDc1ODg3Ng==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2021/08/17/redis_9/">https://program-park.github.io/2021/08/17/redis_9/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Redis/">Redis</a></div><div class="post_share"><div class="social-share" data-image="/img/redis/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/08/23/python_13/"><img class="prev-cover" src="/img/python/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">python整数相除保留小数SyntaxError: from __future__ imports must occur at the beginning of the file</div></div></a></div><div class="next-post pull-right"><a href="/2021/08/13/python_12/"><img class="next-cover" src="/img/python/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">AttributeEroor: ‘list‘ object has no attribute ‘clear‘</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/08/30/redis_10/" title="Redis 配置文件详解"><img class="cover" src="/img/redis/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-30</div><div class="title">Redis 配置文件详解</div></div></a></div><div><a href="/2021/09/03/redis_11/" title="Redis 的持久化操作"><img class="cover" src="/img/redis/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-03</div><div class="title">Redis 的持久化操作</div></div></a></div><div><a href="/2021/05/25/redis_1/" title="Redis 6.2.3 安装教程"><img class="cover" src="/img/redis/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-05-25</div><div class="title">Redis 6.2.3 安装教程</div></div></a></div><div><a href="/2021/09/03/redis_12/" title="Redis 的发布和订阅"><img class="cover" src="/img/redis/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-03</div><div class="title">Redis 的发布和订阅</div></div></a></div><div><a href="/2021/09/06/redis_13/" title="Redis 主从复制"><img class="cover" src="/img/redis/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-06</div><div class="title">Redis 主从复制</div></div></a></div><div><a href="/2021/09/06/redis_14/" title="Redis 哨兵模式详解"><img class="cover" src="/img/redis/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-06</div><div class="title">Redis 哨兵模式详解</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">80</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">17</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E4%BA%8B%E5%8A%A1%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="toc-text">1. 事务的定义</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E4%BA%8B%E5%8A%A1%E7%9A%84%E6%8F%90%E4%BA%A4"><span class="toc-text">2. 事务的提交</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E4%BA%8B%E5%8A%A1%E7%9A%84%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86"><span class="toc-text">3. 事务的错误处理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%81%9A%E6%88%90%E4%BA%8B%E5%8A%A1"><span class="toc-text">4. 为什么要做成事务</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E4%BA%8B%E5%8A%A1%E5%86%B2%E7%AA%81%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-text">5. 事务冲突的问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-%E4%B8%BE%E4%BE%8B"><span class="toc-text">5.1 举例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-%E6%82%B2%E8%A7%82%E9%94%81"><span class="toc-text">5.2 悲观锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-3-%E4%B9%90%E8%A7%82%E9%94%81"><span class="toc-text">5.3 乐观锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-4-watch%E7%9B%91%E8%A7%86"><span class="toc-text">5.4 watch监视</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-Redis%E4%BA%8B%E5%8A%A1%E7%9A%84%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7"><span class="toc-text">6. Redis事务的三大特性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#7-Redis%E4%BA%8B%E5%8A%A1%E7%A7%92%E6%9D%80%E6%A1%88%E4%BE%8B"><span class="toc-text">7. Redis事务秒杀案例</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#7-1-%E8%A7%A3%E5%86%B3%E8%AE%A1%E6%95%B0%E5%99%A8%E5%92%8C%E4%BA%BA%E5%91%98%E8%AE%B0%E5%BD%95%E7%9A%84%E4%BA%8B%E5%8A%A1%E6%93%8D%E4%BD%9C"><span class="toc-text">7.1 解决计数器和人员记录的事务操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-2-%E7%A7%92%E6%9D%80%E5%B9%B6%E5%8F%91%E6%A8%A1%E6%8B%9F"><span class="toc-text">7.2 秒杀并发模拟</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-3-%E8%B6%85%E5%8D%96%E9%97%AE%E9%A2%98"><span class="toc-text">7.3 超卖问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-4-%E5%88%A9%E7%94%A8%E4%B9%90%E8%A7%82%E9%94%81%E6%B7%98%E6%B1%B0%E7%94%A8%E6%88%B7%EF%BC%8C%E8%A7%A3%E5%86%B3%E8%B6%85%E5%8D%96%E9%97%AE%E9%A2%98"><span class="toc-text">7.4 利用乐观锁淘汰用户，解决超卖问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-5-%E7%BB%A7%E7%BB%AD%E5%A2%9E%E5%8A%A0%E5%B9%B6%E5%8F%91%E6%B5%8B%E8%AF%95"><span class="toc-text">7.5 继续增加并发测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-5-1-%E8%BF%9E%E6%8E%A5%E6%9C%89%E9%99%90%E5%88%B6"><span class="toc-text">7.5.1 连接有限制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-5-2-%E5%B7%B2%E7%BB%8F%E7%A7%92%E5%85%89%EF%BC%8C%E5%8F%AF%E6%98%AF%E8%BF%98%E6%9C%89%E5%BA%93%E5%AD%98"><span class="toc-text">7.5.2 已经秒光，可是还有库存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-5-3-%E8%BF%9E%E6%8E%A5%E8%B6%85%E6%97%B6%EF%BC%8C%E9%80%9A%E8%BF%87%E8%BF%9E%E6%8E%A5%E6%B1%A0%E8%A7%A3%E5%86%B3"><span class="toc-text">7.5.3 连接超时，通过连接池解决</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-5-4-%E8%BF%9E%E6%8E%A5%E6%B1%A0"><span class="toc-text">7.5.4 连接池</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-6-%E8%A7%A3%E5%86%B3%E5%BA%93%E5%AD%98%E9%81%97%E7%95%99%E9%97%AE%E9%A2%98"><span class="toc-text">7.6 解决库存遗留问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-6-1-LUA%E8%84%9A%E6%9C%AC"><span class="toc-text">7.6.1 LUA脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-6-2-LUA%E8%84%9A%E6%9C%AC%E5%9C%A8Redis%E4%B8%AD%E7%9A%84%E4%BC%98%E5%8A%BF"><span class="toc-text">7.6.2 LUA脚本在Redis中的优势</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/02/algorithm_8/" title="《数据结构与算法》（八）- 串详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（八）- 串详解"/></a><div class="content"><a class="title" href="/2021/11/02/algorithm_8/" title="《数据结构与算法》（八）- 串详解">《数据结构与算法》（八）- 串详解</a><time datetime="2021-11-02T06:19:16.000Z" title="发表于 2021-11-02 14:19:16">2021-11-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/01/algorithm_7/" title="《数据结构与算法》（七）- 队列详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（七）- 队列详解"/></a><div class="content"><a class="title" href="/2021/11/01/algorithm_7/" title="《数据结构与算法》（七）- 队列详解">《数据结构与算法》（七）- 队列详解</a><time datetime="2021-11-01T12:09:19.000Z" title="发表于 2021-11-01 20:09:19">2021-11-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/31/algorithm_6/" title="《数据结构与算法》（六）- 栈详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（六）- 栈详解"/></a><div class="content"><a class="title" href="/2021/10/31/algorithm_6/" title="《数据结构与算法》（六）- 栈详解">《数据结构与算法》（六）- 栈详解</a><time datetime="2021-10-31T10:28:22.000Z" title="发表于 2021-10-31 18:28:22">2021-10-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/18/algorithm_5/" title="《数据结构与算法》（五）- 链表详解"><img src="/img/algorithm/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《数据结构与算法》（五）- 链表详解"/></a><div class="content"><a class="title" href="/2021/10/18/algorithm_5/" title="《数据结构与算法》（五）- 链表详解">《数据结构与算法》（五）- 链表详解</a><time datetime="2021-10-18T10:46:16.000Z" title="发表于 2021-10-18 18:46:16">2021-10-18</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/redis/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2021/08/17/redis_9/'
+    this.page.identifier = '/2021/08/17/redis_9/'
+    this.page.title = 'Redis 的事务操作、乐观锁'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
