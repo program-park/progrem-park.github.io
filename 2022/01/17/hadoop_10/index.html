@@ -1,0 +1,492 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Hadoop 生态圈（七）- HDFS 优化方案 | 程序园</title><meta name="keywords" content="大数据,Hadoop"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是《Hadoop生态圈》系列，第七篇：HDFS 优化方案。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hadoop 生态圈（七）- HDFS 优化方案">
+<meta property="og:url" content="https://program-park.github.io/2022/01/17/hadoop_10/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是《Hadoop生态圈》系列，第七篇：HDFS 优化方案。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/hadoop/1.png">
+<meta property="article:published_time" content="2022-01-17T03:02:14.000Z">
+<meta property="article:modified_time" content="2022-09-07T07:18:45.871Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="大数据">
+<meta property="article:tag" content="Hadoop">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/hadoop/1.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://program-park.github.io/2022/01/17/hadoop_10/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Hadoop 生态圈（七）- HDFS 优化方案',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-07 15:18:45'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">121</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">20</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/hadoop/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Hadoop 生态圈（七）- HDFS 优化方案</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-01-17T03:02:14.000Z" title="发表于 2022-01-17 11:02:14">2022-01-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-07T07:18:45.871Z" title="更新于 2022-09-07 15:18:45">2022-09-07</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Hadoop/">Hadoop</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">5.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>18分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Hadoop 生态圈（七）- HDFS 优化方案"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="前言">前言</h1>
+<p><font color=#999AAA >部分内容摘自尚硅谷、黑马等等培训资料</font></p>
+<h1 id="1-HDFS优化方案">1. HDFS优化方案</h1>
+<h2 id="1-1-短路本地读取：Short-Circuit-Local-Reads">1.1 短路本地读取：Short Circuit Local Reads</h2>
+<h3 id="1-1-1-背景">1.1.1 背景</h3>
+<p>  在 HDFS 中，不管是 Local Reads（DFSClient 和 Datanode 在同一个节点）还是 Remote Reads（DFSClient 和 Datanode不在同一个节点），底层处理方式都是一样的，都是先由<code>Datanode读取数据，然后再通过RPC（基于TCP）把数据传给DFSClient</code>。这样处理是比较简单的，但是性能会受到一些影响，因为需要 Datanode 在中间做一次中转。<br>
+  尤其 Local Reads 的时候，既然 DFSClient 和数据是在一个机器上面，那么很自然的想法，就是让 DFSClient 绕开 Datanode 自己去读取数据。<br>
+<img src="https://img-blog.csdnimg.cn/74a54f73fd32400b9df245ecd3e37ccb.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  所谓的“短路”读取绕过了 DataNode，从而允许客户端直接读取文件。显然，这仅在客户端与数据位于同一机器的情况下才可行。短路读取为许多应用提供了显着的性能提升。</p>
+<h3 id="1-1-2-短路本地读取">1.1.2 短路本地读取</h3>
+<p>  在 HDFS-2246 这个 JIRA 中，工程师们的想法是既然读取数据 DFSClient 和数据在同一台机器上，那么 Datanode 就把数据在文件系统中的路径，从什么地方开始读（offset）和需要读取多少（length）等信息告诉 DFSClient，然后 DFSClient 去打开文件自己读取。想法很好，问题在于配置复杂以及安全问题。<br>
+<img src="https://img-blog.csdnimg.cn/2be0909f9c2c4a809e153854fefc6fad.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  首先是配置问题，因为是<code>让DFSClient自己打开文件读取数据</code>，那么就需要配置一个白名单，定义哪些用户拥有访问 Datanode 的数据目录权限。如果有新用户加入，那么就得修改白名单。需要注意的是，这里是允许客户端访问 Datanode 的数据目录，也就意味着，任何用户拥有了这个权限，就可以访问目录下其他数据，从而导致了安全漏洞。因此，<font color=red><strong>这个实现已经不建议使用了</strong></font>。<br>
+<img src="https://img-blog.csdnimg.cn/ab3f4de5c62c4866a961ea6f496facf1.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="1-1-3-短路本地读取安全性改进">1.1.3 短路本地读取安全性改进</h3>
+<p>  在 HDFS-347 中，提出了一种新的解决方案，让短路本地读取数据更加安全。<br>
+<img src="https://img-blog.csdnimg.cn/67e62d034788439d94f55b735d43b59e.png#pic_center" alt="在这里插入图片描述"><br>
+  在 Linux 中，有个技术叫做<code>Unix Domain Socket</code>。Unix Domain Socket 是一种进程间的通讯方式，它使得<code>同一个机器上的两个进程能以Socket的方式通讯</code>。它带来的另一大好处是，利用它两个进程除了可以传递普通数据外，还<code>可以在进程间传递文件描述符</code>。<br>
+  假设机器上的两个用户 A 和 B，A 拥有访问某个文件的权限而 B 没有，而 B 又需要访问这个文件。借助 Unix Domain Socket，可以让 A 打开文件得到一个文件描述符，然后把文件描述符传递给 B，B 就能读取文件里面的内容了即使它没有相应的权限。在 HDFS 的场景里面，A 就是 Datanode，B 就是 DFSClient，需要读取的文件就是 Datanode 数据目录中的某个文件。<br>
+<img src="https://img-blog.csdnimg.cn/47d39377acfe4ac28d320f352247e360.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  这个方案在安全上就比上一个方案上好一些，至少它只允许 DFSClient 读取它需要的文件。</p>
+<h3 id="1-1-4-短路本地读取配置">1.1.4 短路本地读取配置</h3>
+<h4 id="1-1-4-1-libhadoop-so">1.1.4.1 <a target="_blank" rel="noopener" href="http://libhadoop.so">libhadoop.so</a></h4>
+<p>  因为 Java 不能直接操作 Unix Domain Socket，所以需要安装 Hadoop 的 native 包 <a target="_blank" rel="noopener" href="http://libhadoop.so">libhadoop.so</a>。在编译 Hadoop 源码的时候可以通过编译 native 模块获取。可以用如下命令来检查 native 包是否安装好。<br>
+  <code>hadoop checknative</code><br>
+<img src="https://img-blog.csdnimg.cn/7f37f89c958f42229de486393bd7bf99.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"></p>
+<h4 id="1-1-4-2-hdfs-site-xml">1.1.4.2 hdfs-site.xml</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;property&gt;</span><br><span class="line">	&lt;name&gt;dfs.client.read.shortcircuit&lt;/name&gt;</span><br><span class="line">	&lt;value&gt;true&lt;/value&gt;</span><br><span class="line">&lt;/property&gt;</span><br><span class="line">&lt;property&gt;</span><br><span class="line">	&lt;name&gt;dfs.domain.socket.path&lt;/name&gt;</span><br><span class="line">	&lt;value&gt;/var/lib/hadoop-hdfs/dn_socket&lt;/value&gt;</span><br><span class="line">&lt;/property&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>dfs.client.read.shortcircuit</code>是打开短路本地读取功能的开关。</li>
+<li><code>dfs.domain.socket.path</code>是 DataNode 和DFSClient 之间沟通的 Socket 的本地路径。</li>
+</ul>
+<p><font color=red><strong>注：</strong></font><code>/var/lib/hadoop-hdfs/dn_socket</code>需要提前创建，但是只需要创建到<code>/var/lib/hadoop-hdfs</code>，后面的<code>/dn_socket</code>由 hadoop 自己创建，如果提前创建到这一步，DataNode 会启动失败。</p>
+<h2 id="1-2-makeHDFS-Block负载平衡器：Balancer">1.2 makeHDFS Block负载平衡器：Balancer</h2>
+<h3 id="1-2-1-背景">1.2.1 背景</h3>
+<p>  HDFS 数据可能并不总是在 DataNode 之间均匀分布。一个常见的原因是向现有群集中添加了新的 DataNode。HDFS 提供了一个 Balancer 程序，分析 block 放置信息并且在整个 DataNode 节点之间平衡数据，直到被视为平衡为止。<br>
+  所谓的<code>平衡指的是每个DataNode的利用率（节点上已用空间与节点总容量之比）与集群的利用率（集群上已用空间与集群总容量的比）相差不超过给定阈值百分比。</code> 平衡器无法在单个 DataNode 上的各个卷之间进行平衡。<br>
+<img src="https://img-blog.csdnimg.cn/0f08abe9ae0e4780a26fd2df81700a1c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_19,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="1-2-2-命令行配置和运行">1.2.2 命令行配置和运行</h3>
+<p><img src="https://img-blog.csdnimg.cn/31377bc8dac642ebb214cc68b1022a4a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_18,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-threshold  10				//集群平衡的条件，datanode间磁盘使用率相差阈值，区间选择：0~100</span><br><span class="line">-policy datanode			//平衡策略，默认为datanode， 如果datanode平衡，则集群已平衡。</span><br><span class="line">-exclude  -f  /tmp/ip1.txt	//默认为空，指定该部分ip不参与balance， -f：指定输入为文件</span><br><span class="line">-include  -f  /tmp/ip2.txt	//默认为空，只允许该部分ip参与balance，-f：指定输入为文件</span><br><span class="line">-idleiterations  5			//迭代 5</span><br></pre></td></tr></table></figure>
+<h4 id="1-2-2-1-设置平衡数据传输宽带">1.2.2.1 设置平衡数据传输宽带</h4>
+<p>  命令：<code>hdfs dfsadmin -setBalancerBandwidth newbandwidth</code><br>
+  其中<code>newbandwidth</code>是每个 DataNode 在平衡操作期间可以使用的最大网络带宽量，以每秒字节数为单位。<br>
+  比如：<code>hdfs dfsadmin -setBalancerBandwidth 104857600 </code></p>
+<h4 id="1-2-2-2-默认运行balancer">1.2.2.2 默认运行balancer</h4>
+<p>  命令：<code>hdfs balancer</code><br>
+  此时将会以默认参数进行数据块的平衡操作。</p>
+<h4 id="1-2-2-3-修改阈值运行balancer">1.2.2.3 修改阈值运行balancer</h4>
+<p>  命令：<code>hdfs balancer -threshold 5</code><br>
+  Balancer 将以阈值 5％ 运行（默认值 10%），这意味着程序将确保每个 DataNode 上的磁盘使用量与群集中的总体使用量相差不超过 5％。例如，如果集群中所有 DataNode 的总体使用率是集群磁盘总存储容量的 40％，则程序将确保每个 DataNode 的磁盘使用率在该 DataNode 磁盘存储容量的 35％ 至 45％ 之间。</p>
+<h2 id="1-3-磁盘均衡器：HDFS-Disk-Balancer">1.3 磁盘均衡器：HDFS Disk Balancer</h2>
+<h3 id="1-3-1-背景">1.3.1 背景</h3>
+<p>  相比较于个人 PC，服务器一般可以通过挂载多块磁盘来扩大单机的存储能力。<br>
+  在 Hadoop HDFS 中，DataNode 负责最终数据 block 的存储，在所在机器上的磁盘之间分配数据块。当写入新 block 时，DataNodes 将根据选择策略（循环策略或可用空间策略）来选择 block 的磁盘（卷）。<br>
+  <code>循环策略</code>：它将新 block 均匀分布在可用磁盘上。默认此策略。<br>
+  <code>可用空间策略</code>：此策略将数据写入具有更多可用空间（按百分比）的磁盘。<br>
+<img src="https://img-blog.csdnimg.cn/61d25ee286cc41378ed2df0b3f650674.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  但是，在长期运行的群集中采用循环策略时，DataNode 有时会不均匀地填充其存储目录（磁盘/卷），从而导致某些磁盘已满而其他磁盘却很少使用的情况。发生这种情况的原因可能是由于大量的写入和删除操作，也可能是由于更换了磁盘。<br>
+  另外，如果我们使用基于可用空间的选择策略，则每个新写入将进入新添加的空磁盘，从而使该期间的其他磁盘处于空闲状态。这将在新磁盘上创建瓶颈。<br>
+  因此，需要一种<code>Intra DataNode Balancing（DataNode内数据块的均匀分布）</code>来解决 Intra-DataNode 偏斜（磁盘上块的不均匀分布），这种偏斜是由于磁盘更换或随机写入和删除而发生的。<br>
+  因此，Hadoop 3.0 中引入了一个名为 Disk Balancer 的工具，该工具专注于在 DataNode 内分发数据。</p>
+<h3 id="1-3-2-HDFS-Disk-Balancer简介">1.3.2 HDFS Disk Balancer简介</h3>
+<p>  <code>HDFS disk balancer</code>是 Hadoop 3 中引入的命令行工具，用于平衡 DataNode 中的数据在磁盘之间分布不均匀问题。 这里要特别注意，HDFS disk balancer 与 HDFS Balancer 是不同的：<br>
+  HDFS disk balancer 针对给定的 DataNode 进行操作，并将块从一个磁盘移动到另一个磁盘，是 DataNode 内部数据在不同磁盘间平衡；<br>
+  HDFS Balancer 平衡了 DataNode 节点之间的分布。</p>
+<h3 id="1-3-3-HDFS-Disk-Balancer功能">1.3.3 HDFS Disk Balancer功能</h3>
+<p>  HDFS Disk balancer支持两个主要功能，即<code>报告</code>和<code>平衡</code>。</p>
+<h4 id="1-3-3-1-数据传播报告">1.3.3.1 数据传播报告</h4>
+<p>  为了定义一种方法来衡量集群中哪些计算机遭受数据分布不均的影响，HDFS 磁盘平衡器定义了 HDFS Volume Data Density metric（卷/磁盘数据密度度量标准）和 Node Data Density metric（节点数据密度度量标准）。<br>
+  HDFS 卷数据密度度量标准能够比较数据在给定节点的不同卷上的分布情况。<br>
+  节点数据密度度量允许在节点之间进行比较。</p>
+<ul>
+<li><strong>Volume data density metric计算过程</strong><br>
+  假设有一台具有四个卷/磁盘的计算机：Disk1，Disk2，Disk3，Disk4，各个磁盘使用情况：</li>
+</ul>
+<table>
+	<tr align=center>
+		<th></th>
+		<th>Disk1</th>
+		<th>Disk2</th>
+		<th>Disk3</th>
+		<th>Disk4</th>
+	</tr>
+	<tr align=center>
+		<th>capacity</th>
+		<td>200 GB</td>
+		<td>300 GB</td>
+		<td>350 GB</td>
+		<td>500 GB</td>
+	</tr>
+	<tr align=center>
+		<th>dfsUsed</th>
+		<td>100 GB</td>
+		<td>76 GB</td>
+		<td>300 GB</td>
+		<td>475 GB</td>
+	</tr>
+	<tr align=center>
+		<th>dfsUsedRatio</th>
+		<td>0.5</td>
+		<td>0.25</td>
+		<td>0.85</td>
+		<td>0.95</td>
+	</tr>
+	<tr align=center>
+		<th>volumeDataDensity</th>
+		<td>0.20</td>
+		<td>0.45</td>
+		<td>-0.15</td>
+		<td>-0.24</td>
+	</tr>
+</table>
+<p>  <code>Total capacity= 200 + 300 + 350 + 500 = 1350 GB</code><br>
+  <code>Total Used= 100 + 76 + 300 + 475 = 951 GB</code><br>
+  因此，每个卷/磁盘上的理想存储为：<br>
+  <code>Ideal storage = total Used ÷ total capacity= 951÷1350 = 0.70 </code><br>
+  也就是每个磁盘应该保持在 70% 理想存储容量。<br>
+  <code>VolumeDataDensity = idealStorage – dfs Used Ratio</code><br>
+  比如 Disk1 的卷数据密度= 0.70-0.50 = 0.20。其他 Disk 以此类推。<br>
+  <code>volumeDataDensity的正值表示磁盘未充分利用，而负值表示磁盘相对于当前理想存储目标的利用率过高。</code></p>
+<ul>
+<li><strong>Node Data Density计算过程</strong><br>
+  Node Data Density（节点数据密度）= 该节点上所有卷/磁盘volume data density 绝对值的总和。<br>
+  上述例子中的节点数据密度=|0.20|+|0.45|+|-0.15|+|-0.24| = 1.04<br>
+  较低的 node Data Density 值表示该机器节点具有较好的扩展性，而较高的值表示节点具有更倾斜的数据分布。<br>
+  一旦有了 volumeDataDensity 和 nodeDataDensity，就可以找到集群中数据分布倾斜的节点，或者可以获取给定节点的 volumeDataDensity。</li>
+</ul>
+<h4 id="1-3-3-2-磁盘平衡">1.3.3.2 磁盘平衡</h4>
+<p>  当指定某个 DataNode 节点进行 disk 数据平衡，就可以先计算或读取当前的 volumeDataDensity（磁盘数据密度）。有了这些信息，我们可以轻松地确定哪些卷已超量配置，哪些卷已不足。为了将数据从一个卷移动到 DataNode 中的另一个卷，Hadoop 开发实现了基于 RPC 协议的 Disk Balancer。</p>
+<h3 id="1-3-4-HDFS-Disk-Balancer开启">1.3.4 HDFS Disk Balancer开启</h3>
+<p>  HDFS Disk Balancer 通过创建计划进行操作，该计划是一组语句，描述应在两个磁盘之间移动多少数据，然后在 DataNode 上执行该组语句。计划包含多个移动步骤。计划中的每个移动步骤都具有目标磁盘，源磁盘的地址。移动步骤还具有要移动的字节数。该计划是针对可操作的 DataNode 执行的。<br>
+  默认情况下，Hadoop 集群上已经启用了 Disk Balancer 功能。通过在<code>hdfs-site.xml</code>中调整<code>dfs.disk.balancer.enabled</code>参数值，选择在 Hadoop 中是否启用磁盘平衡器。</p>
+<h3 id="1-3-5-HDFS-Disk-Balancer相关命令">1.3.5 HDFS Disk Balancer相关命令</h3>
+<h4 id="1-3-5-1-Plan计划">1.3.5.1 Plan计划</h4>
+<p>  命令：<code>hdfs diskbalancer -plan &lt;datanode&gt;</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-out				//控制计划文件的输出位置</span><br><span class="line">-bandwidth			//设置用于运行Disk Balancer的最大带宽。默认带宽10 MB/s。</span><br><span class="line">–thresholdPercentage	//定义磁盘开始参与数据重新分配或平衡操作的值。默认的thresholdPercentage值为10％，这意味着仅当磁盘包含的数据比理想存储值多10％或更少时，磁盘才用于平衡操作。</span><br><span class="line">-maxerror			//它允许用户在中止移动步骤之前为两个磁盘之间的移动操作指定要忽略的错误数。</span><br><span class="line">-v					//详细模式，指定此选项将强制plan命令在stdout上显示计划的摘要。</span><br><span class="line">-fs					//此选项指定要使用的NameNode。如果未指定，则Disk Balancer将使用配置中的默认NameNode。</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/a2b1c8f9ce7a400aa4b1dc0d744fcd14.png#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="1-3-5-2-Execute执行">1.3.5.2 Execute执行</h4>
+<p>  命令：<code>hdfs diskbalancer -execute &lt;JSON file path&gt;</code><br>
+  execute 命令针对为其生成计划的 DataNode 执行计划。</p>
+<h4 id="1-3-5-3-Query查询">1.3.5.3 Query查询</h4>
+<p>  命令：<code>hdfs diskbalancer -query &lt;datanode&gt;</code><br>
+  query 命令从运行计划的 DataNode 获取 HDFS 磁盘平衡器的当前状态。</p>
+<h4 id="1-3-5-4-Cancel取消">1.3.5.4 Cancel取消</h4>
+<p>  命令：<code>hdfs diskbalancer -cancel &lt;JSON file path&gt;</code><br>
+     <code>hdfs diskbalancer -cancel planID node &lt;nodename&gt;</code><br>
+  cancel 命令取消运行计划。</p>
+<h4 id="1-3-5-5-Report执行">1.3.5.5 Report执行</h4>
+<p>  命令：<code>hdfs diskbalancer -fs https://namenode.uri -report &lt;file://&gt;</code></p>
+<h2 id="1-4-纠删码技术：Erasure-Coding">1.4 纠删码技术：Erasure Coding</h2>
+<h3 id="1-4-1-背景：3副本策略弊端">1.4.1 背景：3副本策略弊端</h3>
+<p>  为了提供容错能力，HDFS 会根据 replication factor（复制因子）在不同的 DataNode 上复制文件块。默认复制因子为 3（注意这里的 3 指的是 1+2=3，不是额外 3 个），则原始块除外，还将有额外两个副本。每个副本使用 100％ 的存储开销，因此导致 200％ 的存储开销。这些副本也消耗其他资源，例如网络带宽。<br>
+<img src="https://img-blog.csdnimg.cn/38dd5d0a3dd0461f9bb00b755fed6677.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_17,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  在<code>复制因子为N时，存在N-1个容错能力，但存储效率仅为1/N。</code><br>
+  这种复制增加了存储开销，并且似乎很昂贵。因此，HDFS 使用 Erasure Coding（纠删码）代替复制，以提供相同级别的容错能力，并且存储开销不超过 50％。<br>
+  Erasure Coding 文件的复制因子始终为 1，用户无法对其进行更改。</p>
+<h3 id="1-4-2-Erasure-Coding（EC）简介">1.4.2 Erasure Coding（EC）简介</h3>
+<p>  <strong>纠删码技术（Erasure coding）</strong> 简称 EC，是一种编码容错技术。最早用于通信行业，数据传输中的数据恢复。它通过对数据进行分块，然后计算出校验数据，使得各个部分的数据产生关联性。当一部分数据块丢失时，可以通过剩余的数据块和校验块计算出丢失的数据块。<br>
+  Hadoop 3.0 之后引入了纠删码技术（Erasure Coding），它可以提高 50% 以上的存储利用率，并且保证数据的可靠性。<br>
+  存储系统 RAID 使用纠删码。RAID通过<strong>striping（条带化）</strong> 实现纠删码，也就是说，将逻辑上连续的数据（例如文件）划分为较小的单位（bit，byte，or block），并将连续的单位存储在不同的磁盘上。<br>
+  对于原始数据集的每个条带，都会<strong>根据纠删码算法来计算并存储一定数量的奇偶校验单元</strong>，该过程称为<code>编码</code>。<br>
+  任何条带化单元中的<strong>错误都可以根据剩余数据和奇偶校验单元从计算中恢复</strong>，此过程称为<code>解码</code>。<br>
+<img src="https://img-blog.csdnimg.cn/c3a0fff6543d4d6d961071f62ba9c63f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_17,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="1-4-3-Reed-Solomon（RS）码">1.4.3 Reed-Solomon（RS）码</h3>
+<h4 id="1-4-3-1-RS码介绍">1.4.3.1 RS码介绍</h4>
+<p>  <strong>Reed-Solomon（RS）码</strong>是存储系统较为常用的一种纠删码，它有两个参数 k 和 m，记为 RS(k，m)。如下图所示，k 个数据块组成一个向量被乘上一个生成矩阵（Generator Matrix）GT 从而得到一个码字（codeword）向量，该向量由 k 个数据块和 m 个校验块构成。如果一个数据块丢失，可以用 (GT)-1 乘以码字向量来恢复出丢失的数据块。RS(k，m)最多可容忍 m 个块（包括数据块和校验块）丢失。<br>
+<img src="https://img-blog.csdnimg.cn/9c9a616fd7424b1aac270bfb326920de.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_11,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="1-4-3-2-RS码通俗解释">1.4.3.2 RS码通俗解释</h4>
+<p>  比如有 7、8、9 三个原始数据，通过矩阵乘法，计算出来两个校验数据 50、122。这时原始数据加上校验数据，一共五个数据：7、8、9、50、122，可以任意丢两个，然后通过算法进行恢复。<br>
+<img src="https://img-blog.csdnimg.cn/07620d730c824ba484bb236f734d9e18.png#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="1-4-4-Hadoop-EC架构">1.4.4 Hadoop EC架构</h3>
+<p>  为了支持纠删码，HDFS 体系结构进行了一些更改调整。</p>
+<ul>
+<li><strong>Namenode扩展</strong>
+<ul>
+<li>条带化的 HDFS 文件在<strong>逻辑</strong>上由<code>block group（块组）</code>组成，每个块组包含一定数量的内部块。这允许在块组级别而不是块级别进行文件管理。</li>
+</ul>
+</li>
+<li><strong>客户端扩展</strong>
+<ul>
+<li>客户端的读写路径得到了增强，可以<strong>并行处理</strong>块组中的多个内部块。</li>
+</ul>
+</li>
+<li><strong>Datanode扩展</strong>
+<ul>
+<li>DataNode 运行一个附加的 ErasureCodingWorker（ECWorker）任务，以对失败的纠删编码块进行后台恢复。 NameNode 检测到失败的 EC 块，然后 NameNode 选择一个 DataNode 进行恢复工作。</li>
+</ul>
+</li>
+<li><strong>纠删编码策略</strong>
+<ul>
+<li>为了适应异构的工作负载，允许 HDFS 集群中的文件和目录具有不同的复制和纠删码策略。纠删码策略封装了如何对文件进行编码/解码。默认情况下启用<code>RS-6-3-1024k</code>策略， RS 表示编码器算法 Reed-Solomon，6 、3 中表示数据块和奇偶校验块的数量，1024k 表示条带化单元的大小。</li>
+<li><code>目录上还支持默认的REPLICATION方案。</code>它只能在目录上设置，以强制目录采用 3 倍复制方案，而不继承其祖先的纠删码策略。此策略可以使 3x 复制方案目录与纠删码目录交错。REPLICATION 始终处于启用状态。</li>
+<li>此外也支持用户通过 XML 文件定义自己的 EC 策略，Hadoop conf 目录中有一个名为<code>user_ec_policies.xml.template</code>的示例 EC 策略 XML 文件，用户可以参考该文件。</li>
+</ul>
+</li>
+<li><strong>Intel ISA-L</strong>
+<ul>
+<li>英特尔 ISA-L 代表英特尔智能存储加速库。 ISA-L 是针对存储应用程序而优化的低级功能的开源集合。它包括针对 Intel AVX 和 AVX2 指令集优化的快速块 Reed-Solomon 类型擦除代码。 <code>HDFS纠删码可以利用ISA-L加速编码和解码计算。</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="1-4-5-Erasure-Coding部署方式">1.4.5 Erasure Coding部署方式</h3>
+<h4 id="1-4-5-1-集群和硬件配置">1.4.5.1 集群和硬件配置</h4>
+<p>  编码和解码工作会消耗 HDFS 客户端和 DataNode 上的额外<code>CPU</code>。<br>
+  纠删码文件也分布在整个机架上，以实现机架容错。这意味着在读写条带化文件时，大多数操作都是在机架上进行的。因此，<code>网络带宽</code>也非常重要。<br>
+  对于机架容错，拥有<code>足够数量的机架</code>也很重要，每个机架所容纳的块数不超过 EC 奇偶校验块的数。<br>
+  <code>机架数量=（数据块+奇偶校验块）/奇偶校验块后取整</code>。比如对于 EC 策略 RS（6,3），这意味着最少 3 个机架（由（6 + 3）/ 3 = 3 计算），理想情况下为 9 个或更多，以处理计划内和计划外的停机。对于机架数少于奇偶校验单元数的群集，HDFS 无法维持机架容错能力，但仍将尝试在多个节点之间分布条带化文件以保留节点级容错能力。因此，建议设置具有类似数量的 DataNode 的机架。</p>
+<h4 id="1-4-5-2-纠删码策略设置">1.4.5.2 纠删码策略设置</h4>
+<p>  纠删码策略由参数<code>dfs.namenode.ec.system.default.policy</code>指定，默认是 RS-6-3-1024k，其他策略默认是禁用的。可以通过<code>hdfs ec [-enablePolicy -policy &lt;policyName&gt;]</code>命令启用策略集。</p>
+<h4 id="1-4-5-3-启用英特尔ISA-L">1.4.5.3 启用英特尔ISA-L</h4>
+<p>  默认 RS 编解码器的 HDFS 本机实现利用 Intel ISA-L 库来改善编码和解码计算。要启用和使用 Intel ISA-L，需要执行三个步骤。<br>
+  建立 ISA-L 库；<br>
+  使用 ISA-L 支持构建 Hadoop；<br>
+  使用 -Dbundle.isal 将 isal.lib 目录的内容复制到最终的 tar 文件中。使用 tar 文件部署 Hadoop。确保 ISA-L 在 HDFS 客户端和 DataNode 上可用。</p>
+<h3 id="1-4-6-EC命令">1.4.6 EC命令</h3>
+<p>  HDFS 提供了一个 ec 子命令来执行与纠删码有关的管理命令。<br>
+<img src="https://img-blog.csdnimg.cn/62966f0f91044ad39bbe2cc07dcb6d8e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li><code>-setPolicy -path &lt;path&gt; [-policy &lt;policy&gt;] [-replicate]</code>
+<ul>
+<li>在指定路径的目录上设置擦除编码策略。</li>
+<li><code>path</code>：HDFS 中的目录。这是必填参数。设置策略仅影响新创建的文件，而不影响现有文件。</li>
+<li><code>policy</code>：用于此目录下文件的擦除编码策略。默认 RS-6-3-1024k 策略。</li>
+<li><code>-replicate</code>在目录上应用默认的 REPLICATION 方案，强制目录采用 3x 复制方案。</li>
+<li><code>-replicate</code>和<code>-policy &lt;policy&gt;</code>是可选参数。不能同时指定它们。</li>
+</ul>
+</li>
+<li><code>-getPolicy -path &lt;path&gt;</code>
+<ul>
+<li>获取指定路径下文件或目录的擦除编码策略的详细信息。</li>
+</ul>
+</li>
+<li><code>-unsetPolicy -path &lt;path&gt;</code>
+<ul>
+<li>取消设置先前对目录上的 setPolicy 的调用所设置的擦除编码策略。如果该目录从祖先目录继承了擦除编码策略，则 unsetPolicy 是 no-op。在没有显式策略集的目录上取消策略将不会返回错误。</li>
+</ul>
+</li>
+<li><code>-listPolicies</code>
+<ul>
+<li>列出在 HDFS 中注册的所有（启用，禁用和删除）擦除编码策略。只有启用的策略才适合与 setPolicy 命令一起使用。</li>
+</ul>
+</li>
+<li><code>-addPolicies -policyFile &lt;文件&gt;</code>
+<ul>
+<li>添加用户定义的擦除编码策略列表。</li>
+</ul>
+</li>
+<li><code>-listCodecs</code>
+<ul>
+<li>获取系统中支持的擦除编码编解码器和编码器的列表。</li>
+</ul>
+</li>
+<li><code>-removePolicy -policy &lt;policyName&gt;</code>
+<ul>
+<li>删除用户定义的擦除编码策略。</li>
+</ul>
+</li>
+<li><code>-enablePolicy -policy &lt;policyName&gt;</code>
+<ul>
+<li>启用擦除编码策略。</li>
+</ul>
+</li>
+<li><code>-disablePolicy -policy &lt;policyName&gt;</code>
+<ul>
+<li>禁用擦除编码策略。</li>
+</ul>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2022/01/17/hadoop_10/">https://program-park.github.io/2022/01/17/hadoop_10/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a><a class="post-meta__tags" href="/tags/Hadoop/">Hadoop</a></div><div class="post_share"><div class="social-share" data-image="/img/hadoop/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/01/17/hadoop_11/"><img class="prev-cover" src="/img/hadoop/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">ERROR org.apache.hadoop.hdfs.server.datanode.DataNode: Exception in secureMain</div></div></a></div><div class="next-post pull-right"><a href="/2022/01/17/hadoop_9/"><img class="next-cover" src="/img/hadoop/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Hadoop 生态圈（六）- HDFS NAMENODE 安全模式</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/01/17/hadoop_11/" title="ERROR org.apache.hadoop.hdfs.server.datanode.DataNode: Exception in secureMain"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-17</div><div class="title">ERROR org.apache.hadoop.hdfs.server.datanode.DataNode: Exception in secureMain</div></div></a></div><div><a href="/2022/01/17/hadoop_12/" title="Hadoop 生态圈（八）- HDFS 动态节点管理"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-17</div><div class="title">Hadoop 生态圈（八）- HDFS 动态节点管理</div></div></a></div><div><a href="/2022/01/19/hadoop_13/" title="Hadoop 生态圈（九）- HDFS High Availability（HA）高可用集群"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-19</div><div class="title">Hadoop 生态圈（九）- HDFS High Availability（HA）高可用集群</div></div></a></div><div><a href="/2022/01/19/hadoop_14/" title="Hadoop 生态圈（十）- HDFS Federation 联邦机制"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-19</div><div class="title">Hadoop 生态圈（十）- HDFS Federation 联邦机制</div></div></a></div><div><a href="/2022/01/11/hadoop_1/" title="Hadoop 3.x 在 centos 上的完全分布式部署（包括免密登录、集群测试、历史服务器、日志聚集、常用命令、群起脚本）"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-11</div><div class="title">Hadoop 3.x 在 centos 上的完全分布式部署（包括免密登录、集群测试、历史服务器、日志聚集、常用命令、群起脚本）</div></div></a></div><div><a href="/2022/01/21/hadoop_16/" title="Hadoop 生态圈（十二）- HDFS 架构深入学习"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-21</div><div class="title">Hadoop 生态圈（十二）- HDFS 架构深入学习</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">121</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">20</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-HDFS%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88"><span class="toc-text">1. HDFS优化方案</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E7%9F%AD%E8%B7%AF%E6%9C%AC%E5%9C%B0%E8%AF%BB%E5%8F%96%EF%BC%9AShort-Circuit-Local-Reads"><span class="toc-text">1.1 短路本地读取：Short Circuit Local Reads</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-1-%E8%83%8C%E6%99%AF"><span class="toc-text">1.1.1 背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-2-%E7%9F%AD%E8%B7%AF%E6%9C%AC%E5%9C%B0%E8%AF%BB%E5%8F%96"><span class="toc-text">1.1.2 短路本地读取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-3-%E7%9F%AD%E8%B7%AF%E6%9C%AC%E5%9C%B0%E8%AF%BB%E5%8F%96%E5%AE%89%E5%85%A8%E6%80%A7%E6%94%B9%E8%BF%9B"><span class="toc-text">1.1.3 短路本地读取安全性改进</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-4-%E7%9F%AD%E8%B7%AF%E6%9C%AC%E5%9C%B0%E8%AF%BB%E5%8F%96%E9%85%8D%E7%BD%AE"><span class="toc-text">1.1.4 短路本地读取配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-4-1-libhadoop-so"><span class="toc-text">1.1.4.1 libhadoop.so</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-4-2-hdfs-site-xml"><span class="toc-text">1.1.4.2 hdfs-site.xml</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-makeHDFS-Block%E8%B4%9F%E8%BD%BD%E5%B9%B3%E8%A1%A1%E5%99%A8%EF%BC%9ABalancer"><span class="toc-text">1.2 makeHDFS Block负载平衡器：Balancer</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-1-%E8%83%8C%E6%99%AF"><span class="toc-text">1.2.1 背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-2-%E5%91%BD%E4%BB%A4%E8%A1%8C%E9%85%8D%E7%BD%AE%E5%92%8C%E8%BF%90%E8%A1%8C"><span class="toc-text">1.2.2 命令行配置和运行</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-2-1-%E8%AE%BE%E7%BD%AE%E5%B9%B3%E8%A1%A1%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93%E5%AE%BD%E5%B8%A6"><span class="toc-text">1.2.2.1 设置平衡数据传输宽带</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-2-2-%E9%BB%98%E8%AE%A4%E8%BF%90%E8%A1%8Cbalancer"><span class="toc-text">1.2.2.2 默认运行balancer</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-2-3-%E4%BF%AE%E6%94%B9%E9%98%88%E5%80%BC%E8%BF%90%E8%A1%8Cbalancer"><span class="toc-text">1.2.2.3 修改阈值运行balancer</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-%E7%A3%81%E7%9B%98%E5%9D%87%E8%A1%A1%E5%99%A8%EF%BC%9AHDFS-Disk-Balancer"><span class="toc-text">1.3 磁盘均衡器：HDFS Disk Balancer</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-1-%E8%83%8C%E6%99%AF"><span class="toc-text">1.3.1 背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-2-HDFS-Disk-Balancer%E7%AE%80%E4%BB%8B"><span class="toc-text">1.3.2 HDFS Disk Balancer简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-3-HDFS-Disk-Balancer%E5%8A%9F%E8%83%BD"><span class="toc-text">1.3.3 HDFS Disk Balancer功能</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-3-1-%E6%95%B0%E6%8D%AE%E4%BC%A0%E6%92%AD%E6%8A%A5%E5%91%8A"><span class="toc-text">1.3.3.1 数据传播报告</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-3-2-%E7%A3%81%E7%9B%98%E5%B9%B3%E8%A1%A1"><span class="toc-text">1.3.3.2 磁盘平衡</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-4-HDFS-Disk-Balancer%E5%BC%80%E5%90%AF"><span class="toc-text">1.3.4 HDFS Disk Balancer开启</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-5-HDFS-Disk-Balancer%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4"><span class="toc-text">1.3.5 HDFS Disk Balancer相关命令</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-5-1-Plan%E8%AE%A1%E5%88%92"><span class="toc-text">1.3.5.1 Plan计划</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-5-2-Execute%E6%89%A7%E8%A1%8C"><span class="toc-text">1.3.5.2 Execute执行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-5-3-Query%E6%9F%A5%E8%AF%A2"><span class="toc-text">1.3.5.3 Query查询</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-5-4-Cancel%E5%8F%96%E6%B6%88"><span class="toc-text">1.3.5.4 Cancel取消</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-5-5-Report%E6%89%A7%E8%A1%8C"><span class="toc-text">1.3.5.5 Report执行</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-%E7%BA%A0%E5%88%A0%E7%A0%81%E6%8A%80%E6%9C%AF%EF%BC%9AErasure-Coding"><span class="toc-text">1.4 纠删码技术：Erasure Coding</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-1-%E8%83%8C%E6%99%AF%EF%BC%9A3%E5%89%AF%E6%9C%AC%E7%AD%96%E7%95%A5%E5%BC%8A%E7%AB%AF"><span class="toc-text">1.4.1 背景：3副本策略弊端</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-2-Erasure-Coding%EF%BC%88EC%EF%BC%89%E7%AE%80%E4%BB%8B"><span class="toc-text">1.4.2 Erasure Coding（EC）简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-3-Reed-Solomon%EF%BC%88RS%EF%BC%89%E7%A0%81"><span class="toc-text">1.4.3 Reed-Solomon（RS）码</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-3-1-RS%E7%A0%81%E4%BB%8B%E7%BB%8D"><span class="toc-text">1.4.3.1 RS码介绍</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-3-2-RS%E7%A0%81%E9%80%9A%E4%BF%97%E8%A7%A3%E9%87%8A"><span class="toc-text">1.4.3.2 RS码通俗解释</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-4-Hadoop-EC%E6%9E%B6%E6%9E%84"><span class="toc-text">1.4.4 Hadoop EC架构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-5-Erasure-Coding%E9%83%A8%E7%BD%B2%E6%96%B9%E5%BC%8F"><span class="toc-text">1.4.5 Erasure Coding部署方式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-5-1-%E9%9B%86%E7%BE%A4%E5%92%8C%E7%A1%AC%E4%BB%B6%E9%85%8D%E7%BD%AE"><span class="toc-text">1.4.5.1 集群和硬件配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-5-2-%E7%BA%A0%E5%88%A0%E7%A0%81%E7%AD%96%E7%95%A5%E8%AE%BE%E7%BD%AE"><span class="toc-text">1.4.5.2 纠删码策略设置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-5-3-%E5%90%AF%E7%94%A8%E8%8B%B1%E7%89%B9%E5%B0%94ISA-L"><span class="toc-text">1.4.5.3 启用英特尔ISA-L</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-6-EC%E5%91%BD%E4%BB%A4"><span class="toc-text">1.4.6 EC命令</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/25/hadoop_21/" title="Hadoop 生态圈（十七）- HDFS 权限管理"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十七）- HDFS 权限管理"/></a><div class="content"><a class="title" href="/2022/01/25/hadoop_21/" title="Hadoop 生态圈（十七）- HDFS 权限管理">Hadoop 生态圈（十七）- HDFS 权限管理</a><time datetime="2022-01-25T02:21:17.000Z" title="发表于 2022-01-25 10:21:17">2022-01-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/24/hadoop_20/" title="Hadoop 生态圈（十六）- HDFS Snapshot 快照详解"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十六）- HDFS Snapshot 快照详解"/></a><div class="content"><a class="title" href="/2022/01/24/hadoop_20/" title="Hadoop 生态圈（十六）- HDFS Snapshot 快照详解">Hadoop 生态圈（十六）- HDFS Snapshot 快照详解</a><time datetime="2022-01-24T08:18:12.000Z" title="发表于 2022-01-24 16:18:12">2022-01-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/24/hadoop_19/" title="Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解"/></a><div class="content"><a class="title" href="/2022/01/24/hadoop_19/" title="Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解">Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解</a><time datetime="2022-01-24T08:03:12.000Z" title="发表于 2022-01-24 16:03:12">2022-01-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/24/hadoop_18/" title="Hadoop 生态圈（十四）- HDFS 小文件解决方案"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十四）- HDFS 小文件解决方案"/></a><div class="content"><a class="title" href="/2022/01/24/hadoop_18/" title="Hadoop 生态圈（十四）- HDFS 小文件解决方案">Hadoop 生态圈（十四）- HDFS 小文件解决方案</a><time datetime="2022-01-24T07:33:45.000Z" title="发表于 2022-01-24 15:33:45">2022-01-24</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/hadoop/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2022/01/17/hadoop_10/'
+    this.page.identifier = '/2022/01/17/hadoop_10/'
+    this.page.title = 'Hadoop 生态圈（七）- HDFS 优化方案'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>《数据结构与算法》（十七）- 二叉排序树 | 程序园</title><meta name="keywords" content="数据结构,算法"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是《数据结构与算法》系列，第十七篇：二叉排序树。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《数据结构与算法》（十七）- 二叉排序树">
+<meta property="og:url" content="https://program-park.github.io/2021/11/15/algorithm_17/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是《数据结构与算法》系列，第十七篇：二叉排序树。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/algorithm/1.png">
+<meta property="article:published_time" content="2021-11-15T07:31:09.000Z">
+<meta property="article:modified_time" content="2022-09-07T02:14:08.085Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="数据结构">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/algorithm/1.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://program-park.github.io/2021/11/15/algorithm_17/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '《数据结构与算法》（十七）- 二叉排序树',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-07 10:14:08'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">121</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">20</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/algorithm/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">《数据结构与算法》（十七）- 二叉排序树</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-11-15T07:31:09.000Z" title="发表于 2021-11-15 15:31:09">2021-11-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-07T02:14:08.085Z" title="更新于 2022-09-07 10:14:08">2022-09-07</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">数据结构与算法</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">4.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>15分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="《数据结构与算法》（十七）- 二叉排序树"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="前言">前言</h1>
+<p><font color=#999AAA >部分内容摘自程杰的《大话数据结构》</font></p>
+<h1 id="1-二叉排序树">1. 二叉排序树</h1>
+<p>  大家可能都听过这个故事，说有两个年轻人正在深山中行走。忽然发现远处有一只老虎要冲过来，怎么办？其中一个赶忙弯腰系鞋带，另一个奇怪地问：“你系鞋带干什么？你不可能跑得比老虎还快。” 系鞋带者说：“我有什么必要跑赢老虎呢？我只要跑得比你快就行了。”<br>
+  这真是交友不慎呀！别急，如果你的朋友是系鞋带者，你怎么办？<br>
+  后来老虎来了，系鞋带者拼命地跑，另一人则急中生智，爬到了树上。老虎在选择爬树还是追人之间，当然是会选择后者，于是结果······爬树者改变了跑的思想，这一改变何等重要，捡回了自己的一条命。<br>
+  假设查找的数据集是普通的顺序存储，那么插入操作就是将记录放在表的末端，给表记录数加一即可，删除操作可以是删除后，后面的记录向前移，也可以是要删除的元素与最后一个元素互换，表记录数减一，反正整个数据集也没有什么顺序，这样的效率也不错。应该说，插入和删除对于顺序存储结构来说，效率是可以接受的，但这样的表由于无序造成查找的效率很低，前面我们有讲解，这就不在哆嗦。<br>
+  如果查找的数据集是有序线性表，并且是顺序存储的，查找可以用折半、插值、斐波那契等查找算法来实现，可惜，因为有序，在插入和删除操作上，就需要耗费大量的时间。<br>
+  有没有一种即可以使得插入和删除效率不错，又可以比较高效率地实现查找的算法呢？还真有。<br>
+  我们在前面把这种需要在查找时插入或删除的查找表称为动态查找表。我们现在就来看看什么样的结构可以实现动态查找表的高效率。<br>
+  如果在复杂的问题面前，我们束手无策的话，不妨先从最最简单的情况入手。现在我们的目标是插入和查找同样高效。假设我们的数据集开始只有一个数 {62}，然后现在需要将 88 插入数据集，于是数据集成了 {62,88}，还保持着从小到大有序。再查找有没有 58，没有则插入，可此时要想在线性表的顺序存储中有序，就得移动 62 和 88 的位置，如左下图，可不可以不移动呢？嗯，当然是可以，那就是二叉树结构。当我们用二叉树的方式时，首先我们将第一个数 62 定为根结点，88 因为比 62 大，因此让它做 62 的右子树，58 因比 62 小，所以成为它的左子树。此时 58 的插入并没有影响到 62 与 88 的关系，如右下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/4abc362fce63451697c193c219bf9f37.png#pic_center" alt="在这里插入图片描述"><br>
+  也就是说，若我们现在需要对集合 {62,88,58,47,35,73,51,99,37,93} 做查找，在我们打算创建此集合时就考虑用二又树结构，而且是排好序的二叉树来创建。如下图所示，62、88、58 创建好后，下一个数 47 因比 58 小，是它的左子树 （见③），35 是 47 的左子树（见④），73 比 62 大，但却比 88 小，是 88 的左子树（见⑤），51 比 62 小。比 58 小。比 47 大，是 47 的右子树（见⑥），99 比 62、88 都大，是 88 的右子树（见⑦），37 比 62、58、47 都小，但却比 35 大，是 35 的右子树（见⑧），93 则因比 62、88 大是 99 的左子树（见⑨）。<br>
+<img src="https://img-blog.csdnimg.cn/d057292753b44ec4a62dc36343d19b29.png#pic_center" alt="在这里插入图片描述"><br>
+  这样我们就得到了一棵二叉树，并且当我们对它进行中序遍历时，就可以得到一个有序的序列 {35,37,47,51,58,62,73,88,93,99}，所以我们通常称它为二叉排序树。<br>
+  <font color=#6495ED><strong>二叉排序树（Binary Sort Tree），又称为二叉查找树。它或者是一棵空树，或者是具有下列性质的二叉树。</strong></font></p>
+<ul>
+<li>若它的左子树不空， 则左子树上所有结点的值均小于它的根结构的值；</li>
+<li>若它的右子树不空，则右子树上所有结点的值均大于它的根结点的值；</li>
+<li>它的左、右子树也分别为二叉排序树。</li>
+</ul>
+<p>  从二叉排序树的定义也可以知道，它前提是二叉树，然后它采用了递归的定义方法，再者，它的结点间满足一定的次序关系，左子树结点一定比其双亲结点小，右子树结点一定比其双亲结点大。<br>
+  构造一棵二叉排序树的目的，其实并不是为了排序，而是为了提高查找和插入删除关键字的速度。不管怎么说，在一个有序数据集上的查找，速度总是要快于无序的数据集的，而二叉排序树这种非线性的结构，也有利于插入和删除的实现。</p>
+<h2 id="1-1-二叉排序树的查找操作">1.1 二叉排序树的查找操作</h2>
+<p>  首先我们提供一个二叉树的结构。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 二叉树的二叉链表结点结构定义 */</span></span><br><span class="line"><span class="keyword">typedef</span><span class="string">&quot; struct BiTNode	/* 结点结构 */</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">	int data;	/* 结点数据 */</span></span><br><span class="line"><span class="string">	struct BiTNode *lchild, *rchild;	/* 左右孩子指针 */</span></span><br><span class="line"><span class="string">&#125; BiTNode, *BiTree;</span></span><br></pre></td></tr></table></figure>
+<p>  然后我们来看看二叉排序树的查找是如何实现的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 递归查找二叉排序树T中是否存在key, */</span></span><br><span class="line"><span class="comment">/* 指针f指向T的双亲，其初始调用值为NULL */</span></span><br><span class="line"><span class="comment">/* 若查找成功，则指针p指向该数据元素结点，并返回TRUE */</span></span><br><span class="line"><span class="comment">/* 否则指针p指向查找路径上访问的最后一个结点并返回FALSE */</span></span><br><span class="line">Status <span class="title function_">SearchBST</span><span class="params">(BITree T, <span class="type">int</span> key, BiTree f, BiTree *p)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">if</span> (!T)	<span class="comment">/* 查找不成功 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		p=f;</span><br><span class="line">		<span class="keyword">return</span> FALSE;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (key=T-&gt;data)	<span class="comment">/* 查找成功 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		*p=T;</span><br><span class="line">		<span class="keyword">return</span> TRUE;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (key&lt;T-&gt;data)</span><br><span class="line">		<span class="keyword">return</span> SearchBST(T-&gt;lchild, key, T, p);	<span class="comment">/* 在左子树继续查找 */</span></span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">return</span> SearchBST(T-&gt;rchi1d, key, T, p);	<span class="comment">/* 在右子树继续查找 */</span></span><br></pre></td></tr></table></figure>
+<ol>
+<li><code>SearchBST()</code>函数是一个可递归运行的函数，函数调用时的语句为<code>SearchBST(T,93,NULL,p)</code>，参数<code>T</code>是一个二叉链表，其中数据如下图所示，<code>key</code>代表要查找的关键字，目前我们打算查找 93，二叉树<code>f</code>指向<code>T</code>的双亲，当<code>T</code>指向根结点时，f的初值就为<code>NULL</code>，它在递归时有用，最后的参数<code>p</code>是为了查找成功后可以得到查找到的结点位置。</li>
+<li>第 3~7 行，是用来判断当前二叉树是否到叶子结点，显然下图告诉我们当<br>
+前<code>T</code>指向根结点 62 的位置，<code>T</code>不为空，第 5~6 行不执行。</li>
+<li>第 8~12 行是查找到相匹配的关键字时执行语句，显然<code>93≠62</code>，第 10~11 行不执行。</li>
+<li>第 13~14 行是当要查找关键字小于当前结点值时执行语句，由于<code>93&gt;62</code>，第 14 行不执行。</li>
+<li>第 15~16 行是当要查找关键字大于当前结点值时执行语句，由于<code>93&gt;62</code>，所以递归调用<code>SearchBST(T-&gt;rchid, key, T, p)</code>。 此时<code>T</code>指向了 62 的右孩子 88，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/20addcb1d67645d98076e5ca8d3da4fa.png#pic_center" alt="在这里插入图片描述"></li>
+<li>此时第二层<code>SearchBST</code>，因 93 比 88 大，所以执行第 16 行，再次递归调用<code>SearchBST(T-&gt;rchildl, key, T, p)</code>。此时<code>T</code>指向了 88 的右孩子 99，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/7745fe0c491b426b8d360f36ec33c8eb.png#pic_center" alt="在这里插入图片描述"></li>
+<li>第三层的<code>SearchBST</code>，因 93 比 99 小，所以执行第 14 行，递归调用<code>SearchBST(T-&gt;lchild, key, T, p)</code>。此时<code>T</code>指向了 99 的左孩子 93，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/d3b72e86e1b14629bd3fc82f039c2b60.png#pic_center" alt="在这里插入图片描述"></li>
+<li>第四层<code>SearchBST</code>，因<code>key</code>等于<code>T-&gt;data</code>，所以执行第 10~11 行，此时指针<code>p</code>指向 93 所在的结点，并返回<code>True</code>到第三层、第二层、第一层，最终函数返回<code>True</code>。</li>
+</ol>
+<h2 id="1-2-二叉排序树的插入操作">1.2 二叉排序树的插入操作</h2>
+<p>  有了二叉排序树的查找函数，那么所谓的二叉排序树的插入，其实也就是将关键字放到树中的合适位置而已，来看代码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 当二叉排序树T中不存在关键字等于key的数据元素时， */</span></span><br><span class="line"><span class="comment">/* 插入key并返回TRUE,否则返回FALSE */</span></span><br><span class="line">Status <span class="title function_">InsertBSTt</span><span class="params">(BiTree *T，<span class="type">int</span> key)</span></span><br><span class="line">&#123;</span><br><span class="line">	BiTree p,s;</span><br><span class="line">	<span class="keyword">if</span> (!SearchBST(*T, key, <span class="literal">NULL</span>, p))	<span class="comment">/* 查找不成功 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		s = (BiTree)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(BiTNode));</span><br><span class="line">		s-&gt;data=key;</span><br><span class="line">		s-&gt;lchild = s-&gt;rchild = <span class="literal">NULL</span>;</span><br><span class="line">		<span class="keyword">if</span> (!p)</span><br><span class="line">			*T=S;	<span class="comment">/* 插入s为新的根结点 */</span></span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span>(key&lt;p-&gt;data )</span><br><span class="line">			p-&gt;lchild=s;	<span class="comment">/* 插入s为左孩子 */</span></span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">			p-&gt;rchild=s;	<span class="comment">/* 插入s为右孩子 */</span></span><br><span class="line">		<span class="keyword">return</span> TRUE;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">return</span> FALSE;	<span class="comment">/* 树中已有关键字相同的结点，不再插入 */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  这段代码非常简单。如果你调用函数是 “InsertBST(&amp;T,93) ;&quot;，那么结果就是<code>FALSE</code>，如果是 “InsertBST(&amp;T,95);”，那么一定就是在 93 的结点增加一个右孩子 95，并且返回<code>True</code>。如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/cf3567ca7de34b8f9763208626e7c7c4.png#pic_center" alt="在这里插入图片描述"><br>
+  有了二叉排序树的插入代码，我们要实现二叉排序树的构建就非常容易了。下面的代码就可以创建一棵下图这样的树。<br>
+<img src="https://img-blog.csdnimg.cn/d057292753b44ec4a62dc36343d19b29.png#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> i;</span><br><span class="line"><span class="type">int</span> a[<span class="number">10</span>]=&#123;<span class="number">62</span>,<span class="number">88</span>,<span class="number">58</span>,<span class="number">47</span>,<span class="number">35</span>,<span class="number">73</span>,<span class="number">51</span>,<span class="number">99</span>,<span class="number">37</span>,<span class="number">93</span>&#125;;</span><br><span class="line">BiTree T=<span class="literal">NULL</span>;</span><br><span class="line"><span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;<span class="number">10</span>;i++)</span><br><span class="line">&#123;</span><br><span class="line">	InsertBST (&amp;T，a[i]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  在你的大脑里，是否已经有一幅随着循环语句的运行逐步生成这棵二叉排序树的动画图案呢？如果不能，那只能说明你还没真理解它的原理哦。</p>
+<h2 id="1-3-二叉排序树删除操作">1.3 二叉排序树删除操作</h2>
+<p>  俗话说 “请神容易送神难”，我们已经介绍了二叉排序树的查找与插入算法，但是对于二叉排序树的删除，就不是那么容易，我们不能因为删除了结点，而让这棵树变得不满足二叉排序树的特性，所以删除需要考虑多种情况。<br>
+  如果需要查找并删除如 37、 51、 73、93 这些在二叉排序树中是叶子的结点，那是很容易的，毕竞删除它们对整棵树来说，其他结点的结构并未受到影响，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/499aa99f7e6a4d3e96c1c8cf8ce06825.png#pic_center" alt="在这里插入图片描述"><br>
+  对于要删除的结点只有左子树或只有右子树的情况，相对也比较好解决。那就是结点删除后，将它的左子树或右子树整个移动到删除结点的位置即可，可以理解为独子继承父业。比如下图，就是先删除 35 和 99 结点，再删除 58 结点的变化图，最终，整个结构还是一个二叉排序树。<br>
+<img src="https://img-blog.csdnimg.cn/2a77dada88194a019d54b1be5ac45842.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_7,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  但是对于要删除的结点既有左子树又有右子树的情况怎么办呢？比如下图中的 47 结点若要删除了，它的两儿子以及子孙们怎么办呢？<br>
+<img src="https://img-blog.csdnimg.cn/e5bde9f229704d07981e9e805ded0059.png#pic_center" alt="在这里插入图片描述"><br>
+  起初的想法，我们当 47 结点只有一个左子树，那么做法和一个左子树的操作一样，让 35 及它之下的结点成为 58 的左子树，然后再对 47 的右子树所有结点进行插入操作，如下图所示。这是比较简单的想法，可是 47 的右子树有子孙共 5 个结点，这么做效率不高且不说，还会导致整个二叉排序树结构发生很大的变化，有可能会增加树的高度。增加高度可不是个好事，这我们待会再说，总之这个想法不太好。<br>
+<img src="https://img-blog.csdnimg.cn/02d3cd6909e744b7baa3e3457b53c942.png#pic_center" alt="在这里插入图片描述"><br>
+  我们仔细观察一下，47 的两个子树中能否找出一个结点可以代替 47 呢？果然有，37 或者 48 都可以代替 47，此时在删除 47 后，整个二叉排序树并没有发生什么本质的改变。<br>
+  为什么是 37 和 48？对的，它们正好是二叉排序树中比它小或比它大的最接近 47 的两个数。也就是说，如果我们对这棵二叉排序树进行中序遍历，得到的序列 {29,35,36,37,47,48,49,50,51,56,58,62,73,88,93,99}，它们正好是 47 的前驱和后继。<br>
+  因此，比较好的办法就是，找到需要删除的结点<code>p</code>的直接前驱（或直接后继）<code>s</code>，用<code>s</code>来替换结点<code>p</code>，然后再删除此结点<code>s</code>，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/775e13710bdc497781e30caeb686f759.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_8,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/5e573a612f83497398e763b0b30985bb.png#pic_center" alt="在这里插入图片描述"><br>
+  根据我们对删除结点三种情况的分析：</p>
+<ul>
+<li>叶子结点；</li>
+<li>仅有 左或右子树的结点；</li>
+<li>左右子树都有的结点， 我们来看代码，下面这个算法是递归方式对二叉排序树<code>T</code>查找<code>key</code>，查找到时删除。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 若二叉排序树下中存在关键宇等于key的数据元素时，则删除该数据元素结点， */</span></span><br><span class="line"><span class="comment">/* 并返回TRUE;否则返回FALSE */</span></span><br><span class="line">Status <span class="title function_">DeleteBST</span><span class="params">(BiTree *T,<span class="type">int</span> key)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">if</span>(!*T) <span class="comment">/* 不存在关键宇等于key的数据元素 */</span></span><br><span class="line">		<span class="keyword">return</span> FALSE:</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (key==(*T)-&gt;data)	<span class="comment">/* 找到关键字等于key的数据元素 */</span></span><br><span class="line">			<span class="keyword">return</span> Delete(T);</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span> (key&lt;(*T)-&gt;data)</span><br><span class="line">			<span class="keyword">return</span> DeleteBST(&amp;(*T)-&gt;lchild, key);</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">			<span class="keyword">return</span> DeleteBST(G(*T)-&gt;rchild, key);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  这段代码和前面的二叉排序树查找几乎完全相同，唯一的区别就在于第 8 行，此时执行的是<code>Delete</code>方法，对当前结点进行删除操作。我们来看<code>Delete</code>的代码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 从二又排序树中删除结点p，并重接它的左或右子树。 */</span></span><br><span class="line">Status <span class="title function_">Delete</span><span class="params">(BiTree *p)</span></span><br><span class="line">&#123;</span><br><span class="line">	BiTree q,s;</span><br><span class="line">	<span class="keyword">if</span>((*p)-&gt;rchild==<span class="literal">NULL</span>)	<span class="comment">/* 右子树空则只需重接它的左子树 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		q=*p; *p=(*p)-&gt;lchild; <span class="built_in">free</span>(q);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span>((*p)-&gt;<span class="number">1</span>child==<span class="literal">NULL</span>)	<span class="comment">/* 只需重接它的右子树 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		q=*p; *p=(*p)-&gt;rchild; <span class="built_in">free</span>(q);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span>	<span class="comment">/* 左右于树均不空 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		q=*p; s=(*p)-&gt;lchild;</span><br><span class="line">		<span class="keyword">while</span> (s-&gt;rchild)	<span class="comment">/* 转左，然后向右到尽头(找待删结点的前驱) */</span></span><br><span class="line">		&#123;</span><br><span class="line">			q=s; s=s-&gt;rchild;</span><br><span class="line">		&#125;</span><br><span class="line">		(*p)-&gt;data=s-&gt;data;	<span class="comment">/* s指向被删结点的直接前驱 */</span></span><br><span class="line">		<span class="keyword">if</span> (q!=*p)</span><br><span class="line">			q-&gt;rchild=s-&gt;lchild;	<span class="comment">/* 重接q的右子树 */</span></span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">			q-&gt;lchild=s-&gt;lchild;	<span class="comment">/* 重接q的左子树 */</span></span><br><span class="line">		<span class="built_in">free</span>(s);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>程序开始执行，代码第 4~7 行目的是为了删除没有右子树只有左子树的结点。此时只需将此结点的左孩子替换它自己，然后释放此结点内存，就等于删除了。</li>
+<li>代码第 8~11 行是同样的道理处理只有右子树没有左子树的结点删除问题。</li>
+<li>第 12~25 行处理复杂的左右子树均存在的问题。</li>
+<li>第 14 行，将要删除的结点<code>p</code>赋值给临时的变量<code>q</code>，再将<code>p</code>的左孩子<code>p-&gt;lchild</code>赋值给临时的变量<code>s</code>。此时<code>q</code>指向 47 结点，<code>s</code>指向 35 结点，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/04212aeae5c84b7fb76d2ca5b4ad98e0.png#pic_center" alt="在这里插入图片描述"></li>
+<li>第 15~18 行，循环找到左子树的右结点，直到右侧尽头。就当前例子来说就是让<code>q</code>指向 35，而<code>s</code>指向了 37 这个再没有右子树的结点，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/273f0c640620485aba0557003168a118.png#pic_center" alt="在这里插入图片描述"></li>
+<li>第 19 行，此时让要删除的结点<code>p</code>的位置的数据被赋值为<code>s-&gt;data</code>，即让<code>p-&gt;data=37</code>，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/a36ac34711224893ba27b2f8b6b97afe.png#pic_center" alt="在这里插入图片描述"></li>
+<li>第 20~23 行，如果<code>p</code>和<code>q</code>指向不同，则将<code>s-&gt;lchild</code>赋值给<code>q-&gt;rchild</code>，否则就是将<code>s-&gt;child</code>赋值给<code>q-&gt;lchild</code>。显然这个例子<code>p</code>不等于<code>q</code>，将<code>s-&gt;lchild</code>指向的 36 赋值给<code>q-&gt;rchild</code>，也就是让<code>q-&gt;rchild</code>指向 36 结点，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/422c6d42950b482fa58400013f865325.png#pic_center" alt="在这里插入图片描述"></li>
+<li>第 24 行，<code>free(s)</code>，就非常好理解了，将 37 结点删除，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/ffe414d604764080bde2ff8eac18f444.png#pic_center" alt="在这里插入图片描述"></li>
+</ol>
+<p>  从这段代码也可以看出，我们其实是在找删除结点的前驱结点替换的方法，对于用后继结点来替换，方法上是一样的。</p>
+<h2 id="1-4-二叉排序树总结">1.4 二叉排序树总结</h2>
+<p>  总之，二叉排序树是以链接的方式存储，保持了链接存储结构在执行插入或删除操作时不用移动元素的优点，只要找到合适的插入和删除位置后，仅需修改链接指针即可。插入删除的时间性能比较好。而对于二叉排序树的查找，走的就是从根结点到要查找的结点的路径，其比较次数等于给定值的结点在二叉排序树的层数。极端情况，最少为 1 次，即根结点就是要找的结点，最多也不会超过树的深度。也就是说，二叉排序树的查找性能取决于二叉排序树的形状。可问题就在于，二叉排序树的形状是不确定的。<br>
+  例如 {62,88,58,47,35,73,51,99,37,93} 这样的数组，我们可以构建如左下图的二叉排序树。但如果数组元素的次序是从小到大有序，如 {35,37,47,51,58,62,73,88,93,99}，则二叉排序树就成了极端的右斜树，注意它依然是一棵二叉排序树，如右下图。此时，同样是查找结点 99，左图只需要两次比较，而右图就需要 10 次比较才可以得到结果，二者差异很大。<br>
+<img src="https://img-blog.csdnimg.cn/879f943401614436b26f7c710caffd79.png#pic_center" alt="在这里插入图片描述"><br>
+  也就是说，我们希望二叉排序树是比较平衡的，即其深度与完全：二叉树相同，均为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mi>l</mi><mi>o</mi><msub><mi>g</mi><mn>2</mn></msub><mi>n</mi><mo stretchy="false">]</mo><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">[log_2n]+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathnormal">n</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>，那么查找的时间复杂也就为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(logn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>，近似于折半查找，事实上，左上图也不够平衡，明显的左重右轻。<br>
+  不平衡的最坏情况就是像右上图的斜树，查找时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>，这等同于顺序查找。<br>
+  因此，如果我们希望对一个集合按二叉排序树查找，最好是把它构建成一棵平衡的二叉排序树。这样我们就引申出另一个问题，如何让二叉排序树平衡的问题。<br>
+<br></p>
+<h1 id="2-总结">2. 总结</h1>
+<p>  二叉排序树是动态查找最重要的数据结构，它可以在兼顾查找性能的基础上，让插入和删除也变得效率较高。不过为了达到最优的状态，二叉排序树最好是构成平衡的二叉树才是最佳，这个在下一篇博客再详细说。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2021/11/15/algorithm_17/">https://program-park.github.io/2021/11/15/algorithm_17/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/">算法</a></div><div class="post_share"><div class="social-share" data-image="/img/algorithm/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/11/16/algorithm_18/"><img class="prev-cover" src="/img/algorithm/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">《数据结构与算法》（十八）- 平衡二叉树</div></div></a></div><div class="next-post pull-right"><a href="/2021/11/15/algorithm_16/"><img class="next-cover" src="/img/algorithm/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">《数据结构与算法》（十六）- “查找”详解</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/10/11/algorithm_1/" title="《数据结构与算法》（一）- 数据结构详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-11</div><div class="title">《数据结构与算法》（一）- 数据结构详解</div></div></a></div><div><a href="/2021/11/11/algorithm_14/" title="《数据结构与算法》（十四）- 图的应用：最短路径"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-11</div><div class="title">《数据结构与算法》（十四）- 图的应用：最短路径</div></div></a></div><div><a href="/2021/11/09/algorithm_11/" title="《数据结构与算法》（十一）- 树、森林与二叉树的转换及哈夫曼树详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-09</div><div class="title">《数据结构与算法》（十一）- 树、森林与二叉树的转换及哈夫曼树详解</div></div></a></div><div><a href="/2021/11/08/algorithm_10/" title="《数据结构与算法》（十）- 二叉树详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-08</div><div class="title">《数据结构与算法》（十）- 二叉树详解</div></div></a></div><div><a href="/2021/11/10/algorithm_13/" title="《数据结构与算法》（十三）- 图的应用：最小生成树"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-10</div><div class="title">《数据结构与算法》（十三）- 图的应用：最小生成树</div></div></a></div><div><a href="/2021/11/10/algorithm_12/" title="《数据结构与算法》（十二）- 图详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-10</div><div class="title">《数据结构与算法》（十二）- 图详解</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">121</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">20</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E4%BA%8C%E5%8F%89%E6%8E%92%E5%BA%8F%E6%A0%91"><span class="toc-text">1. 二叉排序树</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E4%BA%8C%E5%8F%89%E6%8E%92%E5%BA%8F%E6%A0%91%E7%9A%84%E6%9F%A5%E6%89%BE%E6%93%8D%E4%BD%9C"><span class="toc-text">1.1 二叉排序树的查找操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E4%BA%8C%E5%8F%89%E6%8E%92%E5%BA%8F%E6%A0%91%E7%9A%84%E6%8F%92%E5%85%A5%E6%93%8D%E4%BD%9C"><span class="toc-text">1.2 二叉排序树的插入操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-%E4%BA%8C%E5%8F%89%E6%8E%92%E5%BA%8F%E6%A0%91%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C"><span class="toc-text">1.3 二叉排序树删除操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-%E4%BA%8C%E5%8F%89%E6%8E%92%E5%BA%8F%E6%A0%91%E6%80%BB%E7%BB%93"><span class="toc-text">1.4 二叉排序树总结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%80%BB%E7%BB%93"><span class="toc-text">2. 总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/25/hadoop_21/" title="Hadoop 生态圈（十七）- HDFS 权限管理"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十七）- HDFS 权限管理"/></a><div class="content"><a class="title" href="/2022/01/25/hadoop_21/" title="Hadoop 生态圈（十七）- HDFS 权限管理">Hadoop 生态圈（十七）- HDFS 权限管理</a><time datetime="2022-01-25T02:21:17.000Z" title="发表于 2022-01-25 10:21:17">2022-01-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/24/hadoop_20/" title="Hadoop 生态圈（十六）- HDFS Snapshot 快照详解"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十六）- HDFS Snapshot 快照详解"/></a><div class="content"><a class="title" href="/2022/01/24/hadoop_20/" title="Hadoop 生态圈（十六）- HDFS Snapshot 快照详解">Hadoop 生态圈（十六）- HDFS Snapshot 快照详解</a><time datetime="2022-01-24T08:18:12.000Z" title="发表于 2022-01-24 16:18:12">2022-01-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/24/hadoop_19/" title="Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解"/></a><div class="content"><a class="title" href="/2022/01/24/hadoop_19/" title="Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解">Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解</a><time datetime="2022-01-24T08:03:12.000Z" title="发表于 2022-01-24 16:03:12">2022-01-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/24/hadoop_18/" title="Hadoop 生态圈（十四）- HDFS 小文件解决方案"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十四）- HDFS 小文件解决方案"/></a><div class="content"><a class="title" href="/2022/01/24/hadoop_18/" title="Hadoop 生态圈（十四）- HDFS 小文件解决方案">Hadoop 生态圈（十四）- HDFS 小文件解决方案</a><time datetime="2022-01-24T07:33:45.000Z" title="发表于 2022-01-24 15:33:45">2022-01-24</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/algorithm/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2021/11/15/algorithm_17/'
+    this.page.identifier = '/2021/11/15/algorithm_17/'
+    this.page.title = '《数据结构与算法》（十七）- 二叉排序树'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

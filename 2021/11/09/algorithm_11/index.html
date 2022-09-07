@@ -1,0 +1,423 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>《数据结构与算法》（十一）- 树、森林与二叉树的转换及哈夫曼树详解 | 程序园</title><meta name="keywords" content="数据结构,算法"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是《数据结构与算法》系列，第十一篇：树、森林与二叉树的转换及哈夫曼树。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《数据结构与算法》（十一）- 树、森林与二叉树的转换及哈夫曼树详解">
+<meta property="og:url" content="https://program-park.github.io/2021/11/09/algorithm_11/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是《数据结构与算法》系列，第十一篇：树、森林与二叉树的转换及哈夫曼树。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/algorithm/1.png">
+<meta property="article:published_time" content="2021-11-09T04:34:32.000Z">
+<meta property="article:modified_time" content="2022-09-07T01:56:33.989Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="数据结构">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/algorithm/1.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://program-park.github.io/2021/11/09/algorithm_11/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '《数据结构与算法》（十一）- 树、森林与二叉树的转换及哈夫曼树详解',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-07 09:56:33'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">121</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">20</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/algorithm/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">《数据结构与算法》（十一）- 树、森林与二叉树的转换及哈夫曼树详解</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-11-09T04:34:32.000Z" title="发表于 2021-11-09 12:34:32">2021-11-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-07T01:56:33.989Z" title="更新于 2022-09-07 09:56:33">2022-09-07</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">数据结构与算法</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">4.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>15分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="《数据结构与算法》（十一）- 树、森林与二叉树的转换及哈夫曼树详解"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="前言">前言</h1>
+<p><font color=#999AAA >部分内容摘自程杰的《大话数据结构》</font></p>
+<h1 id="1-树、森林与二叉树之间的转换">1. 树、森林与二叉树之间的转换</h1>
+<h2 id="1-1-树转换为二叉树">1.1 树转换为二叉树</h2>
+<p>  树如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/19c94873d22e4b77b9a5479b1960f5e7.png#pic_center" alt="在这里插入图片描述"><br>
+  将树转换为二叉树的步骤如下：</p>
+<ol>
+<li>加线。在所有兄弟结点之间加一条连线，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/a973109e4416452ebe85b5d630609706.png" alt="在这里插入图片描述"></li>
+<li>去线。对树中每个结点，只保留它与第一个孩子结点的连线，删除它与其他孩子结点之间的连线。<br>
+<img src="https://img-blog.csdnimg.cn/d2525d94f1ad4f989c4bb85c0be88536.png" alt="在这里插入图片描述"></li>
+<li>层次调整。以树的根结点为轴心，将整棵树顺时针旋转一定的角度， 使之结构层次分明。注意第一个孩子是二叉树结点的左孩子，兄弟转换过来的孩子是结点的右孩子，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/e8270835c4fc4c1ab5e3fcd12ae7fcb0.png" alt="在这里插入图片描述"></li>
+</ol>
+<p>  例如上面几幅图，一棵树经过三个步骤转换为一棵二叉树。初学者容易犯的错误就是在层次调整时，弄错了左右孩子的关系。比如图中<code>F</code>、<code>G</code>本都是树结点<code>B</code>的孩子，是结点<code>E</code>的兄弟，因此转换后，<code>F</code>就是二叉树结点<code>E</code>的右孩子，<code>G</code>是二叉树结点<code>F</code>的右孩子。</p>
+<h2 id="1-2-森林转换为二叉树">1.2. 森林转换为二叉树</h2>
+<p>  森林是由若干棵树组成的，所以完全可以理解为，森林中的每一棵树都是兄弟，可以按照兄弟的处理办法来操作。步骤如下：<br>
+  例如下图，将森林的三棵树转化为一棵二叉树。<br>
+<img src="https://img-blog.csdnimg.cn/044a1587f41145b88603f782a15137ea.png#pic_center" alt="在这里插入图片描述"><br>
+  <strong>转化步骤如下：</strong></p>
+<ol>
+<li>把每个树转换为二叉树，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/72e207f2bab94f32945df7bf147dfe4e.png" alt="在这里插入图片描述"></li>
+<li>第一棵二叉树不动，从第二棵二叉树开始，依次把后一棵二叉树的根结点作为前一棵二又树的根结点的右孩子，用线连接起来。当所有的二叉树连接起来后就得到了由森林转换来的二叉树，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/34ba9e0dda8c41caa94fea239c3366ce.png" alt="在这里插入图片描述"></li>
+</ol>
+<h2 id="1-3-二叉树转换为树">1.3. 二叉树转换为树</h2>
+<p>  二叉树转换为树是树转换为二叉树的逆过程，也就是反过来做而已。如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/2d21465de7814e98aeff11aa167219a3.png#pic_center" alt="在这里插入图片描述"><br>
+  转化为树的步骤如下：</p>
+<ol>
+<li>加线。若某结点的左孩子结点存在，则将这个左孩子的右孩子结点、右孩子的右孩子结点、右孩子的右孩子的右孩子结······总之就是左孩子的<code>n</code>个右孩子结点都作为此结点的孩子。将该结点与这些右孩子结点用线连接起来。<br>
+<img src="https://img-blog.csdnimg.cn/503c969ab249405cb39d5aa4be8da792.png" alt="在这里插入图片描述"></li>
+<li>去线。删除原二叉树中所有结点与其右孩子结点的连线。<br>
+<img src="https://img-blog.csdnimg.cn/8c1a31247605430fa03dc9fe90de762d.png" alt="在这里插入图片描述"></li>
+<li>层次调整。使之结构层次分明。<br>
+<img src="https://img-blog.csdnimg.cn/bb9009bbbb6b465fa654c461d5a23746.png" alt="在这里插入图片描述"></li>
+</ol>
+<h2 id="1-4-二叉树转换为森林">1.4 二叉树转换为森林</h2>
+<p>  判断一棵二叉树能够转换成一棵树还是森林， 标准很简单，那就是只要看这棵二叉树的根结点有没有右孩子，有就是森林，没有就是一棵树。如下图所示：<br>
+<img src="https://img-blog.csdnimg.cn/e13204b604844bcfba5e834b5a22a0ef.png#pic_center" alt="在这里插入图片描述"><br>
+  那么如果是转换成森林，步骤如下：</p>
+<ol>
+<li>从根结点开始，若右孩子存在，则把与右孩子结点的连线删除，再查看分离后的二叉树，若右孩子存在，则连线删除······，直到所有右孩子连线都删除为止，得到分离的二叉树。<br>
+<img src="https://img-blog.csdnimg.cn/06b3b9a748364ea4b91aba6d23a90878.png" alt="在这里插入图片描述"></li>
+<li>再将每棵分离后的二叉树转换为树即可。<br>
+<img src="https://img-blog.csdnimg.cn/a5c5b51b6f7d467fa5ece200997366cb.png" alt="在这里插入图片描述"></li>
+</ol>
+<h2 id="1-5-树与森林的遍历">1.5 树与森林的遍历</h2>
+<p>  最后我们再谈一谈关于树和森林的遍历问题。<br>
+  <strong>树的遍历分为两种方式：</strong></p>
+<ol>
+<li>一种是先根遍历树，即先访问树的根结点，然后依次先根遍历根的每棵子树。</li>
+<li>另一种是后根遍历，即先依次后根遍历每棵子树，然后再访问根结点。比如下图的树，它的先根遍历序列为 ABEFCDG，后根遍历序列为 EFBCGDA。<br>
+<img src="https://img-blog.csdnimg.cn/a97751e51ca547ed8f91a091033689c7.png" alt="在这里插入图片描述"></li>
+</ol>
+<p>  <strong>森林的遍历也分为两种方式：</strong></p>
+<ol>
+<li><font color=#8A2BE2><strong>前序遍历：</strong></font>先访问森林中第一棵树的根结点， 然后再依次先根遍历根的每棵子树，再依次用同样方式遍历除去第一棵树的剩余树构成的森林。比如下图中三棵树的森林，前序遍历序列的结果就是 ABCDEFGHJI。<br>
+<img src="https://img-blog.csdnimg.cn/c4d676cfd5614b1c87c0796322be53da.png" alt="在这里插入图片描述"></li>
+<li><font color=#8A2BE2><strong>后序遍历：</strong></font>先访问森林中第一棵树，后根遍历的方式遍历每棵子树，然后再访问根结点，再依次同样方式遍历除去第一棵树的剩余树构成的森林。比如上图中三棵树的森林，后序遍历序列的结果就是 BCDAFEHIG。</li>
+</ol>
+<p>  可如果我们对下图的二叉树进行分析就会发现，森林的前序遍历和二叉树的前序遍历结果相同，森林的后序遍历和二叉树的中序遍历结果相同。<br>
+<img src="https://img-blog.csdnimg.cn/48e2fefd419f4bbb94f8efd6a116afc5.png#pic_center" alt="在这里插入图片描述"></p>
+<p>  这也就告诉我们，当以二叉链表作树的存储结构时，树的先根遍历和后根遍历完全可以借用二叉树的前序遍历和中序遍历的算法来实现。这其实也就证实，我们找到了对树和森林这种复杂问题的简单解决办法。<br>
+<br></p>
+<h1 id="2-哈夫曼树及其应用">2. 哈夫曼树及其应用</h1>
+<h2 id="2-1-哈夫曼树">2.1 哈夫曼树</h2>
+<p>  现在我们都是讲究效率的社会，什么都要求速度，在不能出错的情况下，做任何事情都讲究越快越好。在计算机和互联网技术中，文本压缩就是一个非常重要的技术。玩电脑的人几乎都会应用压缩和解压缩软件来处理文档。因为它除了可以减少文档在磁盘上的空间外，还有重要的一点，就是我们可以在网络上以压缩的形式传输大量数据，使得保存和传递都更加高效。<br>
+  那么压缩而不出错是如何做到的呢？简单说，就是把我们要压缩的文本进行重新编码，以减少不必要的空间。尽管现在最新技术在编码上已经很好很强大，但这一切都来自于曾经的技术积累，我们今天就来介绍一下最基本的压缩编码方法——赫夫曼编码。<br>
+  在介绍赫夫曼编码前，我们必须得介绍赫夫曼树，而介绍赫夫曼树，我们不得不提这样一个人，美国数学家赫夫曼（David Huffman），也有的翻译为哈夫曼。他在 1952 年发明了赫夫曼编码，为了纪念他的成就，于是就把他在编码中用到的特殊的二叉树称之为赫夫曼树，他的编码方法称为赫夫曼编码。也就是说，我们现在介绍的知识全都来自于近 60 年前这位伟大科学家的研究成果，而我们平时所用的压缩和解压缩技术也都是基于赫夫曼的研究之上发展而来，我们应该要记住他。<br>
+  什么叫做赫夫曼树呢？我们先来看一个例子。<br>
+  过去的小学、中学-般考试都是用百分制来表示学科成绩的。这带来了-一个弊端，就是很容易让学生、家长，甚至老师自己都以分取人，让分数代表了一切。有时想想也对，90 分和 95 分也许就只是一道题目对错的差距，但却让两个孩子可能受到完全不同的待遇，这并不公平。于是在如今提倡素质教育的背景下，我们很多的学科，特别是小学的学科成绩都改作了优秀、良好、中等、及格和不及格这样模糊的词语，不再通报具体的分数。<br>
+  不过对于老师来讲，他在对试卷评分的时候，显然不能凭感觉给优良或及格不及格等成绩，因此一般都还是按照百分制算出每个学生的成绩后，再根据统一的标准换算得出五级分制的成绩。比如下面的代码就实现了这样的转换。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (a&lt;<span class="number">60</span>)</span><br><span class="line">	b=<span class="string">&quot;不及格“;</span></span><br><span class="line"><span class="string">else if (a&lt;70)</span></span><br><span class="line"><span class="string">	b=&quot;</span>及格<span class="string">&quot;;</span></span><br><span class="line"><span class="string">else if (a&lt;80)</span></span><br><span class="line"><span class="string">	b=&quot;</span>中等<span class="string">&quot;;</span></span><br><span class="line"><span class="string">else if (a&lt;90)</span></span><br><span class="line"><span class="string">	b=&quot;</span>良好<span class="string">&quot;;</span></span><br><span class="line"><span class="string">else</span></span><br><span class="line"><span class="string">	b=&quot;</span>优秀<span class="string">&quot;:</span></span><br></pre></td></tr></table></figure>
+<p>  下图粗略看没什么问题，可是通常都认为，一张好的考卷应该是让学生成绩大部分处于中等或良好的范围，优秀和不及格都应该较少才对。而上面这样的程序，就使得所有的成绩都需要先判断是否及格，再逐级而上得到结果。输入量很大的时候，其实算法是有效率问题的。<br>
+<img src="https://img-blog.csdnimg.cn/2b1a320461e5412d8887ff9ca1dba6ac.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_7,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<p>  如果在实际的学习生活中，学生的成绩在5个等级上的分布规律如下表所示。</p>
+<table>
+	<tr align=center>
+		<th>分数</th>
+		<th>0~59</th>
+		<th>60~69</th>
+		<th>70~79</th>
+		<th>80~89</th>
+		<th>90~100</th>
+	</tr>
+	<tr align=center>
+		<td>所占比例</td>
+		<td>5%</td>
+		<td>15%</td>
+		<td>40%</td>
+		<td>30%</td>
+		<td>10%</td>
+	</tr>
+</table>
+<p>  那么 70 分以上大约占总数 80% 的成绩都需要经过 3 次以上的判断才可以得到结果，这显然不合理。<br>
+  有没有好一些的办法，仔细观察发现，中等成绩（70~79 分之间）比例最高，其次是良好成绩，不及格的所占比例最少。我们把上图的二叉树重新进行分配。改成如下图的做法试试看。<br>
+<img src="https://img-blog.csdnimg.cn/cf0f9ee26e1b44f982dc016967671ddb.png#pic_center" alt="在这里插入图片描述"><br>
+  从图中感觉，应该效率要高一些了，到底高多少呢。这样的二叉树又是如何设计出来的呢？我们来看看赫夫曼是如何说的吧。</p>
+<h2 id="2-2-哈夫曼树的定义与原理">2.2 哈夫曼树的定义与原理</h2>
+<p>  我们先把这两棵二叉树简化成叶子结点带权的二叉树（树结点间的边相关的数叫做权 Weigth），如下图所示。其中<code>A</code>表示不及格、<code>B</code>表示及格、<code>C</code>表示中等、<code>D</code>表示良好、<code>E</code>表示优秀。每个叶子的分支线上的数字就是刚才我们提到的五级分制的成绩所占比例数。<br>
+<img src="https://img-blog.csdnimg.cn/be49f0ac295e49cdacccfceab90f7989.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_9,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<p>  赫夫曼说，<font color=#6495ED><strong>从树中一个结点到另一个结点之间的分支构成两个结点之间的路径，路径上的分支数目称做路径长度。</strong></font>上图中的二叉树<code>a</code>中，根结点到结点<code>D</code>的路径长度就为 4，二叉树<code>b</code>中根结点到结点<code>D</code>的路径长度为 2。<font color=#6495ED><strong>树的路径长度就是从树根到每一结点的路径长度之和。</strong></font>二叉树<code>a</code>的树路径长度就为<code>1+1+2+2+3+3+4+4=20</code>。二叉树<code>b</code>的树路径长度就为<code>1+2+3+3+2+1+2+2=16</code>。<br>
+  如果考虑到带权的结点，结点的带权的路径长度为从该结点到树根之间的路径长度与结点上权的乘积。树的带权路径长度为树中所有叶子结点的带权路径长度之和。假设有<code>n</code>个权值 <strong>{w<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,w<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,···,w<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">_n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3014em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>}</strong>，构造一棵有<code>n</code>个叶子结点的二叉树，每个叶子结点带权 <strong>W<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4861em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong>，每个叶子的路径长度为 <strong>l<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4861em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong>，我们通常记作，则其中<font color=#6495ED><strong>带权路径长度WPL最小的二叉树称做赫夫曼树。</strong></font>也有不少书中也称为最优二叉树。<br>
+  有了赫夫曼对带权路径长度的定义，我们来计算一下上图中这两棵树的<code>WPL</code>值。<br>
+  二叉树<code>a</code>的<code>WPL=5×1+15×2+40×3+30×4+10×4=315</code><br>
+  <strong>注意：这里 5 是 A 结点的权，1 是 A 结点的路径长度，其他同理。</strong><br>
+  二叉树<code>b</code>的<code>WPL=5×3+15×3+40×2+30×2+10×2=220</code><br>
+  这样的结果意味着什么呢？如果我们现在有 10000 个学生的百分制成绩需要计算五级分制成绩，用二叉树<code>a</code>的判断方法，需要做 31500 次比较，而二叉树<code>b</code>的判断方法，只需要 22000 次比较，差不多少了三分之一一量， 在性能上提高不是一点点。<br>
+  那么现在的问题就是，上图的二叉树<code>b</code>这样的树是如何构造出来的，这样的二叉树是不是就是最优的赫夫曼树呢？别急，赫夫曼大叔给了我们解决的办法。</p>
+<ol>
+<li>先把有权值的叶子结点按照从小到大的顺序排列成一个有序序列，即：<code>A5</code>，<code>E10</code>，<code>B15</code>，<code>D30</code>，<code>C40</code>。</li>
+<li>取头两个最小权值的结点作为一个新节点 <strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 的两个子结点，注意相对较小的是左孩子，这里就是<code>A</code>为 <strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 的左孩子，<code>E</code>为 <strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 的右孩子，如下图所示。新结点的权值为两个叶子权值的和<code>5+10=15</code>。<br>
+<img src="https://img-blog.csdnimg.cn/8e534e4819554087b7e242c2206926f9.png" alt="在这里插入图片描述"></li>
+<li>将 <strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 替换<code>A</code>与<code>E</code>，插入有序序列中，保持从小到大排列。即： <strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub><mn>15</mn></mrow><annotation encoding="application/x-tex">_115</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7944em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">15</span></span></span></span></strong>，<code>B15</code>，<code>D30</code>，<code>C40</code>。</li>
+<li>重复步骤 2。将 <strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 与<code>B</code>作为一个新节点 <strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 的两个子结点。如下图所示。<strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 的权值=15+15=30。<br>
+<img src="https://img-blog.csdnimg.cn/16b03b9e23414d4498ff816061abdd02.png" alt="在这里插入图片描述"></li>
+<li>将 <strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 替换 <strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 与<code>B</code>，插入有序序列中，保持从小到大排列。即：<strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub><mn>30</mn></mrow><annotation encoding="application/x-tex">_230</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7944em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">30</span></span></span></span></strong>，<code>D30</code>，<code>C40</code>。</li>
+<li>重复步骤 2。将 <strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 与<code>D</code>作为一个新节点 <strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>3</mn></msub></mrow><annotation encoding="application/x-tex">_3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 的两个子结点。如下图所示。<strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>3</mn></msub></mrow><annotation encoding="application/x-tex">_3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 的权值=30+30=60。<br>
+<img src="https://img-blog.csdnimg.cn/0e7182387cf349929ae5f4a80572cdae.png" alt="在这里插入图片描述"></li>
+<li>将 <strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>3</mn></msub></mrow><annotation encoding="application/x-tex">_3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 替换 <strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 与<code>D</code>，插入有序序列中，保持从小到大排列。即：<code>C40</code>，<strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>3</mn></msub><mn>60</mn></mrow><annotation encoding="application/x-tex">_360</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7944em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">60</span></span></span></span></strong> 。</li>
+<li>重复步骤 2。将<code>C</code>与 <strong>N<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>3</mn></msub></mrow><annotation encoding="application/x-tex">_3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 作为一个新节点<code>T</code>的两个子结点，如下图所示。由于<code>T</code>即是根结点，完成赫夫曼树的构造。<br>
+<img src="https://img-blog.csdnimg.cn/6b288d57e20444caa7c54b4b7b524284.png" alt="在这里插入图片描述"></li>
+</ol>
+<p>  此时的上图二叉树的带权路径长度<code>WPL=40× 1+30×2+15×3+10×4+5×4=205</code>。与本章开头的二叉树<code>b</code>的<code>WPL=5×3+15×3+40×2+30×2+10×2=220</code>相比，还少了 15。显然此时构造出来的二叉树才是最优的赫夫曼树。<br>
+  不过现实总是比理想要复杂得多，上图虽然是赫夫曼树，但由于每次判断都要两次比较（如根结点就是<code>a&lt;80 &amp;&amp; a&gt;=70</code>，两次比较才能得到<code>y</code>或<code>n</code>的结果），所以总体性能上，反而不如二叉树<code>b</code>的二叉树性能高。当然这并不是我们要讨论的重点了。<br>
+  通过刚才的步骤，我们可以得出构造赫夫曼树的赫夫曼算法描述。</p>
+<ol>
+<li>根据给定的<code>n</code>个权值 <strong>{w<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,w<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,···,w<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">_n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3014em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>}</strong> 构成<code>n</code>棵二叉树的集合 <strong>F={T<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,T<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,···,T<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">_n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3014em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>}</strong>，其中每棵二叉树 <strong>T<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4617em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 中只有一个带权为 <strong>w<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4617em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> 根结点，其左右子树均为空。</li>
+<li>在<code>F</code>中选取两棵根结点的权值最小的树作为左右子树构造一棵新的二叉树，且置新的二叉树的根结点的权值为其左右子树上根结点的权值之和。</li>
+<li>在<code>F</code>中删除这两棵树，同时将新得到的二叉树加入<code>F</code>中。</li>
+<li>重复 2 和 3 步骤，直到<code>F</code>只含一棵树为止。这棵树便是赫夫曼树。</li>
+</ol>
+<h2 id="2-3-哈夫曼编码">2.3 哈夫曼编码</h2>
+<p>  当然，赫夫曼研究这种最优树的目的不是为了我们可以转化一下成绩。 他的更大目的是为了解决当年远距离通信（主要是电报）的数据传输的最优化问题。<br>
+  比如我们有一段文字内容为 “BADCADFEED” 要网络传输给别人，显然用二进制的数字（ 0 和 1 ）来表示是很自然的想法。我们现在这段文字只有六个字母 A、B、C、D、E、F，那么我们可以用相应的二进制数据表示，如下表所示。</p>
+<table>
+	<tr align=center>
+		<th>字母</th>
+		<th>A</th>
+		<th>B</th>
+		<th>C</th>
+		<th>D</th>
+		<th>E</th>
+		<th>F</th>
+	</tr>
+	<tr align=center>
+		<td>二进制字符</td>
+		<td>000</td>
+		<td>001</td>
+		<td>010</td>
+		<td>011</td>
+		<td>100</td>
+		<td>101</td>
+	</tr>
+</table>
+<p>  这样真正传输的数据就是编码后的 “001000011010000011101100100011”，对方接收时可以按照三位一分来译码。 如果一篇文章很长，这样的进制串也将非常的可怕。而且事实上，不管是英文、中文或是其他语言，字母或汉字的出现频率是不相同的，比如英语中的几个元音字母 “a e i o u”，中文中的 “的 了 有 在&quot; 等汉字都是频率极高。<br>
+  假设六个字母的频率为 A 27，B 8，C 15，D 15，E 30，F 5，合起来正好是 100%。那就意味着，我们完全可以重新按照赫夫曼树来规划它们。<br>
+  左下图为构造赫夫曼树的过程的权值显示。右下图为将权值左分支改为 0，右分支改为 1 后的赫夫曼树。<br>
+<img src="https://img-blog.csdnimg.cn/6540359aedab4243b1e19cd664924af2.png#pic_center" alt="在这里插入图片描述"><br>
+  此时，我们对这六个字母用其从树根到叶子所经过路径的 0 或 1 来编码，可以得到如下表所示这样的定义。</p>
+<table>
+	<tr align=center>
+		<th>字母</th>
+		<th>A</th>
+		<th>B</th>
+		<th>C</th>
+		<th>D</th>
+		<th>E</th>
+		<th>F</th>
+	</tr>
+	<tr align=center>
+		<td>二进制字符</td>
+		<td>01</td>
+		<td>1001</td>
+		<td>101</td>
+		<td>00</td>
+		<td>11</td>
+		<td>1000</td>
+	</tr>
+</table>
+<p>  我们将文字内容为 “BADCADFEED” 再次编码，对比可以看到结果串变小。</p>
+<ul>
+<li>原编码二进制串：001000011010000011101100100011（共 30个字符）</li>
+<li>新编码二进制串：1001010010101001000111100（共25个字符）</li>
+</ul>
+<p>  也就是说，我们的数据被压缩了，节约了大约 17% 的存储或传输成本。随着字符的增加和多字符权重的不同，这种压缩会更加显出其优势。<br>
+  当我们接收到 1001010010101001000111100 这样压缩过的新编码时，我们应该如何把它解码出来呢？<br>
+  编码中非 0 即 1，长短不等的话其实是很容易混淆的，所以<font color=#6495ED><strong>若要设计长短不等的编码，则必须是任一字符的编码都不是另一个字符的编码的前缀， 这种编码称做前缀编码。</strong></font><br>
+  你仔细观察就会发现，上表中的编码就不存在容易与 1001、1000 混淆的 “10” 和 “100&quot; 编码。<br>
+  可仅仅是这样不足以让我们去方便地解码的，因此在解码时，还是要用到赫夫曼树，即发送方和接收方必须要约定好同样的赫夫曼编码规则。<br>
+  当我们接收到 1001010010101001000111100 时，由约定好的赫夫曼树可知，1001 得到第一个字母是<code>B</code>，接下来 01 意味着第二个字符是<code>A</code>，如下图所示，其余的也相应的可以得到，从而成功解码。<br>
+<img src="https://img-blog.csdnimg.cn/0815f0001d924217beae7d9a65646b5e.png#pic_center" alt="在这里插入图片描述"><br>
+  <font color=#6495ED><strong>一般地，设需要编码的字符集为 {d<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,d<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,···,d<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">_n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3014em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>}，各个字符在电文中出现的次数或频率集合为 {w<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,w<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,···,w<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">_n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3014em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>}，以 d<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,d<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,···,d<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">_n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3014em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 作为叶子结点，以 w<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,w<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4511em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,···,w<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">_n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3014em;vertical-align:-0.15em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 作为相应叶子结点的权值来构造一棵赫夫曼树。规定赫夫曼树的左分支代表 0，右分支代表 1，则从根结点到叶子结点所经过的路径分支组成的 0 和 1 的序列便为该结点对应字符的编码，这就是赫夫曼编码。</strong></font><br>
+<br></p>
+<h1 id="3-总结">3. 总结</h1>
+<p>  树、森林看似复杂，其实它们都可以转化为简单的二叉树来处理，我们提供了树、森林与二叉树的互相转换的办法，这样就使得面对树和森林的数据结构时，编码实现成为了可能。<br>
+  最后我们提到了关于二叉树的一个应用，哈夫曼树和哈夫曼编码，对于带权路径的二叉树做了详尽地讲述，能让我们初步理解数据压缩的原理，并明白其是如何做到无损编码和无错解码的。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2021/11/09/algorithm_11/">https://program-park.github.io/2021/11/09/algorithm_11/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/">算法</a></div><div class="post_share"><div class="social-share" data-image="/img/algorithm/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/11/10/algorithm_12/"><img class="prev-cover" src="/img/algorithm/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">《数据结构与算法》（十二）- 图详解</div></div></a></div><div class="next-post pull-right"><a href="/2021/11/08/algorithm_10/"><img class="next-cover" src="/img/algorithm/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">《数据结构与算法》（十）- 二叉树详解</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/10/11/algorithm_1/" title="《数据结构与算法》（一）- 数据结构详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-11</div><div class="title">《数据结构与算法》（一）- 数据结构详解</div></div></a></div><div><a href="/2021/11/11/algorithm_14/" title="《数据结构与算法》（十四）- 图的应用：最短路径"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-11</div><div class="title">《数据结构与算法》（十四）- 图的应用：最短路径</div></div></a></div><div><a href="/2021/11/08/algorithm_10/" title="《数据结构与算法》（十）- 二叉树详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-08</div><div class="title">《数据结构与算法》（十）- 二叉树详解</div></div></a></div><div><a href="/2021/11/10/algorithm_13/" title="《数据结构与算法》（十三）- 图的应用：最小生成树"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-10</div><div class="title">《数据结构与算法》（十三）- 图的应用：最小生成树</div></div></a></div><div><a href="/2021/11/10/algorithm_12/" title="《数据结构与算法》（十二）- 图详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-10</div><div class="title">《数据结构与算法》（十二）- 图详解</div></div></a></div><div><a href="/2021/11/11/algorithm_15/" title="《数据结构与算法》（十五）- 图的应用：有向无环图"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-11</div><div class="title">《数据结构与算法》（十五）- 图的应用：有向无环图</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">121</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">20</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E6%A0%91%E3%80%81%E6%A3%AE%E6%9E%97%E4%B8%8E%E4%BA%8C%E5%8F%89%E6%A0%91%E4%B9%8B%E9%97%B4%E7%9A%84%E8%BD%AC%E6%8D%A2"><span class="toc-text">1. 树、森林与二叉树之间的转换</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E6%A0%91%E8%BD%AC%E6%8D%A2%E4%B8%BA%E4%BA%8C%E5%8F%89%E6%A0%91"><span class="toc-text">1.1 树转换为二叉树</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E6%A3%AE%E6%9E%97%E8%BD%AC%E6%8D%A2%E4%B8%BA%E4%BA%8C%E5%8F%89%E6%A0%91"><span class="toc-text">1.2. 森林转换为二叉树</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-%E4%BA%8C%E5%8F%89%E6%A0%91%E8%BD%AC%E6%8D%A2%E4%B8%BA%E6%A0%91"><span class="toc-text">1.3. 二叉树转换为树</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-%E4%BA%8C%E5%8F%89%E6%A0%91%E8%BD%AC%E6%8D%A2%E4%B8%BA%E6%A3%AE%E6%9E%97"><span class="toc-text">1.4 二叉树转换为森林</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-5-%E6%A0%91%E4%B8%8E%E6%A3%AE%E6%9E%97%E7%9A%84%E9%81%8D%E5%8E%86"><span class="toc-text">1.5 树与森林的遍历</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%93%88%E5%A4%AB%E6%9B%BC%E6%A0%91%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8"><span class="toc-text">2. 哈夫曼树及其应用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E5%93%88%E5%A4%AB%E6%9B%BC%E6%A0%91"><span class="toc-text">2.1 哈夫曼树</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E5%93%88%E5%A4%AB%E6%9B%BC%E6%A0%91%E7%9A%84%E5%AE%9A%E4%B9%89%E4%B8%8E%E5%8E%9F%E7%90%86"><span class="toc-text">2.2 哈夫曼树的定义与原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E5%93%88%E5%A4%AB%E6%9B%BC%E7%BC%96%E7%A0%81"><span class="toc-text">2.3 哈夫曼编码</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%80%BB%E7%BB%93"><span class="toc-text">3. 总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/25/hadoop_21/" title="Hadoop 生态圈（十七）- HDFS 权限管理"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十七）- HDFS 权限管理"/></a><div class="content"><a class="title" href="/2022/01/25/hadoop_21/" title="Hadoop 生态圈（十七）- HDFS 权限管理">Hadoop 生态圈（十七）- HDFS 权限管理</a><time datetime="2022-01-25T02:21:17.000Z" title="发表于 2022-01-25 10:21:17">2022-01-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/24/hadoop_20/" title="Hadoop 生态圈（十六）- HDFS Snapshot 快照详解"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十六）- HDFS Snapshot 快照详解"/></a><div class="content"><a class="title" href="/2022/01/24/hadoop_20/" title="Hadoop 生态圈（十六）- HDFS Snapshot 快照详解">Hadoop 生态圈（十六）- HDFS Snapshot 快照详解</a><time datetime="2022-01-24T08:18:12.000Z" title="发表于 2022-01-24 16:18:12">2022-01-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/24/hadoop_19/" title="Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解"/></a><div class="content"><a class="title" href="/2022/01/24/hadoop_19/" title="Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解">Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解</a><time datetime="2022-01-24T08:03:12.000Z" title="发表于 2022-01-24 16:03:12">2022-01-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/24/hadoop_18/" title="Hadoop 生态圈（十四）- HDFS 小文件解决方案"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十四）- HDFS 小文件解决方案"/></a><div class="content"><a class="title" href="/2022/01/24/hadoop_18/" title="Hadoop 生态圈（十四）- HDFS 小文件解决方案">Hadoop 生态圈（十四）- HDFS 小文件解决方案</a><time datetime="2022-01-24T07:33:45.000Z" title="发表于 2022-01-24 15:33:45">2022-01-24</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/algorithm/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2021/11/09/algorithm_11/'
+    this.page.identifier = '/2021/11/09/algorithm_11/'
+    this.page.title = '《数据结构与算法》（十一）- 树、森林与二叉树的转换及哈夫曼树详解'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

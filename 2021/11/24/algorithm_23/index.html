@@ -1,0 +1,299 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>《数据结构与算法》（二十三）- 排序算法：堆排序 | 程序园</title><meta name="keywords" content="数据结构,算法"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是《数据结构与算法》系列，第二十三篇：堆排序。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《数据结构与算法》（二十三）- 排序算法：堆排序">
+<meta property="og:url" content="https://program-park.github.io/2021/11/24/algorithm_23/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是《数据结构与算法》系列，第二十三篇：堆排序。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/algorithm/1.png">
+<meta property="article:published_time" content="2021-11-24T05:13:49.000Z">
+<meta property="article:modified_time" content="2022-09-07T02:55:56.118Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="数据结构">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/algorithm/1.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://program-park.github.io/2021/11/24/algorithm_23/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '《数据结构与算法》（二十三）- 排序算法：堆排序',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-07 10:55:56'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">121</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">20</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/algorithm/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">《数据结构与算法》（二十三）- 排序算法：堆排序</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-11-24T05:13:49.000Z" title="发表于 2021-11-24 13:13:49">2021-11-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-07T02:55:56.118Z" title="更新于 2022-09-07 10:55:56">2022-09-07</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">数据结构与算法</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">3.4k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>11分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="《数据结构与算法》（二十三）- 排序算法：堆排序"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="前言">前言</h1>
+<p><font color=#999AAA >部分内容摘自程杰的《大话数据结构》</font></p>
+<h1 id="1-堆排序">1. 堆排序</h1>
+<p>  我们前面讲到简单选择排序，它在待排序的<code>n</code>个记录中选择一个最小的记录需要比较<code>n-1</code>次。本来这也可以理解，查找第一个数据需要比较这么多次是正常的，否.则如何知道它是最小的记录。<br>
+  可惜的是，这样的操作并没有把每一趟的 比较结果保存下来，在后一趟的比较中，有许多比较在前一趟已经做过了，但由于前一趟排序时未保存这些比较结果，所以后一趟排序时又重复执行了这些比较操作，因而记录的比较次数较多。<br>
+  如果可以做到每次在选择到最小记录的同时，并根据比较结果对其他记录做出相应的调整，那样排序的总体效率就会非常高了。而堆排序（Heap Sort），就是对简单选择排序进行的一种改进，这种改进的效果是非常明显的。堆排序算法是 Floyd 和 Williams 在 1964 年共同发明的，同时，他们发明了 “堆” 这样的数据结构。<br>
+  “堆” 结构相当于把数字符号堆成一个塔型的结构。当然，这绝不是简单的堆砌。大家看下图所示，能够找到什么规律吗？<br>
+<img src="https://img-blog.csdnimg.cn/22dd41693d7c4e59ac0e6cabd9eccefd.png#pic_center" alt="在这里插入图片描述"><br>
+  很明显，我们可以发现它们都是二叉树，如果观察仔细些，还能看出它们都是完全二叉树。左图中根结点是所有元素中最大的，右图的根结点是所有元素中最小的。再细看看，发现左图每个结点都比它的左右孩子要大，右图每个结点都比它的左右孩子要小。这就是我们要讲的堆结构。<br>
+  <font color=#6495ED><strong>堆是具有下列性质的完全二叉树：每个结点的值都大于或等于其左右孩子结点的值，称为大顶堆</strong></font>（例如上图左图所示）；<font color=#6495ED><strong>或者每个结点的值都小于或等于其左右孩子结点的值，称为小顶堆</strong></font>（例如上图右图所示）。<br>
+  这里需要注意从堆的定义可知，根结点一定是堆中所有结点最大（小）者。较大（小）的结点靠近根结点（但也不绝对，比如右图小顶堆中 60、40 均小于 70，但它们并没有 70 靠近根结点）。<br>
+  如果按照层序遍历的方式给结点从 1 开始编号，则结点之间满足如下关系：<br>
+<img src="https://img-blog.csdnimg.cn/4e647660090d42af9a01fca2e8b4b9a1.png#pic_center" alt="在这里插入图片描述"><br>
+  这里为什么<code>i</code>要小于等于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">⌊</mo><mi>n</mi><mi mathvariant="normal">/</mi><mn>2</mn><mo stretchy="false">⌋</mo></mrow><annotation encoding="application/x-tex">\lfloor n/2\rfloor</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">⌊</span><span class="mord mathnormal">n</span><span class="mord">/2</span><span class="mclose">⌋</span></span></span></span> 呢？相信大家可能都忘记了前面讲的二叉树的性质 5，其实忘记也不奇怪，这个性质在我们讲完之后，就再也没有提到过它。可以说，这个性质仿佛就是在为堆准备的。性质 5 的第一条就说一棵完全二叉树，如果<code>i=1</code>，则结点<code>i</code>是二叉树的根，无双亲；如果<code>i&gt;1</code>，则其双亲是结点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">⌊</mo><mi>n</mi><mi mathvariant="normal">/</mi><mn>2</mn><mo stretchy="false">⌋</mo></mrow><annotation encoding="application/x-tex">\lfloor n/2\rfloor</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">⌊</span><span class="mord mathnormal">n</span><span class="mord">/2</span><span class="mclose">⌋</span></span></span></span>。那么对于有<code>n</code>个结点的二叉树而言，它的i值自然就是小于等于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">⌊</mo><mi>n</mi><mi mathvariant="normal">/</mi><mn>2</mn><mo stretchy="false">⌋</mo></mrow><annotation encoding="application/x-tex">\lfloor n/2\rfloor</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">⌊</span><span class="mord mathnormal">n</span><span class="mord">/2</span><span class="mclose">⌋</span></span></span></span> 了。性质 5 的第二、三条，也是在说明下标<code>i</code>与<code>2i</code>和<code>2i+1</code>的双亲子女关系。<br>
+  如果将上图的大顶堆和小顶堆用层序遍历存入数组，则一定满足上面的关系表达，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/c69f1bc877b34568b41e0924e8de1efc.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_6,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  我们现在讲这个堆结构，其目的就是为了堆排序用的。</p>
+<h2 id="1-1-堆排序算法">1.1 堆排序算法</h2>
+<p>  堆排序（Heap Sort）就是利用堆（假设利用大顶堆）进行排序的方法。它的基本思想是，<font color=#6495ED><strong>将待排序的序列构造成一个大顶堆。此时，整个序列的最大值就是堆顶的根结点。将它移走（其实就是将其与堆数组的末尾元素交换，此时末尾元素就是最大值），然后将剩余的n-1个序列重新构造成一个堆， 这样就会得到n个元素中的次小值。如此反复执行，便能得到一个有序序列了。</strong></font><br>
+  例如下图所示，图①是一个大顶堆，90 为最大值，将 90 与 20（末尾元素）互换，如图②所示，此时 90 就成了整个堆序列的最后一个元素， 将 20 经过调整，使得除 90 以外的结点继续满足大顶堆定义（所有结点都大于等于其子孩子），见图③，然后再考虑将 30 与 80 互换······<br>
+<img src="https://img-blog.csdnimg.cn/18077ca81712454ab16fd71d0cd045f2.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/aa1cf55107cf4be0a0908039727646f0.png#pic_center" alt="在这里插入图片描述"><br>
+  相信大家有些明白堆排序的基本思想了，不过要实现它还需要解决两个问题：</p>
+<ol>
+<li>如何由一个无序序列构建成一个堆？</li>
+<li>如果在输出堆项元素后，调整剩余元素成为一个新的堆？</li>
+</ol>
+<p>  要解释清楚它们，让我们来看代码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 对顺序表L进行堆排序 */</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">HeapSort</span><span class="params">(SqList *L)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	<span class="keyword">for</span> (i=L-&gt;length/<span class="number">2</span>;i&gt;<span class="number">0</span>;i--)	<span class="comment">/* 把L中的r构建成一个大顶堆 */</span></span><br><span class="line">		HeapAdjust(L,i,L-&gt;<span class="number">1</span>ength) ;</span><br><span class="line">		</span><br><span class="line">	<span class="keyword">for</span> (i=L-&gt;length;i&gt;<span class="number">1</span>;i-- )</span><br><span class="line">	&#123;</span><br><span class="line">		swap(L,<span class="number">1</span>,i);	<span class="comment">/* 将堆顶记录和当前未经排序子序列的最后一个记录交换 */</span></span><br><span class="line">		HeapAdjust(L,<span class="number">1</span>,i<span class="number">-1</span>);	<span class="comment">/* 将L-&gt;r[1..i-1]重新调整为大顶堆 */</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  从代码中也可以看出，整个排序过程分为两个<code>for</code>循环。第一个循环要完成的就是将现在的待排序序列构建成一个大顶堆。第二个循环要完成的就是逐步将每个最大值的根结点与末尾元素交换，并且再调整其成为大顶堆。<br>
+  假设我们要排序的序列是 {50,10,90,30,70,40,80,60,20}，那么<code>L.length=9</code>，第一个<code>for</code>循环，代码第 4 行，<code>i</code>是从 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">⌊</mo><mn>9</mn><mi mathvariant="normal">/</mi><mn>2</mn><mo stretchy="false">⌋</mo><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">\lfloor 9/2\rfloor =4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">⌊</span><span class="mord">9/2</span><span class="mclose">⌋</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> 开始，4→3→2→1 的变量变化。为什么不是从 1 到 9 或者从 9 到 1，而是从 4 到 1 呢？其实我们看了下图就明白了，它们都有什么规律？它们都是有孩子的结点。注意灰色结点的下标编号就是 1、2、3、4。<br>
+<img src="https://img-blog.csdnimg.cn/5a01551a0f454380b9f1f2c89766c83a.png#pic_center" alt="在这里插入图片描述"><br>
+  我们所谓的将待排序的序列构建成为一个大顶堆，其实就是从下往上、从右到左，将每个非终端结点（非叶结点）当作根结点，将其和其子树调整成大顶堆。<code>i</code>的 4→3-→2→1 的变量变化，其实也就是 30，90，10、50 的结点调整过程。<br>
+  既然已经弄清楚<code>i</code>的变化是在调整哪些元素了，现在我们来看关键的 HeapAdjust（堆调整）函数是如何实现的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 已知L-&gt;r[s..m]中记录的关键字除L-&gt;r[s]之外均满足堆的定义中 */</span></span><br><span class="line"><span class="comment">/* 本函数调整L-&gt;r[s]的关键字，使L-&gt;r[s..m]成为一个大顶堆 */</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">HeapAdjust</span><span class="params">(SqList *L,<span class="type">int</span> s,<span class="type">int</span> m)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> temp,j;</span><br><span class="line">	temp=L-&gt;r[s];</span><br><span class="line">	<span class="keyword">for</span>(j=<span class="number">2</span>*s;j&lt;=m;j*=<span class="number">2</span>)	<span class="comment">/* 沿关键宇较大的孩子结点向下筛选 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span>(j&lt;m &amp;&amp; L-&gt;r[f]&lt;L-&gt;r[j+<span class="number">1</span>])</span><br><span class="line">			++j;	<span class="comment">/* 为关键字中较大的记录的下标 */</span></span><br><span class="line">		<span class="keyword">if</span> (temp&gt;=L-&gt;r[j] )</span><br><span class="line">			<span class="keyword">break</span>;	<span class="comment">/* rc应插入在位置s上 */</span></span><br><span class="line">		L-&gt;r[s]=L-&gt;r[j];</span><br><span class="line">		s=j;</span><br><span class="line">	&#125;</span><br><span class="line">	L-&gt;r[s]=temp;	<span class="comment">/* 插入 */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>函数被第一次调用时，<code>s=4</code>，<code>m=9</code>，传入的<code>SqList</code>参数的值为<code>length=9</code>，<code>r[10]=&#123;0,50,10,90,30,70,40,80,60,20&#125;</code>。</li>
+<li>第 4 行，将<code>L.r[s]=L.r[4]=30</code>赋值给<code>temp</code>，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/7e12ea5ff58740e78cb76b79d89d9b69.png#pic_center" alt="在这里插入图片描述"></li>
+<li>第 5~13 行，循环遍历其结点的孩子。这里<code>j</code>变量为什么是从<code>2*s</code>开始呢？又为什么是<code>j*=2</code>递增呢？原因还是二叉树的性质 5，因为我们这棵是完全二杈树，当前结点序号是<code>s</code>，其左孩子的序号一定是<code>2s</code>，右孩子的序号一定是<code>2s+1</code>，它们的孩子当然也是以 2 的位数序号增加，因此<code>j</code>变量才是这样循环。</li>
+<li>第 7~8 行，此时<code>j=2*4=8</code>，<code>j&lt;m</code>说明它不是最后一个结点，如果<code>L.r[j]&lt;L.r[j+1]</code>，则说明左孩子小于右孩子。我们的目的是要找到较大值，当然需要让<code>j+1</code>以便变成指向右孩子的下标。当前 30 的左右孩子是 60 和 20，并不满足此条件，因此<code>j</code>还是 8。</li>
+<li>第 9~10 行，<code>temp=30</code>，<code>L.r[j]=60</code>，并不满足条件。</li>
+<li>第 11~12 行，将 60 赋值给<code>L.r[4]</code>，并令<code>s=j=8</code>。也就是说，当前算出，以 30 为根结点的子二叉树，当前最大值是 60，在第 8 的位置。注意此时<code>L.r[4]</code>和<code>L.r[8]</code>的值均为 60。</li>
+<li>再循环因为<code>j=2*j=16</code>，<code>m=9</code>，<code>j&gt;m</code>，因此跳出循环。</li>
+<li>第 14 行，将<code>temp=30</code>赋值给<code>L.r[s]=L.r[8]</code>，完成 30 与 60 的交换工作。如下图所示。本次函数调用完成。<br>
+<img src="https://img-blog.csdnimg.cn/b3dc20a9950449549b7c587a1cb2144c.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_6,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></li>
+<li>再次调用<code>HeapAdjust</code>，此时<code>s=3</code>，<code>m=9</code>。 第 4 行，<code>temp=L.r[3]=90</code>，第 7~8 行，由于<code>40&lt;80</code>得到<code>j+1=2*s+1=7</code>。9~10 行，由于<code>90&gt;80</code>，因此退出循环，最终本次调用，整个序列未发什么改变。</li>
+<li>再次调用<code>HeapAdjust</code>，此时<code>s=2</code>，<code>m=9</code>。第 4 行，<code>temp=L.r[2]=10</code>，第 7~8 行，<code>60&lt;70</code>，使得<code>j=5</code>。最终本次调用使得 10 与 70 进行了互换，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/d0b1b49aec68472dab3bbfe3ab326c31.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/09cba0a625144bf1a90587868bb96956.png#pic_center" alt="在这里插入图片描述"></li>
+<li>再次调用<code>HeapAdjust</code>，此时<code>s=1</code>，<code>m=9</code>。 第 4 行，<code>temp=L.r[1]=50</code>，第 7~8 行，<code>70&lt;90</code>，使得<code>j=3</code>。第 11~12 行，<code>L.r[1]</code>被赋值了 90，并且<code>s=3</code>，再循环，由于<code>2j=6</code>并未大于<code>m</code>，因此再次执行循环体，使得<code>L.r[3]</code>被赋值了 80，完成循环后，<code>L.r[7]</code>被赋值为 50，最终本次调用使得 50、90、 80 进行了轮换，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/097071f80abb410da88a85fa18deaa36.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_6,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></li>
+</ol>
+<p>  到此为止，我们构建大顶堆的过程算是完成了，也就是<code>HeapSort</code>函数的第 4~5 行循环执行完毕。或许是有点复杂，如果不明白，多试着模拟计算机执行的方式走几遍，应该就可以理解其原理。<br>
+  接下来<code>HeapSort</code>函数的第 6~11 行就是正式的排序过程，由于有了前面的充分准备，其实这个排序就比较轻松了。下面是这部分代码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (i=L-&gt;length;i&gt;<span class="number">1</span>;i-- )</span><br><span class="line">&#123;</span><br><span class="line">	swap(L,<span class="number">1</span>,i);	<span class="comment">/* 将堆顶记录和当前未经排序子序列的最后一个记录交换 */</span></span><br><span class="line">	HeapAdjust(L,<span class="number">1</span>,i<span class="number">-1</span>);	<span class="comment">/* 将L-&gt;r[1..i-1]重新调整为大顶堆 */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>当<code>i=9</code>时，第 8 行，交换 20 与 90，第 9 行，将当前的根结点 20 进行大顶堆的调整，调整过程和刚才流程一样，找到它左右子结点的较大值，互换，再找到其子结点的较大值互换。此时序列变为 {80,70,50,60,10,40,20,30,90}，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/0152e8a3397f4c37a5f2d5ad5cdd4c6e.png#pic_center" alt="在这里插入图片描述"></li>
+<li>当<code>i=8</code>时，交换 30 与 80，并将 30 与 70 交换，再与 60 交换，此时序列变为 {70,60,50,30,10,40,20,80,90}，如下图所示。<br>
+<img src="https://img-blog.csdnimg.cn/28cbde50a11144d2b81f8681b383c61a.png#pic_center" alt="在这里插入图片描述"></li>
+<li>后面的变化完全类似，不解释，只看下图。<br>
+<img src="https://img-blog.csdnimg.cn/65000df7dd084c4bb4df1aefdae0317d.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_11,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  最终就得到一一个完全有序的序列了。</li>
+</ol>
+<h2 id="1-2-堆排序复杂度分析">1.2 堆排序复杂度分析</h2>
+<p>  堆排序的效率到底有多高呢?我们来分析- - 下。<br>
+  它的运行时间主要是消耗在初始构建堆和在重建堆时的反复筛选上。<br>
+  在构建堆的过程中，因为我们是完全二叉树从最下层最右边的非终端结点开始构建，将它与其孩子进行比较和若有必要的互换，对于每个非终端结点来说，其实最多进行两次比较和互换操作，因此整个构建堆的时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>。<br>
+  在正式排序时，第<code>i</code>次取堆顶记录重建堆需要用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>i</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(logi)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">i</span><span class="mclose">)</span></span></span></span> 的时间（完全二叉树的某个结点到根结点的距离为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">⌊</mo><mi>l</mi><mi>o</mi><msub><mi>g</mi><mn>2</mn></msub><mi>i</mi><mo stretchy="false">⌋</mo><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\lfloor log_2i\rfloor+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">⌊</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathnormal">i</span><span class="mclose">⌋</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>），并且需要取<code>n-1</code>次堆顶记录，因此，重建堆的时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(nlogn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>。<br>
+  所以总体来说，堆排序的时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(nlogn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>。 由于堆排序对原始记录的排序状态并不敏感，因此它无论是最好、最坏和平均时间复杂度均为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(nlogn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>。 这在性能上显然要远远好过于冒泡、简单选择、直接插入的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> 的时间复杂度了。<br>
+  空间复杂度上，它只有一个用来交换的暂存单元，也非常的不错。不过由于记录的比较与交换是跳跃式进行，因此堆排序也是一种不稳定的排序方法。<br>
+  另外，由于初始构建堆所需的比较次数较多，因此，它并不适合待排序序列个数较少的情况。<br>
+<br></p>
+<h1 id="2-总结">2. 总结</h1>
+<p>  排序算法的总结在后面讲完归并排序及快速排序后再写，也就是快速排序博客的最后。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2021/11/24/algorithm_23/">https://program-park.github.io/2021/11/24/algorithm_23/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/">算法</a></div><div class="post_share"><div class="social-share" data-image="/img/algorithm/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/11/24/algorithm_24/"><img class="prev-cover" src="/img/algorithm/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">《数据结构与算法》（二十四）- 排序算法：归并排序</div></div></a></div><div class="next-post pull-right"><a href="/2021/11/23/algorithm_22/"><img class="next-cover" src="/img/algorithm/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">《数据结构与算法》（二十二）- 排序算法：希尔排序</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/10/11/algorithm_1/" title="《数据结构与算法》（一）- 数据结构详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-11</div><div class="title">《数据结构与算法》（一）- 数据结构详解</div></div></a></div><div><a href="/2021/11/11/algorithm_14/" title="《数据结构与算法》（十四）- 图的应用：最短路径"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-11</div><div class="title">《数据结构与算法》（十四）- 图的应用：最短路径</div></div></a></div><div><a href="/2021/11/09/algorithm_11/" title="《数据结构与算法》（十一）- 树、森林与二叉树的转换及哈夫曼树详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-09</div><div class="title">《数据结构与算法》（十一）- 树、森林与二叉树的转换及哈夫曼树详解</div></div></a></div><div><a href="/2021/11/08/algorithm_10/" title="《数据结构与算法》（十）- 二叉树详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-08</div><div class="title">《数据结构与算法》（十）- 二叉树详解</div></div></a></div><div><a href="/2021/11/10/algorithm_13/" title="《数据结构与算法》（十三）- 图的应用：最小生成树"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-10</div><div class="title">《数据结构与算法》（十三）- 图的应用：最小生成树</div></div></a></div><div><a href="/2021/11/10/algorithm_12/" title="《数据结构与算法》（十二）- 图详解"><img class="cover" src="/img/algorithm/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-10</div><div class="title">《数据结构与算法》（十二）- 图详解</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">121</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">20</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%A0%86%E6%8E%92%E5%BA%8F"><span class="toc-text">1. 堆排序</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E5%A0%86%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95"><span class="toc-text">1.1 堆排序算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E5%A0%86%E6%8E%92%E5%BA%8F%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%88%86%E6%9E%90"><span class="toc-text">1.2 堆排序复杂度分析</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%80%BB%E7%BB%93"><span class="toc-text">2. 总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/25/hadoop_21/" title="Hadoop 生态圈（十七）- HDFS 权限管理"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十七）- HDFS 权限管理"/></a><div class="content"><a class="title" href="/2022/01/25/hadoop_21/" title="Hadoop 生态圈（十七）- HDFS 权限管理">Hadoop 生态圈（十七）- HDFS 权限管理</a><time datetime="2022-01-25T02:21:17.000Z" title="发表于 2022-01-25 10:21:17">2022-01-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/24/hadoop_20/" title="Hadoop 生态圈（十六）- HDFS Snapshot 快照详解"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十六）- HDFS Snapshot 快照详解"/></a><div class="content"><a class="title" href="/2022/01/24/hadoop_20/" title="Hadoop 生态圈（十六）- HDFS Snapshot 快照详解">Hadoop 生态圈（十六）- HDFS Snapshot 快照详解</a><time datetime="2022-01-24T08:18:12.000Z" title="发表于 2022-01-24 16:18:12">2022-01-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/24/hadoop_19/" title="Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解"/></a><div class="content"><a class="title" href="/2022/01/24/hadoop_19/" title="Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解">Hadoop 生态圈（十五）- HDFS Trash垃圾回收详解</a><time datetime="2022-01-24T08:03:12.000Z" title="发表于 2022-01-24 16:03:12">2022-01-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/24/hadoop_18/" title="Hadoop 生态圈（十四）- HDFS 小文件解决方案"><img src="/img/hadoop/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hadoop 生态圈（十四）- HDFS 小文件解决方案"/></a><div class="content"><a class="title" href="/2022/01/24/hadoop_18/" title="Hadoop 生态圈（十四）- HDFS 小文件解决方案">Hadoop 生态圈（十四）- HDFS 小文件解决方案</a><time datetime="2022-01-24T07:33:45.000Z" title="发表于 2022-01-24 15:33:45">2022-01-24</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/algorithm/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2021/11/24/algorithm_23/'
+    this.page.identifier = '/2021/11/24/algorithm_23/'
+    this.page.title = '《数据结构与算法》（二十三）- 排序算法：堆排序'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
