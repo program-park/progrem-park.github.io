@@ -1,0 +1,386 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Hadoop生态圈（二十九）- MapReduce Reduce 阶段核心源码分析 | 程序园</title><meta name="keywords" content="大数据,Hadoop"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是《Hadoop生态圈》系列，第二十九篇：MapReduce Reduce 阶段核心源码分析。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hadoop生态圈（二十九）- MapReduce Reduce 阶段核心源码分析">
+<meta property="og:url" content="https://program-park.github.io/2022/02/09/hadoop_33/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是《Hadoop生态圈》系列，第二十九篇：MapReduce Reduce 阶段核心源码分析。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/hadoop/1.png">
+<meta property="article:published_time" content="2022-02-09T02:21:48.000Z">
+<meta property="article:modified_time" content="2022-09-08T03:10:47.539Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="大数据">
+<meta property="article:tag" content="Hadoop">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/hadoop/1.png"><link rel="shortcut icon" href="/img/favicon_logo/favicon.png"><link rel="canonical" href="https://program-park.github.io/2022/02/09/hadoop_33/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Hadoop生态圈（二十九）- MapReduce Reduce 阶段核心源码分析',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-08 11:10:47'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">165</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">32</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/hadoop/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Hadoop生态圈（二十九）- MapReduce Reduce 阶段核心源码分析</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-02-09T02:21:48.000Z" title="发表于 2022-02-09 10:21:48">2022-02-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-08T03:10:47.539Z" title="更新于 2022-09-08 11:10:47">2022-09-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Hadoop/">Hadoop</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>5分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Hadoop生态圈（二十九）- MapReduce Reduce 阶段核心源码分析"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="前言">前言</h1>
+<p><font color=#999AAA >部分内容摘自尚硅谷、黑马等等培训资料</font></p>
+<h1 id="1-Reduce阶段整体概述">1. Reduce阶段整体概述</h1>
+<p>  Reduce大致分为<code>copy</code>、<code>sort</code>、<code>reduce</code>三个阶段，重点在前两个阶段。<br>
+  copy 阶段包含一个 eventFetcher 来获取已完成的 map 列表，由 Fetcher 线程去 copy 数据，到各个 maptask 那里去拉取属于自己分区的数据。在此过程中会启动两个 merge 线程，分别为<code>inMemoryMerger</code>和<code>onDiskMerger</code>，分别将内存中的数据 merge 到磁盘和将磁盘中的数据进行 merge。<br>
+  待数据 copy 完成之后，copy 阶段就完成了，开始进行 sort 阶段，sort 阶段主要是执行<code>finalMerge</code>操作，纯粹的 sort 阶段。<br>
+  完成之后就是 reduce 阶段，调用用户定义的<code>reduce</code>函数进行处理。</p>
+<p><img src="https://img-blog.csdnimg.cn/871862a07c94429b8bf76fbd8de01b9e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="2-前置：解读ReduceTask类">2. 前置：解读ReduceTask类</h1>
+<p>  <code>ReduceTask</code>类作为 reducetask 的一个载体，调用的就是里面的 run 方法，然后开启 reduce 任务。</p>
+<h2 id="2-1-第一层调用（ReduceTask-run）">2.1 第一层调用（ReduceTask.run）</h2>
+<h3 id="2-1-1-reduce阶段的任务划分">2.1.1 reduce阶段的任务划分</h3>
+<p>  整个 reducetask 分为 3 个阶段：copy 拉取数据、sort 排序数据、reduce 处理数据。</p>
+<p><img src="https://img-blog.csdnimg.cn/4ef1f4079e124443bdd6d61f2e5eb83f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="2-1-2-shuffle操作">2.1.2 shuffle操作</h3>
+<p>  整个 shuffle 操作过程除了 shuffle 核心任务之外，还创建了 reducetask 工作相关的一些组件，包括但不限于：<br>
+  <code>codec解编码器</code>：</p>
+<p><img src="https://img-blog.csdnimg.cn/808861287cc842ef9f9d11648f11cf87.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/9f0b521113274da3a0e46163093fe7e0.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_19,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  <code>CombineOutputCollector输出收集器</code>：</p>
+<p><img src="https://img-blog.csdnimg.cn/4e4dc8d0313746c8b07f33f49b11228f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  <code>shuffleConsumerPlugin（负责reduce端shuffle插件）</code>：</p>
+<p><img src="https://img-blog.csdnimg.cn/e1f8c6308c184f9091337525fd6ff020.png#pic_center" alt="在这里插入图片描述"><br>
+  并且对 shuffleConsumerPlugin 进行了<code>初始化init</code>、<code>run运行</code>。运行返回的结果就是 reduce shuffle 之后的全部数据。这是 shuffle 过程的核心，后续深入。</p>
+<p><img src="https://img-blog.csdnimg.cn/8abd945f9ca243508f36261a66969e7b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_19,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  <code>shuffleContext上下文对象</code>：</p>
+<p><img src="https://img-blog.csdnimg.cn/f4c6f2192301469690f8930a53a74a10.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  <code>GroupingComparator分组比较器</code>：</p>
+<p><img src="https://img-blog.csdnimg.cn/8ab60f8cee5d4196b76690be747ec343.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/85d160d00d8c4481ac955285a44f9e5e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/91258ec2049f47d0939a8c496fe69613.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="2-1-3-运行reducer">2.1.3 运行reducer</h3>
+<p>  shuffle 完的结果将进入到 reducer 进行最终的 reduce 处理。</p>
+<p><img src="https://img-blog.csdnimg.cn/fc993a86351945f79b1f02279982e638.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="2-2-第二层调用（runNewReducer）准备部分">2.2 第二层调用（runNewReducer）准备部分</h2>
+<p>  默认情况下，框架使用 new API 来运行，所以将执行<code>runNewReducer()</code>。<br>
+  runNewReducer 内第一大部分代码我们称之为 reducetask 运行的准备部分。<br>
+  其主要逻辑是创建 reducetask 运行时需要的各种依赖，包括：<br>
+  <code>taskContext上下文</code>：</p>
+<p><img src="https://img-blog.csdnimg.cn/a1b7e5457e97440e8993a0f0ae81e4bc.png#pic_center" alt="在这里插入图片描述"><br>
+  <code>创建用户编写设置的reducer类</code>：</p>
+<p><img src="https://img-blog.csdnimg.cn/c91a008e3d3f415a9cf7e178f0cb7a68.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  <code>outputFormat输出数据组件</code>：</p>
+<p><img src="https://img-blog.csdnimg.cn/c834e12d123e40efab26c5522292f68a.png#pic_center" alt="在这里插入图片描述"><br>
+  <code>ReducerContext上下文</code>：</p>
+<p><img src="https://img-blog.csdnimg.cn/91338e52457d497aace251cd4d05db2a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  接下来我们进去看一下怎么创建的 reducerContext，我们进到它的实现类<code>ReduceContextImpl</code>里面：</p>
+<p><img src="https://img-blog.csdnimg.cn/09ae479e8a7d4bf0b9f49a7232bcee57.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="2-3-第二层调用（runNewReducer）工作部分">2.3 第二层调用（runNewReducer）工作部分</h2>
+<h3 id="2-3-1-reducer-run">2.3.1 reducer.run</h3>
+<p>  在 runNewReducer 的代码中，最后还调用了 Reduer.run 方法开始针对 shuffle 后的数据进行 reduce 操作。</p>
+<p><img src="https://img-blog.csdnimg.cn/89aef674423d437facb366467e9ba930.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/54950358fd894565a348d456c1ce6ca5.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="2-3-2-RecordWriter">2.3.2 RecordWriter</h3>
+<p><img src="https://img-blog.csdnimg.cn/c6773cd1e720403193909522fea566bc.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/15e653cea554449dbb144d635107164c.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/cbb6952f6edc4d76a8c2a546e188be0b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="3-Shuffle-init">3. Shuffle-init</h1>
+<p>  注意 ShuffleConsumerPlugin 是一个接口，默认的实现只有一个<code>Shuffle.class</code>。</p>
+<p><img src="https://img-blog.csdnimg.cn/d9a74a3140f84c7483070334bcc833fe.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_19,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  初始化的过程中，核心逻辑就是创建 MergeManagerImpl 类。在 MergeManagerImpl 类中，核心的有：确定 shuffle 时的一些条件、是否允许内存到内存合并、启动两个 merge 线程，分别为<code>inMemoryMerger</code>和<code>onDiskMerger</code>，分别将内存中的数据 merge 到磁盘和将磁盘中的数据进行合并。</p>
+<p><img src="https://img-blog.csdnimg.cn/f46de84dab744dad9c276459de418847.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/c116961b612b42f1be7f4a7d84aa1a06.png#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="3-1-shuffle条件">3.1 shuffle条件</h2>
+<p><img src="https://img-blog.csdnimg.cn/2e0581336c6443fb965b2b08d5eba7b0.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="3-2-启动MemToMemMerge">3.2 启动MemToMemMerge</h2>
+<p>  因为 fetch 来数据首先放入在内存中的，正常情况下在内存中对数据进行合并是最快的，可惜的是，<code>默认情况下，是不开启内存到内存的合并的</code>。</p>
+<p><img src="https://img-blog.csdnimg.cn/313b99c7b20942c8b014f9fb2d45959a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="3-3-启动inMemoryMerger">3.3 启动inMemoryMerger</h2>
+<p><img src="https://img-blog.csdnimg.cn/589dfc8c3e2e4cc0bbd6fb535bf5d084.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="3-4-启动onDiskMerger">3.4 启动onDiskMerger</h2>
+<p><img src="https://img-blog.csdnimg.cn/e2cf39f6adff41e1a17ea5b0d45adb3e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="4-Shuffle-run">4. Shuffle-run</h1>
+<p>  注意 ShuffleConsumerPlugin 是一个接口，默认的实现只有一个<code>Shuffle.class</code>。</p>
+<p><img src="https://img-blog.csdnimg.cn/322efaf0cbc546e8b3fd80dbb69c92f9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_19,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="4-1-EventFetcher线程">4.1 EventFetcher线程</h2>
+<p><img src="https://img-blog.csdnimg.cn/84f63417b30549dc87e08641d6b99d4a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="4-2-fetchers线程">4.2 fetchers线程</h2>
+<p><img src="https://img-blog.csdnimg.cn/a76394eac24b4df88fd9f50b6ca06787.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="5-Shuffle-Copy阶段">5. Shuffle-Copy阶段</h1>
+<p>  Reduce 进程启动一些数据 copy 线程（<code>Fetcher</code>），通过 HTTP 方式请求 maptask 获取属于自己的文件。如果是本地模式运行，启动一个 fetcher 线程拉取数据，否则启动 5 个线程并发拉取。</p>
+<p><img src="https://img-blog.csdnimg.cn/c4ff67109b9a46bbaeb8e703ef7c8605.png#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="5-1-MapHost类">5.1 MapHost类</h2>
+<p>  MapHost 类用于标记 MapTask 任务状态，记下 MapTask host 信息。</p>
+<p><img src="https://img-blog.csdnimg.cn/b8afdc5645f44598ad97e70d92909b42.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="5-2-Fetcher-run">5.2 Fetcher.run</h2>
+<p>  获得所有 maptask 处于 PENDING 待处理状态的主机。</p>
+<p><img src="https://img-blog.csdnimg.cn/dcb3e84dd9194d0b9cc3c9220c9fb6d3.png#pic_center" alt="在这里插入图片描述"><br>
+  然后进入核心方法，copyFromHost，从 map 拉取数据</p>
+<p><img src="https://img-blog.csdnimg.cn/6008f902c74241a790154ead42610dd4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="5-2-1-copyFromHost">5.2.1 copyFromHost</h3>
+<p>  建立拉取数据的输入流</p>
+<p><img src="https://img-blog.csdnimg.cn/274fdd143d394379847f0a19e2105cb5.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  拉取 copy 数据</p>
+<p><img src="https://img-blog.csdnimg.cn/cd8d054c0cca4aa1a37cf345bf824f8e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="5-2-2-copyMapOutput">5.2.2 copyMapOutput</h3>
+<p>  首先进行判断 copy 过来的数据放置在哪里？<code>优先内存，超过限制放置磁盘</code>。</p>
+<p><img src="https://img-blog.csdnimg.cn/844093d3c78d44849fa2bc262f79a47e.png#pic_center" alt="在这里插入图片描述"><br>
+  因此获得的 mapOutput 就有两种具体的实现。通过 mapOutput.shuffle 开始拉取数据。</p>
+<p><img src="https://img-blog.csdnimg.cn/e41ac7ca002e4a929a2cbed048a1d0bc.png#pic_center" alt="在这里插入图片描述"><br>
+  不断追踪下去，最终是两种不同的实现：</p>
+<p><img src="https://img-blog.csdnimg.cn/bc72bebe28e84d45a67b932961c8c308.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  <code>InMemoryMapOutput</code>：把 copy 来的数据放置到 reducetask 内存中。</p>
+<p><img src="https://img-blog.csdnimg.cn/9d55ade846be4d489c8299855a13863b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  <code>OnDiskMapOutput</code>：把 copy 来的数据放置到磁盘上。</p>
+<p><img src="https://img-blog.csdnimg.cn/606d489a340a4bb9a44696e42eb8d4b2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="6-Shuffle-Merge阶段">6. Shuffle-Merge阶段</h1>
+<p>  在启动 Fetcher 线程 copy 数据过程中已经启动了两个 merge 线程，分别为<code>inMemoryMerger</code>和<code>onDiskMerger</code>，分别将内存中的数据 merge 到磁盘和将磁盘中的数据进行 merge。<br>
+  可以从<code>Shuffle.init</code><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">→</span></span></span></span><code>createMergeManager</code><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">→</span></span></span></span><code>new MergeManagerImpl</code>中确定。</p>
+<p><img src="https://img-blog.csdnimg.cn/7dd99d889a6e40dd83ea8b3cf6a1eb15.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="6-1-inMemoryMerger">6.1 inMemoryMerger</h2>
+<p>  inMemoryMerger 本质是一个 MergeThread 线程。进入线程 run 方法。</p>
+<h3 id="6-1-1-MergeThread-run">6.1.1 MergeThread.run</h3>
+<p><img src="https://img-blog.csdnimg.cn/563fb6a2dac445df81034ba711551871.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_19,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/24bf115143cf46be8e5bab911ef80299.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  在内存中合并，合并的结果写入磁盘。</p>
+<p><img src="https://img-blog.csdnimg.cn/153ee668617f4516825fc445a8f85c24.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="6-2-onDiskMerger">6.2 onDiskMerger</h2>
+<p>  onDiskMerger 本质是一个 MergeThread 线程。进入线程 run  方法。</p>
+<h3 id="6-2-1-MergeThread-run">6.2.1 MergeThread.run</h3>
+<p>  此时应该来到在磁盘上合并的实现类中：</p>
+<p><img src="https://img-blog.csdnimg.cn/31da07adc79c4b0fb74a22c5f459c1a5.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/fb74cba4716844d79b9f6fccdc0f0b1e.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/e35eab8d98a54a178c5ce6d224f8071a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/bef7833280444bf8a5973e7f8e632215.png#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="6-2-2-closeOnDiskFile">6.2.2 closeOnDiskFile</h3>
+<p>  不管是在内存中合并还是在磁盘上合并，最终都调用了 closeOnDiskFile 方法，关闭磁盘文件。</p>
+<p><img src="https://img-blog.csdnimg.cn/b4093fcdc9244d9a978f7ab213a58edd.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="6-3-finalMerge">6.3 finalMerge</h2>
+<p>  当所有的 Fetcher 拉取数据结束之后，会进行最终一次合并，最终合并的所有数据保存在 kvIter。<br>
+  可以在 shuffle 类的 run 中发现。</p>
+<p><img src="https://img-blog.csdnimg.cn/6fd9cda0f79a453a9e30f61d3e50bb91.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/3cb2644982d943c3bb0d94461e9a4bf9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="7-Shuffle-Sort阶段">7. Shuffle-Sort阶段</h1>
+<p>  在合并的过程中，会对数据进行 Sort 排序，默认情况下是 key 的字典序（WritableComparable），如果用户设置比较器，则以用户设置的为准。</p>
+<p><img src="https://img-blog.csdnimg.cn/47fa0223ee3e4d34b6be93d592537821.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/cf76139af96e433dbee1b5b52dcd27cc.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/4a30d433267e4507afe824c4b9b65f96.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="8-Reducer">8. Reducer</h1>
+<p>  当合并排序结束之后，进入到 reduce 阶段。</p>
+<p><img src="https://img-blog.csdnimg.cn/769d3681d8d942b88fae4cec781719fc.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  在 runNewReducer 方法的最后，调用了 reducer.run 方法运行 reducer。</p>
+<p><img src="https://img-blog.csdnimg.cn/fe082b52e8a2451783dc299798d82774.png#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="8-1-Reducer-run">8.1 Reducer.run</h2>
+<p>  点击进入 run 方法</p>
+<p><img src="https://img-blog.csdnimg.cn/76875fa01f364f1bb17d457e26c6e731.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  首先在 Reduce.run 中调用 context.nextKey() 决定是否进入 while，，然后调用 nextKeyValue 将 key/value 的值从 input 中读出，其次通过 context.getValues 将 Iterator 传入 reduce 中，在 reduce 中通过 Iterator.hasNext 查看此 key 是否有下个 value，然后通过 Iterator.next 调用 nextKeyValue 去 input 中读取 value。<br>
+  然后循环迭代 Iterator，读取 input 中相同 key 的 value。<br>
+  也就是说 reduce 中<code>相同key的value值在Iterator.next中通过nextKeyValue读取的，每调用一次next就从input中读一个value</code>。<br>
+  通俗理解：<code>key相同的被分为一组，一组中所有的value会组成一个Iterable。key则是当前的value与之对应的key</code>。</p>
+<h2 id="8-2-Reducer-reduce">8.2 Reducer.reduce</h2>
+<p>  对于 reduce 方法，如果用户不重写，父类中也有默认实现逻辑。其逻辑为：输入什么，原封不动的输出什么，也就意味着不对数据进行任何处理。<br>
+<img src="https://img-blog.csdnimg.cn/7be7cffcb3be4862bb1c2e794f0c5ae4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  通常会基于业务需求重新父类的 reduce 方法。</p>
+<p><img src="https://img-blog.csdnimg.cn/0e45684ebebe42c0b10e999f7267f8d0.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="9-OutputFormat">9. OutputFormat</h1>
+<p>  reduce 阶段的最后是通过调用 context.write 方法将数据写出的。</p>
+<p><img src="https://img-blog.csdnimg.cn/41b8e9feae3a4b8c945e617bc1474e42.png#pic_center" alt="在这里插入图片描述"><br>
+  负责输出数据的组件叫做 OutputFormat，默认实现是<code>TextOutPutFormat</code>。而真正负责写数据的组件叫做 LineRecordWriter，Write 方法就定义在其中，这一点和输入组件很是类似。<br>
+  LineRecordWriter 的行为是一次输出写一行，再有输出换行写。<br>
+  在构造 LineRecordWriter 的时候，已经设置了输出的<code>key,value之间是以\t制表符分割</code>的。</p>
+<p><img src="https://img-blog.csdnimg.cn/c5dae471753740e4904d1d93e35b1c36.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/efafcc3e07424b8ba54a6d065bdaac5b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_15,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2022/02/09/hadoop_33/">https://program-park.github.io/2022/02/09/hadoop_33/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a><a class="post-meta__tags" href="/tags/Hadoop/">Hadoop</a></div><div class="post_share"><div class="social-share" data-image="/img/hadoop/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/02/09/hadoop_34/"><img class="prev-cover" src="/img/hadoop/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Hadoop 生态圈（三十）- Hadoop 数据压缩</div></div></a></div><div class="next-post pull-right"><a href="/2022/02/06/hadoop_32/"><img class="next-cover" src="/img/hadoop/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Hadoop生态圈（二十八）- MapReduce Map 阶段核心源码分析</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/01/11/hadoop_1/" title="Hadoop 3.x 在 centos 上的完全分布式部署（包括免密登录、集群测试、历史服务器、日志聚集、常用命令、群起脚本）"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-11</div><div class="title">Hadoop 3.x 在 centos 上的完全分布式部署（包括免密登录、集群测试、历史服务器、日志聚集、常用命令、群起脚本）</div></div></a></div><div><a href="/2022/01/17/hadoop_11/" title="ERROR org.apache.hadoop.hdfs.server.datanode.DataNode: Exception in secureMain"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-17</div><div class="title">ERROR org.apache.hadoop.hdfs.server.datanode.DataNode: Exception in secureMain</div></div></a></div><div><a href="/2022/01/19/hadoop_13/" title="Hadoop 生态圈（九）- HDFS High Availability（HA）高可用集群"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-19</div><div class="title">Hadoop 生态圈（九）- HDFS High Availability（HA）高可用集群</div></div></a></div><div><a href="/2022/01/17/hadoop_10/" title="Hadoop 生态圈（七）- HDFS 优化方案"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-17</div><div class="title">Hadoop 生态圈（七）- HDFS 优化方案</div></div></a></div><div><a href="/2022/01/19/hadoop_14/" title="Hadoop 生态圈（十）- HDFS Federation 联邦机制"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-19</div><div class="title">Hadoop 生态圈（十）- HDFS Federation 联邦机制</div></div></a></div><div><a href="/2022/01/17/hadoop_12/" title="Hadoop 生态圈（八）- HDFS 动态节点管理"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-17</div><div class="title">Hadoop 生态圈（八）- HDFS 动态节点管理</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">165</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">32</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-Reduce%E9%98%B6%E6%AE%B5%E6%95%B4%E4%BD%93%E6%A6%82%E8%BF%B0"><span class="toc-text">1. Reduce阶段整体概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%89%8D%E7%BD%AE%EF%BC%9A%E8%A7%A3%E8%AF%BBReduceTask%E7%B1%BB"><span class="toc-text">2. 前置：解读ReduceTask类</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E7%AC%AC%E4%B8%80%E5%B1%82%E8%B0%83%E7%94%A8%EF%BC%88ReduceTask-run%EF%BC%89"><span class="toc-text">2.1 第一层调用（ReduceTask.run）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1-reduce%E9%98%B6%E6%AE%B5%E7%9A%84%E4%BB%BB%E5%8A%A1%E5%88%92%E5%88%86"><span class="toc-text">2.1.1 reduce阶段的任务划分</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-2-shuffle%E6%93%8D%E4%BD%9C"><span class="toc-text">2.1.2 shuffle操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-3-%E8%BF%90%E8%A1%8Creducer"><span class="toc-text">2.1.3 运行reducer</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E7%AC%AC%E4%BA%8C%E5%B1%82%E8%B0%83%E7%94%A8%EF%BC%88runNewReducer%EF%BC%89%E5%87%86%E5%A4%87%E9%83%A8%E5%88%86"><span class="toc-text">2.2 第二层调用（runNewReducer）准备部分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E7%AC%AC%E4%BA%8C%E5%B1%82%E8%B0%83%E7%94%A8%EF%BC%88runNewReducer%EF%BC%89%E5%B7%A5%E4%BD%9C%E9%83%A8%E5%88%86"><span class="toc-text">2.3 第二层调用（runNewReducer）工作部分</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-1-reducer-run"><span class="toc-text">2.3.1 reducer.run</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-2-RecordWriter"><span class="toc-text">2.3.2 RecordWriter</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-Shuffle-init"><span class="toc-text">3. Shuffle-init</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-shuffle%E6%9D%A1%E4%BB%B6"><span class="toc-text">3.1 shuffle条件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E5%90%AF%E5%8A%A8MemToMemMerge"><span class="toc-text">3.2 启动MemToMemMerge</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E5%90%AF%E5%8A%A8inMemoryMerger"><span class="toc-text">3.3 启动inMemoryMerger</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-4-%E5%90%AF%E5%8A%A8onDiskMerger"><span class="toc-text">3.4 启动onDiskMerger</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-Shuffle-run"><span class="toc-text">4. Shuffle-run</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-EventFetcher%E7%BA%BF%E7%A8%8B"><span class="toc-text">4.1 EventFetcher线程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-fetchers%E7%BA%BF%E7%A8%8B"><span class="toc-text">4.2 fetchers线程</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-Shuffle-Copy%E9%98%B6%E6%AE%B5"><span class="toc-text">5. Shuffle-Copy阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-MapHost%E7%B1%BB"><span class="toc-text">5.1 MapHost类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-Fetcher-run"><span class="toc-text">5.2 Fetcher.run</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-1-copyFromHost"><span class="toc-text">5.2.1 copyFromHost</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-2-copyMapOutput"><span class="toc-text">5.2.2 copyMapOutput</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-Shuffle-Merge%E9%98%B6%E6%AE%B5"><span class="toc-text">6. Shuffle-Merge阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#6-1-inMemoryMerger"><span class="toc-text">6.1 inMemoryMerger</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-1-MergeThread-run"><span class="toc-text">6.1.1 MergeThread.run</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-2-onDiskMerger"><span class="toc-text">6.2 onDiskMerger</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-1-MergeThread-run"><span class="toc-text">6.2.1 MergeThread.run</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-2-closeOnDiskFile"><span class="toc-text">6.2.2 closeOnDiskFile</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-3-finalMerge"><span class="toc-text">6.3 finalMerge</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#7-Shuffle-Sort%E9%98%B6%E6%AE%B5"><span class="toc-text">7. Shuffle-Sort阶段</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#8-Reducer"><span class="toc-text">8. Reducer</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#8-1-Reducer-run"><span class="toc-text">8.1 Reducer.run</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-2-Reducer-reduce"><span class="toc-text">8.2 Reducer.reduce</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#9-OutputFormat"><span class="toc-text">9. OutputFormat</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/14/elastic_15/" title="Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项"/></a><div class="content"><a class="title" href="/2022/03/14/elastic_15/" title="Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项">Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项</a><time datetime="2022-03-14T06:12:45.000Z" title="发表于 2022-03-14 14:12:45">2022-03-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/14/elastic_14/" title="Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解"/></a><div class="content"><a class="title" href="/2022/03/14/elastic_14/" title="Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解">Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解</a><time datetime="2022-03-14T02:28:33.000Z" title="发表于 2022-03-14 10:28:33">2022-03-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/08/elastic_13/" title="Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案"/></a><div class="content"><a class="title" href="/2022/03/08/elastic_13/" title="Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案">Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案</a><time datetime="2022-03-08T09:24:42.000Z" title="发表于 2022-03-08 17:24:42">2022-03-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/08/elastic_12/" title="Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解"/></a><div class="content"><a class="title" href="/2022/03/08/elastic_12/" title="Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解">Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解</a><time datetime="2022-03-08T06:56:57.000Z" title="发表于 2022-03-08 14:56:57">2022-03-08</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/hadoop/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2022/02/09/hadoop_33/'
+    this.page.identifier = '/2022/02/09/hadoop_33/'
+    this.page.title = 'Hadoop生态圈（二十九）- MapReduce Reduce 阶段核心源码分析'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

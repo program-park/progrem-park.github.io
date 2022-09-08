@@ -1,0 +1,502 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Elastic Stack 日志分析（二）- Elasticsearch 入门及核心概念详解 | 程序园</title><meta name="keywords" content="Elasticsearch,大数据"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是《Elastic Stack日志分析》系列，第二篇：Elasticsearch 入门及核心概念详解。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Elastic Stack 日志分析（二）- Elasticsearch 入门及核心概念详解">
+<meta property="og:url" content="https://program-park.github.io/2022/02/17/elastic_2/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是《Elastic Stack日志分析》系列，第二篇：Elasticsearch 入门及核心概念详解。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/elastic/1.png">
+<meta property="article:published_time" content="2022-02-17T08:48:41.000Z">
+<meta property="article:modified_time" content="2022-09-08T03:47:26.721Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="Elasticsearch">
+<meta property="article:tag" content="大数据">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/elastic/1.png"><link rel="shortcut icon" href="/img/favicon_logo/favicon.png"><link rel="canonical" href="https://program-park.github.io/2022/02/17/elastic_2/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Elastic Stack 日志分析（二）- Elasticsearch 入门及核心概念详解',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-08 11:47:26'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">165</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">32</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/elastic/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Elastic Stack 日志分析（二）- Elasticsearch 入门及核心概念详解</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-02-17T08:48:41.000Z" title="发表于 2022-02-17 16:48:41">2022-02-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-08T03:47:26.721Z" title="更新于 2022-09-08 11:47:26">2022-09-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Elastic-Stack/">Elastic Stack</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Elastic-Stack/Elasticsearch/">Elasticsearch</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">5.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>15分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Elastic Stack 日志分析（二）- Elasticsearch 入门及核心概念详解"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="1-Elasticsearch是什么">1. Elasticsearch是什么</h1>
+<h2 id="1-1-Elasticsearch简介">1.1 Elasticsearch简介</h2>
+<p><img src="https://img-blog.csdnimg.cn/0e3239dc5cbd42b98ebaffa841f083f4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  Elaticsearch，简称为 ES， ES 是一个<strong>开源的高扩展的分布式全文搜索引擎</strong>，是整个 Elastic Stack 技术栈的核心。它可以近乎实时的存储、检索数据；本身扩展性很好，可以扩展到上百台服务器，处理 PB 级别的数据。 ES 也使用 Java 开发并使用 Lucene 作为其核心来实现所有索引和搜索的功能，但是它的目的是<strong>通过简单的 RESTful API 来隐藏 Lucene 的复杂性，从而让全文搜索变得简单</strong>。</p>
+<h2 id="1-2-全文搜索引擎">1.2 全文搜索引擎</h2>
+<p>  Google，百度类的网站搜索，它们都是根据网页中的关键字生成索引，我们在搜索的时候输入关键字，它们会将该关键字即索引匹配到的所有网页返回；还有常见的项目中应用日志的搜索等等。对于这些非结构化的数据文本，关系型数据库搜索不是能很好的支持。<br>
+  一般传统数据库，全文检索都实现的很鸡肋，因为一般也没人用数据库存文本字段。进行全文检索需要扫描整个表，如果数据量大的话即使对 SQL 的语法优化，也收效甚微。建立了索引，但是维护起来也很麻烦，对于 insert 和 update 操作都会重新构建索引。<br>
+  基于以上原因可以分析得出，在一些生产环境中，使用常规的搜索方式，性能是非常差的：</p>
+<ul>
+<li>搜索的数据对象是大量的非结构化的文本数据；</li>
+<li>文件记录量达到数十万或数百万个甚至更多；</li>
+<li>支持大量基于交互式文本的查询；</li>
+<li>需求非常灵活的全文搜索查询；</li>
+<li>对高度相关的搜索结果的有特殊需求，但是没有可用的关系数据库可以满足；</li>
+<li>对不同记录类型、非文本数据操作或安全事务处理的需求相对较少的情况；</li>
+</ul>
+<p>  为了解决结构化数据搜索和非结构化数据搜索性能问题，我们就需要专业，健壮，强大的全文搜索引擎。<br>
+  这里说到的全文搜索引擎指的是目前广泛应用的主流搜索引擎。它的工作原理是计算机索引程序通过扫描文章中的每一个词，对每一个词建立一个索引，指明该词在文章中出现的次数和位置，当用户查询时，检索程序就根据事先建立的索引进行查找，并将查找的结果反馈给用户的检索方式。这个过程类似于通过字典中的检索字表查字的过程。</p>
+<h2 id="1-3-Elasticsearch-VS-Solr">1.3 Elasticsearch VS Solr</h2>
+<p>  Lucene 是 Apache 软件基金会 Jakarta 项目组的一个子项目，提供了一个简单却强大的应用程式接口，能够做全文索引和搜寻。在 Java 开发环境里 Lucene 是一个成熟的免费开源工具。就其本身而言，Lucene 是当前以及最近几年最受欢迎的免费 Java 信息检索程序库。但 Lucene 只是一个提供全文搜索功能类库的核心工具包，而真正使用它还需要一个完善的服务框架搭建起来进行应用。<br>
+  目前市面上流行的搜索引擎软件，主流的就两款：Elasticsearch 和 Solr，这两款都是基于 Lucene 搭建的，可以独立部署启动的搜索引擎服务软件。由于内核相同，所以两者除了服务器安装、部署、管理、集群以外，对于数据的操作 修改、添加、保存、查询等等都十分类似。<br>
+  在使用过程中，一般都会将 Elasticsearch 和 Solr 这两个软件对比，然后进行选型。这两个搜索引擎都是流行的，先进的的开源搜索引擎。它们都是围绕核心底层搜索库 Lucene 构建的，但它们又是不同的。像所有东西一样，每个都有其优点和缺点：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">特征</th>
+<th style="text-align:center">Solr/SolrCloud</th>
+<th style="text-align:center">Elasticsearch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">社区和开发者</td>
+<td style="text-align:center">Apache 软件基金和社区支持</td>
+<td style="text-align:center">单一商业实体及其员工</td>
+</tr>
+<tr>
+<td style="text-align:center">节点发现</td>
+<td style="text-align:center">Apache Zookeeper，在大量项目中成熟且经过实战测试</td>
+<td style="text-align:center">Zen 内置于 Elasticsearch 本身，需要专用的主节点才能进行分裂脑保护</td>
+</tr>
+<tr>
+<td style="text-align:center">碎片放置</td>
+<td style="text-align:center">本质上是静态，需要手动工作来迁移分片，从 Solr 7 开始 Autoscaling API 允许一些动态操作</td>
+<td style="text-align:center">动态，可以根据群集状态按需移动分片</td>
+</tr>
+<tr>
+<td style="text-align:center">高速缓存</td>
+<td style="text-align:center">全局，每个段更改无效</td>
+<td style="text-align:center">每段，更适合动态更改数据</td>
+</tr>
+<tr>
+<td style="text-align:center">分析引擎性能</td>
+<td style="text-align:center">非常适合精确计算的静态数据</td>
+<td style="text-align:center">结果的准确性取决于数据放置</td>
+</tr>
+<tr>
+<td style="text-align:center">全文搜索功能</td>
+<td style="text-align:center">基于 Lucene 的语言分析，多建议，拼写检查，丰富的高亮显示支持</td>
+<td style="text-align:center">基于 Lucene 的语言分析，单一建议 API 实现，高亮显示重新计算</td>
+</tr>
+<tr>
+<td style="text-align:center">DevOps 支持</td>
+<td style="text-align:center">尚未完全，但即将到来</td>
+<td style="text-align:center">非常好的 API</td>
+</tr>
+<tr>
+<td style="text-align:center">非平面数据处理</td>
+<td style="text-align:center">嵌套文档和父子支持</td>
+<td style="text-align:center">嵌套和对象类型的自然支持允许几乎无限的嵌套和父子支持</td>
+</tr>
+<tr>
+<td style="text-align:center">查询 DSL</td>
+<td style="text-align:center">JSON (有限)，XML (有限)或URL参数</td>
+<td style="text-align:center">JSON</td>
+</tr>
+<tr>
+<td style="text-align:center">索引/收集领导控制</td>
+<td style="text-align:center">领导者安置控制和领导者重新平衡甚至可以节点上的负载</td>
+<td style="text-align:center">不可能</td>
+</tr>
+<tr>
+<td style="text-align:center">机器学习</td>
+<td style="text-align:center">内置在流聚合之上，专注于逻辑回归和学习排名贡献模块</td>
+<td style="text-align:center">商业功能，专注于异常和异常值以及时间序列数据</td>
+</tr>
+</tbody>
+</table>
+<p>  Elasticsearch 和 Solr 都是开源搜索引擎，那么我们在使用时该如何选择呢？</p>
+<ul>
+<li>Google 搜索趋势结果表明，与 Solr 相比，Elasticsearch 具有很大的吸引力，但这并不意味着 Apache Solr 已经死亡。虽然有些人可能不这么认为，但 Solr 仍然是最受欢迎的搜索引擎之一，拥有强大的社区和开源支持。</li>
+<li>与 Solr 相比，Elasticsearch 易于安装且非常轻巧。此外，可以在几分钟内安装并运行 Elasticsearch。但是，如果 Elasticsearch 管理不当，这种易于部署和使用可能会成为一个问题。基于 JSON 的配置很简单，但如果要为文件中的每个配置指定注释，那么它不适合我们。总的来说，如果我们的应用使用的是 JSON，那么 Elasticsearch 是一个更好的选择。否则，请使用 Solr，因为它的 schema.xml 和 solrconfig.xml 都有很好的文档记录。</li>
+<li>Solr 拥有更大，更成熟的用户，开发者和贡献者社区。ES 虽拥有的规模较小但活跃的用户社区以及不断增长的贡献者社区。Solr 贡献者和提交者来自许多不同的组织，而 Elasticsearch 提交者来自单个公司。</li>
+<li>Solr 更成熟，但 ES 增长迅速，更稳定。</li>
+<li>Solr 是一个非常有据可查的产品，具有清晰的示例和 API 用例场景。 Elasticsearch 的文档组织良好，但它缺乏好的示例和清晰的配置说明。</li>
+</ul>
+<p>  那么，到底是 Solr 还是 Elasticsearch？<br>
+  有时很难找到明确的答案。无论我们选择 Solr 还是 Elasticsearch，首先需要了解正确的用例和未来需求，总结他们的每个属性。</p>
+<ul>
+<li>由于易于使用，Elasticsearch 在新开发者中更受欢迎。一个下载和一个命令就可以启动一切；</li>
+<li>如果除了搜索文本之外还需要它来处理分析查询，Elasticsearch 是更好的选择；</li>
+<li>随着数据量的增加，Solr 的搜索效率会变得更低，而 ElasticSearch 却没有明显的变化；</li>
+<li>Solr 利用 Zookeeper 进行分布式管理，而 Elasticsearch 自身带有分布式协调管理功能；</li>
+<li>Solr 支持更多格式的数据，比如 JSON、XML、CSV，而 Elasticsearch 仅支持 Json 文件格式；</li>
+<li>Solr 官方提供的功能更多，而 Elasticsearch 本身更注重于核心功能，高级功能多有第三方插件提供，例如图形化界面需要 Kibana 友好支撑；</li>
+<li>单纯的对已有数据进行搜索时，Solr 更快，但更新索引时慢（即插入删除慢），用于电商等查询多的应用;</li>
+<li>ES 建立索引快（即查询慢），即实时性查询快，用于 facebook、新浪等搜索。</li>
+<li>如果需要分布式索引，则需要选择 Elasticsearch。对于需要良好可伸缩性和以及性能分布式环境，Elasticsearch 是更好的选择；</li>
+<li>Solr 是传统搜索应用的有力解决方案，但 Elasticsearch 更适用于新兴的实时搜索应用；</li>
+<li>Solr 比较成熟，有一个更大，更成熟的用户、开发和贡献者社区，而 Elasticsearch 相对开发维护者较少，更新太快，学习使用成本较高；</li>
+<li>如果你喜欢监控和指标，那么可以使用 Elasticsearch，因为相对于 Solr，Elasticsearch 暴露了更多的关键指标。</li>
+</ul>
+<h2 id="1-5-Elasticsearch应用案例">1.5 Elasticsearch应用案例</h2>
+<ul>
+<li>GitHub：2013 年初，抛弃了 Solr，采取 Elasticsearch 来做 PB 级的搜索。GitHub 使用 Elasticsearch 搜索 20TB 的数据，包括 13 亿文件和 1300 亿行代码。</li>
+<li>维基百科：启动以 Elasticsearch 为基础的核心搜索架构 。</li>
+<li>SoundCloud：SoundCloud 使用 Elasticsearch 为 1.8 亿用户提供即时而精准的音乐搜索服务。</li>
+<li>百度：目前广泛使用 Elasticsearch 作为文本数据分析，采集百度所有服务器上的各类指标数据及用户自定义数据，通过对各种数据进行多维分析展示，辅助定位分析实例异常或业务层面异常。目前覆盖百度内部 20 多个业务线（包括云分析、网盟、预测、文库、直达号、钱包、风控等），单集群最大 100 台机器，200 个 ES 节点，每天导入 30TB+ 数据。</li>
+<li>新浪：使用 Elasticsearch 分析处理 32 亿条实时日志。</li>
+<li>阿里：使用 Elasticsearch 构建日志采集和分析体系。</li>
+<li>Stack Overflow：解决 Bug 问题的网站，全英文，编程人员交流的网站。</li>
+</ul>
+<h1 id="2-Elasticsearch入门">2. Elasticsearch入门</h1>
+<h2 id="2-1-Elasticsearch安装">2.1 Elasticsearch安装</h2>
+<h3 id="2-1-1-下载软件">2.1.1 下载软件</h3>
+<p>  Elasticsearch 的官方地址：<a target="_blank" rel="noopener" href="https://www.elastic.co/cn/">https://www.elastic.co/cn/</a><br>
+  Elasticsearch 目前最新的版本是 8.0.0，我们选择 7.17.0 版本（最好不要选最新的版本）<br>
+  下载地址：<a target="_blank" rel="noopener" href="https://www.elastic.co/cn/downloads/past-releases#elasticsearch">https://www.elastic.co/cn/downloads/past-releases#elasticsearch</a></p>
+<p><img src="https://img-blog.csdnimg.cn/372582dc7f8a4ba68f632f881e16d498.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  Elasticsearch 分为 Linux 和 Windows 版本，基于我们主要学习的是 Elasticsearch 的 Java 客户端的使用，所以课程中使用的是安装较为简便的 Windows 版本（后续再单独开一篇博客详细说 Linux 的部署教程）。</p>
+<p><img src="https://img-blog.csdnimg.cn/56ebbf23c154445fb71a6203d1dc220d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_13,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="2-1-2-安装软件">2.1.2 安装软件</h3>
+<p>  Windows 版的 Elasticsearch 的安装很简单，解压即安装完毕，解压后的 Elasticsearch 的目录结构如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/cbe6d16e36904fc8bd7a6d6038f1fa57.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_16,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">目录</th>
+<th style="text-align:center">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">bin</td>
+<td style="text-align:center">可执行脚本目录</td>
+</tr>
+<tr>
+<td style="text-align:center">config</td>
+<td style="text-align:center">配置目录</td>
+</tr>
+<tr>
+<td style="text-align:center">jdk</td>
+<td style="text-align:center">内置 JDK 目录</td>
+</tr>
+<tr>
+<td style="text-align:center">lib</td>
+<td style="text-align:center">类库</td>
+</tr>
+<tr>
+<td style="text-align:center">logs</td>
+<td style="text-align:center">日志目录</td>
+</tr>
+<tr>
+<td style="text-align:center">modules</td>
+<td style="text-align:center">模块目录</td>
+</tr>
+<tr>
+<td style="text-align:center">plugins</td>
+<td style="text-align:center">插件目录</td>
+</tr>
+</tbody>
+</table>
+<p>  解压后，进入<code>bin</code>文件目录，点击<code>elasticsearch.bat</code>文件启动 ES 服务：</p>
+<p><img src="https://img-blog.csdnimg.cn/4edaf2fd89134e0cb2c318a189c1020d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  注意：<code>9300</code>端口为 Elasticsearch 集群间组件的通信端口，<code>9200</code>端口为浏览器访问的 http 协议 RESTful 端口。<br>
+  打开浏览器（推荐使用谷歌浏览器），输入地址：<code>http://localhost:9200</code>，测试结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/9f29c0be297b4fd29e365fa08d811dbc.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_14,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="2-1-3-问题解决">2.1.3 问题解决</h3>
+<ul>
+<li>Elasticsearch 是使用 java 开发的，且 7.11 版本的 ES 需要 JDK 版本 1.8 以上，默认安装包带有 jdk 环境，如果系统配置 JAVA_HOME，那么使用系统默认的 JDK，如果没有配置使用自带的 JDK，一般建议使用系统配置的 JDK。</li>
+<li>双击启动窗口闪退，通过路径访问追踪错误，如果是 “空间不足”，请修改 config/jvm.options 配置文件，添加以下内容：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 设置JVM初始内存为1G。此值可以设置与-Xmx相同，以避免每次垃圾回收完成后JVM重新分配内存 </span><br><span class="line"># Xms represents the initial size of total heap space </span><br><span class="line"># 设置JVM最大可用内存为1G </span><br><span class="line"># Xmx represents the maximum size of total heap space </span><br><span class="line">-Xms1g </span><br><span class="line">-Xmx1g </span><br></pre></td></tr></table></figure>
+<p>  如果本地 JDK 版本不够高，可以手动指定使用自带高版本 JDK，在<code>bin</code>目录下找到<code>elasticsearch-env.bat</code>并打开，加入我们 ES 本身自带的 jdk 路径：</p>
+<p><img src="https://img-blog.csdnimg.cn/d1a9732a2e3c40c79d94b8ba10abb2d8.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_18,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  保存后重新执行<code>elasticsearch.bat</code>即可。</p>
+<h2 id="2-2-核心概念">2.2 核心概念</h2>
+<h3 id="2-2-1-索引（Index）">2.2.1 索引（Index）</h3>
+<p>  一个索引就是一个拥有几分相似特征的文档的集合。比如说，我们可以有一个客户数据的索引，另一个产品目录的索引，还有一个订单数据的索引。一个索引由一个名字来标识（必须全部是小写字母），并且当我们要对这个索引中的文档进行索引、搜索、更新和删除的时候，都要使用到这个名字。在一个集群中，可以定义任意多的索引。<br>
+  能搜索的数据必须索引，这样的好处是可以提高查询速度，比如：新华字典前面的目录就是索引的意思，目录可以提高查询速度。<br>
+  <code>Elasticsearch 索引的精髓：一切设计都是为了提高搜索的性能。 </code></p>
+<h3 id="2-2-2-类型（Type）">2.2.2 类型（Type）</h3>
+<p>  在一个索引中，我们可以定义一种或多种类型。<br>
+  一个类型是我们索引的一个逻辑上的分类/分区，其语义完全由我们自己来定。通常，会为具有一组共同字段的文档定义一个类型。不同的版本，类型发生了不同的变化。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">版本</th>
+<th style="text-align:center">Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">5.x</td>
+<td style="text-align:center">支持多种 type</td>
+</tr>
+<tr>
+<td style="text-align:center">6.x</td>
+<td style="text-align:center">只能有一种 type</td>
+</tr>
+<tr>
+<td style="text-align:center">7.x</td>
+<td style="text-align:center">默认不再支持自定义索引类型（默认类型为：_doc）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-2-3-文档（Document）">2.2.3 文档（Document）</h3>
+<p>  一个文档是一个可被索引的基础信息单元，也就是一条数据<br>
+  比如：我们可以拥有某一个客户的文档，某一个产品的一个文档，当然，也可以拥有某个订单的一个文档。文档以 JSON（Javascript Object Notation）格式来表示，而 JSON 是一个到处存在的互联网数据交互格式。<br>
+  在一个 index/type 里面，我们可以存储任意多的文档。</p>
+<h3 id="2-2-4-字段（Field）">2.2.4 字段（Field）</h3>
+<p>  相当于是数据表的字段，对文档数据根据不同属性进行的分类标识。</p>
+<h3 id="2-2-5-映射（Mapping）">2.2.5 映射（Mapping）</h3>
+<p>  mapping 是处理数据的方式和规则方面做一些限制，如：某个字段的数据类型、默认值、分析器、是否被索引等等。这些都是映射里面可以设置的，其它就是处理 ES 里面数据的一些使用规则设置也叫做映射，按着最优规则处理数据对性能提高很大，因此才需要建立映射，并且需要思考如何建立映射才能对性能更好。</p>
+<h3 id="2-2-6-分片（Shards）">2.2.6 分片（Shards）</h3>
+<p>  一个索引可以存储超出单个节点硬件限制的大量数据。比如，一个具有 10 亿文档数据的索引占据 1TB 的磁盘空间，而任一节点都可能没有这样大的磁盘空间。或者单个节点处理搜索请求，响应太慢。为了解决这个问题，Elasticsearch 提供了将索引划分成多份的能力，每一份就称之为分片。当我们创建一个索引的时候，我们可以指定自己想要的分片的数量。每个分片本身也是一个功能完善并且独立的 “索引”，这个 “索引” 可以被放置到集群中的任何节点上。<br>
+  分片很重要，主要有两方面的原因：</p>
+<ol>
+<li>允许我们水平分割 / 扩展自己的内容容量。</li>
+<li>允许我们在分片之上进行分布式的、并行的操作，进而提高性能/吞吐量。</li>
+</ol>
+<p>  至于一个分片怎样分布，它的文档怎样聚合和搜索请求，是完全由 Elasticsearch 管理的，对于作为用户的我们来说，这些都是透明的，无需过分关心。<br>
+  <code>被混淆的概念是，一个 Lucene 索引 我们在 Elasticsearch 称作分片 。 一个 Elasticsearch 索引是分片的集合。 当 Elasticsearch 在索引中搜索的时候，他发送查询到每一个属于索引的分片(Lucene 索引)，然后合并每个分片的结果到一个全局的结果集。 </code></p>
+<h3 id="2-2-7-副本（Replicas）">2.2.7 副本（Replicas）</h3>
+<p>  在一个网络 / 云的环境里，失败随时都可能发生，在某个分片/节点不知怎么的就处于离线状态，或者由于任何原因消失了，这种情况下，有一个故障转移机制是非常有用并且是强烈推荐的。为此目的，Elasticsearch 允许我们创建分片的一份或多份拷贝，这些拷贝叫做复制分片（副本）。<br>
+  复制分片之所以重要，有两个主要原因：</p>
+<ol>
+<li>在分片/节点失败的情况下，提供了高可用性。因为这个原因，注意到复制分片从不与原/主要（original/primary）分片置于同一节点上是非常重要的。</li>
+<li>扩展我们的搜索量/吞吐量，因为搜索可以在所有的副本上并行运行。总之，每个索引可以被分成多个分片。一个索引也可以被复制 0 次（意思是没有复制）或多次。一旦复制了，每个索引就有了主分片（作为复制源的原来的分片）和复制分片（主分片的拷贝）之别。分片和复制的数量可以在索引创建的时候指定。在索引创建之后，我们可以在任何时候动态地改变复制的数量，但是我们事后不能改变分片的数量。默认情况下， Elasticsearch 中的每个索引被分片 1 个主分片和 1 个复制，这意味着，如果我们的集群中至少有两个节点，我们的索引将会有 1 个主分片和另外 1 个复制分片（1 个完全拷贝），这样的话每个索引总共就有 2 个分片，我们需要根据索引需要确定分片个数。</li>
+</ol>
+<h3 id="2-2-8-分配（Allocation）">2.2.8 分配（Allocation）</h3>
+<p>  将分片分配给某个节点的过程，包括分配主分片或者副本。如果是副本，还包含从主分片复制数据的过程。这个过程是由 master 节点完成的。</p>
+<h2 id="2-3-Elasticsearch核心概念-VS-数据库核心概念">2.3 Elasticsearch核心概念 VS 数据库核心概念</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">关系型数据库（比如Mysql）</th>
+<th style="text-align:center">非关系型数据库（Elasticsearch）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">数据库Database</td>
+<td style="text-align:center">索引Index</td>
+</tr>
+<tr>
+<td style="text-align:center">表Table</td>
+<td style="text-align:center">索引Index（原为Type）</td>
+</tr>
+<tr>
+<td style="text-align:center">数据行Row</td>
+<td style="text-align:center">文档Document</td>
+</tr>
+<tr>
+<td style="text-align:center">数据列Column</td>
+<td style="text-align:center">字段Field</td>
+</tr>
+<tr>
+<td style="text-align:center">约束 Schema</td>
+<td style="text-align:center">映射Mapping</td>
+</tr>
+</tbody>
+</table>
+<p>  Elasticsearch（集群）中可以包含多个索引（数据库），每个索引中可以包含多个类型（表），每个类型下又包含多个文档（行），每个文档中又包含多个字段（列）。</p>
+<h2 id="2-4-系统架构">2.4 系统架构</h2>
+<p><img src="https://img-blog.csdnimg.cn/9193f6f6720d499a92eea4f0be2c00d5.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_14,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  一个运行中的 Elasticsearch 实例称为一个节点，而集群是由一个或者多个拥有相同 <a target="_blank" rel="noopener" href="http://cluster.name">cluster.name</a> 配置的节点组成， 它们共同承担数据和负载的压力。当有节点加入集群中或者从集群中移除节点时，集群将会重新平均分布所有的数据。<br>
+  当一个节点被选举成为主节点时， 它将负责管理集群范围内的所有变更，例如增加、删除索引，或者增加、删除节点等。 而主节点并不需要涉及到文档级别的变更和搜索等操作，所以当集群只拥有一个主节点的情况下，即使流量的增加它也不会成为瓶颈。 任何节点都可以成为主节点。我们的示例集群就只有一个节点，所以它同时也成为了主节点。<br>
+  作为用户，我们可以将请求发送到集群中的任何节点 ，包括主节点。 每个节点都知道任意文档所处的位置，并且能够将我们的请求直接转发到存储我们所需文档的节点。 无论我们将请求发送到哪个节点，它都能负责从各个包含我们所需文档的节点收集回数据，并将最终结果返回給客户端。 Elasticsearch 对这一切的管理都是透明的。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2022/02/17/elastic_2/">https://program-park.github.io/2022/02/17/elastic_2/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Elasticsearch/">Elasticsearch</a><a class="post-meta__tags" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a></div><div class="post_share"><div class="social-share" data-image="/img/elastic/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/02/20/elastic_3/"><img class="prev-cover" src="/img/elastic/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Elastic Stack 日志分析（三）- Elasticsearch HTTP 操作详解</div></div></a></div><div class="next-post pull-right"><a href="/2022/02/16/elastic_1/"><img class="next-cover" src="/img/elastic/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Elastic Stack 日志分析（一）- ELK 简介</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/02/24/elastic_10/" title="Elastic Stack 日志分析（十）- Elasticsearch 数据路由详解"><img class="cover" src="/img/elastic/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-24</div><div class="title">Elastic Stack 日志分析（十）- Elasticsearch 数据路由详解</div></div></a></div><div><a href="/2022/02/16/elastic_1/" title="Elastic Stack 日志分析（一）- ELK 简介"><img class="cover" src="/img/elastic/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-16</div><div class="title">Elastic Stack 日志分析（一）- ELK 简介</div></div></a></div><div><a href="/2022/03/01/elastic_11/" title="Elastic Stack 日志分析（十一）- Elasticsearch 性能优化方案总结"><img class="cover" src="/img/elastic/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-03-01</div><div class="title">Elastic Stack 日志分析（十一）- Elasticsearch 性能优化方案总结</div></div></a></div><div><a href="/2022/03/08/elastic_12/" title="Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解"><img class="cover" src="/img/elastic/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-03-08</div><div class="title">Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解</div></div></a></div><div><a href="/2022/03/14/elastic_14/" title="Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解"><img class="cover" src="/img/elastic/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-03-14</div><div class="title">Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解</div></div></a></div><div><a href="/2022/03/08/elastic_13/" title="Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案"><img class="cover" src="/img/elastic/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-03-08</div><div class="title">Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">165</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">32</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-Elasticsearch%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">1. Elasticsearch是什么</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-Elasticsearch%E7%AE%80%E4%BB%8B"><span class="toc-text">1.1 Elasticsearch简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E5%85%A8%E6%96%87%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E"><span class="toc-text">1.2 全文搜索引擎</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-Elasticsearch-VS-Solr"><span class="toc-text">1.3 Elasticsearch VS Solr</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-5-Elasticsearch%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B"><span class="toc-text">1.5 Elasticsearch应用案例</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-Elasticsearch%E5%85%A5%E9%97%A8"><span class="toc-text">2. Elasticsearch入门</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-Elasticsearch%E5%AE%89%E8%A3%85"><span class="toc-text">2.1 Elasticsearch安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1-%E4%B8%8B%E8%BD%BD%E8%BD%AF%E4%BB%B6"><span class="toc-text">2.1.1 下载软件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-2-%E5%AE%89%E8%A3%85%E8%BD%AF%E4%BB%B6"><span class="toc-text">2.1.2 安装软件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-3-%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3"><span class="toc-text">2.1.3 问题解决</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="toc-text">2.2 核心概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-1-%E7%B4%A2%E5%BC%95%EF%BC%88Index%EF%BC%89"><span class="toc-text">2.2.1 索引（Index）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-2-%E7%B1%BB%E5%9E%8B%EF%BC%88Type%EF%BC%89"><span class="toc-text">2.2.2 类型（Type）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-3-%E6%96%87%E6%A1%A3%EF%BC%88Document%EF%BC%89"><span class="toc-text">2.2.3 文档（Document）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-4-%E5%AD%97%E6%AE%B5%EF%BC%88Field%EF%BC%89"><span class="toc-text">2.2.4 字段（Field）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-5-%E6%98%A0%E5%B0%84%EF%BC%88Mapping%EF%BC%89"><span class="toc-text">2.2.5 映射（Mapping）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-6-%E5%88%86%E7%89%87%EF%BC%88Shards%EF%BC%89"><span class="toc-text">2.2.6 分片（Shards）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-7-%E5%89%AF%E6%9C%AC%EF%BC%88Replicas%EF%BC%89"><span class="toc-text">2.2.7 副本（Replicas）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-8-%E5%88%86%E9%85%8D%EF%BC%88Allocation%EF%BC%89"><span class="toc-text">2.2.8 分配（Allocation）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-Elasticsearch%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5-VS-%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="toc-text">2.3 Elasticsearch核心概念 VS 数据库核心概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84"><span class="toc-text">2.4 系统架构</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/14/elastic_15/" title="Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项"/></a><div class="content"><a class="title" href="/2022/03/14/elastic_15/" title="Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项">Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项</a><time datetime="2022-03-14T06:12:45.000Z" title="发表于 2022-03-14 14:12:45">2022-03-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/14/elastic_14/" title="Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解"/></a><div class="content"><a class="title" href="/2022/03/14/elastic_14/" title="Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解">Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解</a><time datetime="2022-03-14T02:28:33.000Z" title="发表于 2022-03-14 10:28:33">2022-03-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/08/elastic_13/" title="Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案"/></a><div class="content"><a class="title" href="/2022/03/08/elastic_13/" title="Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案">Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案</a><time datetime="2022-03-08T09:24:42.000Z" title="发表于 2022-03-08 17:24:42">2022-03-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/08/elastic_12/" title="Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解"/></a><div class="content"><a class="title" href="/2022/03/08/elastic_12/" title="Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解">Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解</a><time datetime="2022-03-08T06:56:57.000Z" title="发表于 2022-03-08 14:56:57">2022-03-08</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/elastic/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2022/02/17/elastic_2/'
+    this.page.identifier = '/2022/02/17/elastic_2/'
+    this.page.title = 'Elastic Stack 日志分析（二）- Elasticsearch 入门及核心概念详解'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

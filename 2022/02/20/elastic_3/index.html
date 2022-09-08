@@ -1,0 +1,669 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Elastic Stack 日志分析（三）- Elasticsearch HTTP 操作详解 | 程序园</title><meta name="keywords" content="Elasticsearch,大数据"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是《Elastic Stack日志分析》系列，第三篇：Elasticsearch HTTP 操作详解。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Elastic Stack 日志分析（三）- Elasticsearch HTTP 操作详解">
+<meta property="og:url" content="https://program-park.github.io/2022/02/20/elastic_3/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是《Elastic Stack日志分析》系列，第三篇：Elasticsearch HTTP 操作详解。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/elastic/1.png">
+<meta property="article:published_time" content="2022-02-20T11:58:26.000Z">
+<meta property="article:modified_time" content="2022-09-08T03:50:06.231Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="Elasticsearch">
+<meta property="article:tag" content="大数据">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/elastic/1.png"><link rel="shortcut icon" href="/img/favicon_logo/favicon.png"><link rel="canonical" href="https://program-park.github.io/2022/02/20/elastic_3/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Elastic Stack 日志分析（三）- Elasticsearch HTTP 操作详解',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-08 11:50:06'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">165</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">32</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/elastic/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Elastic Stack 日志分析（三）- Elasticsearch HTTP 操作详解</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-02-20T11:58:26.000Z" title="发表于 2022-02-20 19:58:26">2022-02-20</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-08T03:50:06.231Z" title="更新于 2022-09-08 11:50:06">2022-09-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Elastic-Stack/">Elastic Stack</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Elastic-Stack/Elasticsearch/">Elasticsearch</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>25分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Elastic Stack 日志分析（三）- Elasticsearch HTTP 操作详解"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="1-RESTful">1. RESTful</h1>
+<p>  REST 指的是一组架构约束条件和原则。满足这些约束条件和原则的应用程序或设计就是 RESTful。Web 应用程序最重要的 REST 原则是，客户端和服务器之间的交互在请求之间是无状态的。从客户端到服务器的每个请求都必须包含理解请求所必需的信息。如果服务器在请求之间的任何时间点重启，客户端不会得到通知。此外，无状态请求可以由任何可用服务器回答，这十分适合云计算之类的环境。客户端可以缓存数据以改进性能。<br>
+  在服务器端，应用程序状态和功能可以分为各种资源。资源是一个有趣的概念实体，它向客户端公开。资源的例子有：应用程序对象、数据库记录、算法等等。每个资源都使用 URI (Universal Resource Identifier) 得到一个唯一的地址。所有资源都共享统一的接口，以便在客户端和服务器之间传输状态。使用的是标准的 HTTP 方法，比如 GET、PUT、POST 和<br>
+DELETE。<br>
+  在 REST 样式的 Web 服务中，每个资源都有一个地址。资源本身都是方法调用的目标，方法列表对所有资源都是一样的。这些方法都是标准方法，包括 HTTP GET、POST、PUT、DELETE，还可能包括 HEAD 和 OPTIONS。简单的理解就是，如果想要访问互联网上的资源，就必须向资源所在的服务器发出请求，请求体中必须包含资源的网络路径，以及对资源进行的操作（增删改查）。</p>
+<h1 id="2-客户端安装">2. 客户端安装</h1>
+<p>  如果直接通过浏览器向 Elasticsearch 服务器发请求，那么需要在发送的请求中包含 HTTP 标准的方法，而 HTTP 的大部分特性且仅支持 GET 和 POST 方法。所以为了能方便地进行客户端的访问，可以使用 Postman 软件。<br>
+  Postman 是一款强大的网页调试工具，提供功能强大的 Web API 和 HTTP 请求调试。软件功能强大，界面简洁明晰、操作方便快捷，设计得很人性化。Postman 中文版能够发送任何类型的 HTTP 请求（GET, HEAD, POST, PUT······），不仅能够表单提交，且可以附带任意类型请求体。<br>
+  Postman 官网：<a target="_blank" rel="noopener" href="https://www.getpostman.com">https://www.getpostman.com</a><br>
+  Postman 下载：<a target="_blank" rel="noopener" href="https://www.getpostman.com/apps">https://www.getpostman.com/apps</a></p>
+<p><img src="https://img-blog.csdnimg.cn/93ea2c419cac4714aa4958340a9c8805.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="3-HTTP操作">3. HTTP操作</h1>
+<h2 id="3-1-索引操作">3.1 索引操作</h2>
+<h3 id="3-1-1-创建索引">3.1.1 创建索引</h3>
+<p>  对比关系型数据库，创建索引就等同于创建数据库。<br>
+  在 Postman 中，向 ES 服务器发<code>PUT</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/shopping">http://127.0.0.1:9200/shopping</a></p>
+<p><img src="https://img-blog.csdnimg.cn/1781bfd0726b4e3e80beeb0fba554390.png#pic_center" alt="在这里插入图片描述"><br>
+  请求后，服务器返回响应：</p>
+<p><img src="https://img-blog.csdnimg.cn/c8cf075b77644d67be0780634dcc9e72.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_19,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;acknowledged&quot;: true,	# 响应结果，true表示操作成功</span><br><span class="line">    &quot;shards_acknowledged&quot;: true,	# 分片结果，true表示分片成功</span><br><span class="line">    &quot;index&quot;: &quot;shopping&quot;	# 索引名称</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 注意：创建索引库的分片数默认1片，在7.0.0之前的Elasticsearch版本中，默认5片</span><br></pre></td></tr></table></figure>
+<p>  如果重复添加索引，会返回错误信息：</p>
+<p><img src="https://img-blog.csdnimg.cn/21cf69ebeb464ffab477022acea14301.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_19,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-1-2-查看所有索引">3.1.2 查看所有索引</h3>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/_cat/indices?v">http://127.0.0.1:9200/_cat/indices?v</a></p>
+<p><img src="https://img-blog.csdnimg.cn/ad0ea300a5c54b70b61f810389aaf8f3.png#pic_center" alt="在这里插入图片描述"><br>
+  这里请求路径中的<code>_cat</code>表示查看的意思，<code>indices</code>表示索引，所以整体含义就是查看当前 ES 服务器中的所有索引，就好像 MySQL 中的<code>show tables</code>的感觉，服务器响应结果如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/26d856cf69db4ddba40e5b74b9a1ebcb.png#pic_center" alt="在这里插入图片描述"></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">表头</th>
+<th style="text-align:center">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">health</td>
+<td style="text-align:center">当前服务器健康状态： <br>green（集群完整）yellow（单点正常、集群不完整）red（单点不正常）</td>
+</tr>
+<tr>
+<td style="text-align:center">status</td>
+<td style="text-align:center">索引打开、关闭状态</td>
+</tr>
+<tr>
+<td style="text-align:center">index</td>
+<td style="text-align:center">索引名</td>
+</tr>
+<tr>
+<td style="text-align:center">uuid</td>
+<td style="text-align:center">索引统一编号</td>
+</tr>
+<tr>
+<td style="text-align:center">pri</td>
+<td style="text-align:center">主分片数量</td>
+</tr>
+<tr>
+<td style="text-align:center">rep</td>
+<td style="text-align:center">副本数量</td>
+</tr>
+<tr>
+<td style="text-align:center">docs.count</td>
+<td style="text-align:center">可用文档数量</td>
+</tr>
+<tr>
+<td style="text-align:center">docs.deleted</td>
+<td style="text-align:center">文档删除状态（逻辑删除）</td>
+</tr>
+<tr>
+<td style="text-align:center">store.size</td>
+<td style="text-align:center">主分片和副分片整体占空间大小</td>
+</tr>
+<tr>
+<td style="text-align:center">pri.store.size</td>
+<td style="text-align:center">主分片占空间大小</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-1-3-查看单个索引">3.1.3 查看单个索引</h3>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求 ：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/shopping">http://127.0.0.1:9200/shopping</a></p>
+<p><img src="https://img-blog.csdnimg.cn/e1504abf62fd4d1688d84887e8636ed2.png#pic_center" alt="在这里插入图片描述"><br>
+  查看索引向 ES 服务器发送的请求路径和创建索引是一致的。但是 HTTP 方法不一致。这里可以体会一下 RESTful 的意义。<br>
+  请求后，服务器响应结果如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/2d46c29203e84b2b9d6d92d808391c56.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_15,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;shopping&quot;: &#123;	# 索引名</span><br><span class="line">        &quot;aliases&quot;: &#123;&#125;,	# 别名</span><br><span class="line">        &quot;mappings&quot;: &#123;&#125;,	# 映射</span><br><span class="line">        &quot;settings&quot;: &#123;	# 设置</span><br><span class="line">            &quot;index&quot;: &#123;	# 设置-索引</span><br><span class="line">                &quot;routing&quot;: &#123;</span><br><span class="line">                    &quot;allocation&quot;: &#123;</span><br><span class="line">                        &quot;include&quot;: &#123;</span><br><span class="line">                            &quot;_tier_preference&quot;: &quot;data_content&quot;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;,</span><br><span class="line">                &quot;number_of_shards&quot;: &quot;1&quot;,	# 设置-索引-主分片数量</span><br><span class="line">                &quot;provided_name&quot;: &quot;shopping&quot;,	# 设置-索引-名称</span><br><span class="line">                &quot;creation_date&quot;: &quot;1645168939125&quot;,	# 设置-索引-创建时间</span><br><span class="line">                &quot;number_of_replicas&quot;: &quot;1&quot;,	# 设置-索引-副分片数量</span><br><span class="line">                &quot;uuid&quot;: &quot;ts8FMxhKR7WvvjQyfXwDHA&quot;,	# 设置-索引-唯一标识</span><br><span class="line">                &quot;version&quot;: &#123;	# 设置-索引-版本</span><br><span class="line">                    &quot;created&quot;: &quot;7170099&quot;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-1-4-删除索引">3.1.4 删除索引</h3>
+<p>  在 Postman 中，向 ES 服务器发<code>DELETE</code>请求 ：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/shopping">http://127.0.0.1:9200/shopping</a></p>
+<p><img src="https://img-blog.csdnimg.cn/56c4769d7fe845b1923e6172fc01a240.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_19,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  重新访问索引时，服务器返回响应：索引不存在</p>
+<p><img src="https://img-blog.csdnimg.cn/68d45d22af0e42eda4e4091223167521.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_19,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="3-2-文档操作">3.2 文档操作</h2>
+<h3 id="3-2-1-创建文档">3.2.1 创建文档</h3>
+<p>  索引已经创建好了，接下来我们来创建文档，并添加数据。这里的文档可以类比为关系型数据库中的表数据，添加的数据格式为 JSON 格式。<br>
+  在 Postman 中，向 ES 服务器发<code>POST</code>请求 ：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/shopping/_doc">http://127.0.0.1:9200/shopping/_doc</a><br>
+  请求体内容为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123; </span><br><span class="line">    &quot;title&quot;:&quot;小米手机&quot;, </span><br><span class="line">    &quot;category&quot;:&quot;小米&quot;, </span><br><span class="line">    &quot;images&quot;:&quot;http://www.xiaomi.com/xm.jpg&quot;, </span><br><span class="line">    &quot;price&quot;:3999.00 </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/29869c31ee264aefb4bea78c48333fce.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  此处发送请求的方式必须为<code>POST</code>，不能是<code>PUT</code>，否则会发生错误：</p>
+<p><img src="https://img-blog.csdnimg.cn/65964d795ab94dc99844e5eb983e6d3c.png#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/ce7cb46dd35249a4b1ee838c6ef52a2b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_14,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;_index&quot;: &quot;shopping&quot;,	# 索引</span><br><span class="line">    &quot;_type&quot;: &quot;_doc&quot;,	# 类型-文档</span><br><span class="line">    &quot;_id&quot;: &quot;Wy_XC38B-Hye1cdLkPY_&quot;,	# 唯一标识，可以类比为MySQL中的主键，随机生成</span><br><span class="line">    &quot;_version&quot;: 1,	# 版本</span><br><span class="line">    &quot;result&quot;: &quot;created&quot;,	# 结果，这里的created表示成功</span><br><span class="line">    &quot;_shards&quot;: &#123;	# 分片</span><br><span class="line">        &quot;total&quot;: 2,	# 分片总数</span><br><span class="line">        &quot;successful&quot;: 1,	# 分片成功</span><br><span class="line">        &quot;failed&quot;: 0	# 分片失败</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;_seq_no&quot;: 0,</span><br><span class="line">    &quot;_primary_term&quot;: 1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  上面的数据创建后，由于没有指定数据唯一性标识（ID），默认情况下，ES 服务器会随机生成一个。<br>
+  如果想要自定义唯一性标识，需要在创建时指定：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/shopping/_doc/1">http://127.0.0.1:9200/shopping/_doc/1</a></p>
+<p><img src="https://img-blog.csdnimg.cn/e49a47f2a58448d08c2f283dd9eab5dc.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/05b5772965b040f2b4c41e0ba3ba26e1.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  此处需要注意：如果增加数据时明确数据主键，那么请求方式也可以为<code>PUT</code>。</p>
+<h3 id="3-2-2-查看文档">3.2.2 查看文档</h3>
+<p>  查看文档时，需要指明文档的唯一性标识，类似于 MySQL 中数据的主键查询。<br>
+  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/shopping/_doc/1">http://127.0.0.1:9200/shopping/_doc/1</a></p>
+<p><img src="https://img-blog.csdnimg.cn/685c205d5ebc43f0b1135b2b93635dda.png#pic_center" alt="在这里插入图片描述"><br>
+  查询成功后，服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/3fc9790df7c545ecb82c148b301b4fcc.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;_index&quot;: &quot;shopping&quot;,	# 索引</span><br><span class="line">    &quot;_type&quot;: &quot;_doc&quot;,	# 文档类型</span><br><span class="line">    &quot;_id&quot;: &quot;1&quot;,</span><br><span class="line">    &quot;_version&quot;: 1,</span><br><span class="line">    &quot;_seq_no&quot;: 1,</span><br><span class="line">    &quot;_primary_term&quot;: 1,</span><br><span class="line">    &quot;found&quot;: true,	# 查询结果，true表示查找到，false表示未查找到</span><br><span class="line">    &quot;_source&quot;: &#123;	# 文档源信息</span><br><span class="line">        &quot;title&quot;: &quot;华为手机&quot;,</span><br><span class="line">        &quot;category&quot;: &quot;华为&quot;,</span><br><span class="line">        &quot;images&quot;: &quot;http://www.huawei.com/xm.jpg&quot;,</span><br><span class="line">        &quot;price&quot;: 5999.00</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-2-3-修改文档">3.2.3 修改文档</h3>
+<p>  和新增文档一样，输入相同的 URL 地址请求，如果请求体变化，会将原有的数据内容覆盖。<br>
+  在 Postman 中，向 ES 服务器发<code>POST</code>请求 ：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/shopping/_doc/1">http://127.0.0.1:9200/shopping/_doc/1</a></p>
+<p><img src="https://img-blog.csdnimg.cn/22b2607ffbe44d5a9119aae8f13e985b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  修改成功后，服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/4fab25f89c99456ea0cf7c743733afb8.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;_index&quot;: &quot;shopping&quot;,</span><br><span class="line">    &quot;_type&quot;: &quot;_doc&quot;,</span><br><span class="line">    &quot;_id&quot;: &quot;1&quot;,</span><br><span class="line">    &quot;_version&quot;: 2,	# 版本</span><br><span class="line">    &quot;result&quot;: &quot;updated&quot;,	# 结果，updated表示数据被更新</span><br><span class="line">    &quot;_shards&quot;: &#123;</span><br><span class="line">        &quot;total&quot;: 2,</span><br><span class="line">        &quot;successful&quot;: 1,</span><br><span class="line">        &quot;failed&quot;: 0</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;_seq_no&quot;: 2,</span><br><span class="line">    &quot;_primary_term&quot;: 1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-2-4-修改某一条数据的局部信息">3.2.4 修改某一条数据的局部信息</h3>
+<p>  在 Postman 中，向 ES 服务器发<code>POST</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/shopping/_update/1">http://127.0.0.1:9200/shopping/_update/1</a><br>
+  请求体内容为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;  </span><br><span class="line">  &quot;doc&quot;: &#123; </span><br><span class="line">    &quot;price&quot;:7999.00 </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/3ccf839382c64e5998609fc7638efde9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  修改成功后，服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/7b9bb3198fcf40c38257c7e8fdca87d5.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  根据唯一性标识，查询文档数据，文档数据已经更新 ：</p>
+<p><img src="https://img-blog.csdnimg.cn/fc20c5229f614e96b90a944ed23b8bab.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/44279f7b415d4d2184e7e8f2b963b5ad.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-2-5-删除文档">3.2.5 删除文档</h3>
+<p>  删除一个文档不会立即从磁盘上移除，它只是被标记成已删除（逻辑删除）。<br>
+  在 Postman 中，向 ES 服务器发<code>DELETE</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/shopping/_doc/1">http://127.0.0.1:9200/shopping/_doc/1</a></p>
+<p><img src="https://img-blog.csdnimg.cn/217fb74f2e0746ca9d2f05abcb8d8548.png#pic_center" alt="在这里插入图片描述"><br>
+  删除成功，服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/cc35dbf5db444b679d8b0294ef3edb10.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;_index&quot;: &quot;shopping&quot;,</span><br><span class="line">    &quot;_type&quot;: &quot;_doc&quot;,</span><br><span class="line">    &quot;_id&quot;: &quot;1&quot;,</span><br><span class="line">    &quot;_version&quot;: 4,	# 版本，对数据的操作，都会更新版本</span><br><span class="line">    &quot;result&quot;: &quot;deleted&quot;,	# 结果，deleted表示数据被标记为删除</span><br><span class="line">    &quot;_shards&quot;: &#123;</span><br><span class="line">        &quot;total&quot;: 2,</span><br><span class="line">        &quot;successful&quot;: 1,</span><br><span class="line">        &quot;failed&quot;: 0</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;_seq_no&quot;: 4,</span><br><span class="line">    &quot;_primary_term&quot;: 1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  删除后再查询当前文档信息：</p>
+<p><img src="https://img-blog.csdnimg.cn/996866d0a17846089796a3288f1ce287.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/73f358eb11c54cf7a76416d4e8b4626b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  如果删除一个并不存在的文档：</p>
+<p><img src="https://img-blog.csdnimg.cn/31ac00350d06432298dc1ee673195726.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/46f4989187af449e8dfca1a710a71fa8.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_11,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;_index&quot;: &quot;shopping&quot;,</span><br><span class="line">    &quot;_type&quot;: &quot;_doc&quot;,</span><br><span class="line">    &quot;_id&quot;: &quot;2&quot;,</span><br><span class="line">    &quot;_version&quot;: 1,</span><br><span class="line">    &quot;result&quot;: &quot;not_found&quot;,	# 结果，not_found表示未查找到</span><br><span class="line">    &quot;_shards&quot;: &#123;</span><br><span class="line">        &quot;total&quot;: 2,</span><br><span class="line">        &quot;successful&quot;: 1,</span><br><span class="line">        &quot;failed&quot;: 0</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;_seq_no&quot;: 5,</span><br><span class="line">    &quot;_primary_term&quot;: 1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-2-6-条件删除文档">3.2.6 条件删除文档</h3>
+<p>  一般删除数据都是根据文档的唯一性标识进行删除，实际操作时，也可以根据条件对多条数据进行删除，首先分别增加多条数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;title&quot;:&quot;小米手机&quot;, </span><br><span class="line">    &quot;category&quot;:&quot;小米&quot;, </span><br><span class="line">    &quot;images&quot;:&quot;http://www.xiaomi.com/xm.jpg&quot;, </span><br><span class="line">    &quot;price&quot;:4000.00 </span><br><span class="line">&#125;</span><br><span class="line">&#123;</span><br><span class="line">    &quot;title&quot;:&quot;华为手机&quot;, </span><br><span class="line">    &quot;category&quot;:&quot;华为&quot;, </span><br><span class="line">    &quot;images&quot;:&quot;http://www.huawei.com/hw.jpg&quot;, </span><br><span class="line">    &quot;price&quot;:4000.00 </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/ba88957193064eb19995a166cad68a74.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/df2a61e64947463388128f2a96862902.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  向 ES 服务器发<code>POST</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/shopping/_delete_by_query">http://127.0.0.1:9200/shopping/_delete_by_query</a><br>
+  请求体内容为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123; </span><br><span class="line">  &quot;query&quot;:&#123; </span><br><span class="line">    &quot;match&quot;:&#123; </span><br><span class="line">      &quot;price&quot;:4000.00 </span><br><span class="line">    &#125; </span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/2cf476efb0444b06bdd1cc1a87a3482c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  删除成功后，服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/d8b12020099945c98fc74bf16ac8fd78.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_13,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;took&quot;: 15,	# 耗时</span><br><span class="line">    &quot;timed_out&quot;: false,	# 是否超时</span><br><span class="line">    &quot;total&quot;: 2,	# 总数</span><br><span class="line">    &quot;deleted&quot;: 2,	# 删除数量</span><br><span class="line">    &quot;batches&quot;: 1,</span><br><span class="line">    &quot;version_conflicts&quot;: 0,</span><br><span class="line">    &quot;noops&quot;: 0,</span><br><span class="line">    &quot;retries&quot;: &#123;</span><br><span class="line">        &quot;bulk&quot;: 0,</span><br><span class="line">        &quot;search&quot;: 0</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;throttled_millis&quot;: 0,</span><br><span class="line">    &quot;requests_per_second&quot;: -1.0,</span><br><span class="line">    &quot;throttled_until_millis&quot;: 0,</span><br><span class="line">    &quot;failures&quot;: []</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-3-映射操作">3.3 映射操作</h2>
+<p>  有了索引库，等于有了数据库中的 database。接下来就需要建索引库（index）中的映射了，类似于数据库（database）中的表结构（table）。<br>
+  创建数据库表需要设置字段名称，类型，长度，约束等；索引库也一样，需要知道这个类型下有哪些字段，每个字段有哪些约束信息，这就叫做映射（mapping）。</p>
+<h3 id="3-3-1-创建映射">3.3.1 创建映射</h3>
+<p>  在 Postman 中，向 ES 服务器发<code>PUT</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_mapping">http://127.0.0.1:9200/student/_mapping</a><br>
+  请求体内容为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#123; </span><br><span class="line">    &quot;properties&quot;: &#123; </span><br><span class="line">        &quot;name&quot;:&#123;</span><br><span class="line">            &quot;type&quot;: &quot;text&quot;, </span><br><span class="line">            &quot;index&quot;: true </span><br><span class="line">        &#125;, </span><br><span class="line">        &quot;sex&quot;:&#123; </span><br><span class="line">            &quot;type&quot;: &quot;text&quot;, </span><br><span class="line">            &quot;index&quot;: false </span><br><span class="line">        &#125;, </span><br><span class="line">        &quot;age&quot;:&#123; </span><br><span class="line">            &quot;type&quot;: &quot;long&quot;, </span><br><span class="line">            &quot;index&quot;: false </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/06082af16d594347972081484e36f86b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/1f13e2794b42483aa7ed3e64700c55bc.png#pic_center" alt="在这里插入图片描述"><br>
+  映射数据说明：</p>
+<ul>
+<li>字段名：任意填写，下面指定许多属性，例如：title、subtitle、images、price；</li>
+<li>type：类型，Elasticsearch 中支持的数据类型非常丰富，说几个关键的：
+<ul>
+<li>String 类型，又分两种：
+<ul>
+<li>text：可分词；</li>
+<li>keyword：不可分词，数据会作为完整字段进行匹配；</li>
+</ul>
+</li>
+<li>Numerical：数值类型，分两类：
+<ul>
+<li>基本数据类型：long、integer、short、byte、double、float、half_float；</li>
+<li>浮点数的高精度类型：scaled_float；</li>
+</ul>
+</li>
+<li>Date：日期类型；</li>
+<li>Array：数组类型；</li>
+<li>Object：对象；</li>
+</ul>
+</li>
+<li>index：是否索引，默认为 true，也就是说你不进行任何配置，所有字段都会被索引；
+<ul>
+<li>true：字段会被索引，则可以用来进行搜索；</li>
+<li>false：字段不会被索引，不能用来搜索；</li>
+</ul>
+</li>
+<li>store：是否将数据进行独立存储，默认为 false；
+<ul>
+<li>原始的文本会存储在 _source 里面，默认情况下其他提取出来的字段都不是独立存储的，是从 _source 里面提取出来的。当然你也可以独立的存储某个字段，只要设置<code>&quot;store&quot;:true</code>即可，获取独立存储的字段要比从_source 中解析快得多，但是也会占用更多的空间，所以要根据实际业务需求来设置；</li>
+</ul>
+</li>
+<li>analyzer：分词器，这里的 ik_max_word 即使用 ik 分词器，后面再写专门的博客来说学习；</li>
+</ul>
+<h3 id="3-3-2-查看映射">3.3.2 查看映射</h3>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求 ：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_mapping">http://127.0.0.1:9200/student/_mapping</a></p>
+<p><img src="https://img-blog.csdnimg.cn/f5737a85db3f433da47504cd243ce5db.png#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/e6ed72cde6da490582e6b3c7c3e87bc6.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_13,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-3-3-索引映射关联">3.3.3 索引映射关联</h3>
+<p>  在 Postman 中，向 ES 服务器发<code>PUT</code>请求 ：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student1">http://127.0.0.1:9200/student1</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;settings&quot;: &#123;&#125;,</span><br><span class="line">    &quot;mappings&quot;: &#123;</span><br><span class="line">        &quot;properties&quot;: &#123;</span><br><span class="line">            &quot;name&quot;:&#123;</span><br><span class="line">                &quot;type&quot;: &quot;text&quot;,</span><br><span class="line">                &quot;index&quot;: true</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;sex&quot;:&#123;</span><br><span class="line">                &quot;type&quot;: &quot;text&quot;,</span><br><span class="line">                &quot;index&quot;: false</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;age&quot;:&#123;</span><br><span class="line">                &quot;type&quot;: &quot;long&quot;,</span><br><span class="line">                &quot;index&quot;: false</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/199404a54f5c4bdbacac98a241e87da9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/3a7775146d224a00a218a468868e1eef.png#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="3-4-高级查询">3.4 高级查询</h2>
+<p>  Elasticsearch 提供了基于 JSON 提供完整的查询 DSL 来定义查询定义数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"># POST /student/_doc/1001</span><br><span class="line">&#123;</span><br><span class="line">	&quot;name&quot;:&quot;zhangsan&quot;,</span><br><span class="line">	&quot;nickname&quot;:&quot;zhangsan&quot;,</span><br><span class="line">	&quot;sex&quot;:&quot;男&quot;,</span><br><span class="line">	&quot;age&quot;:30</span><br><span class="line">&#125;</span><br><span class="line"># POST /student/_doc/1002</span><br><span class="line">&#123;</span><br><span class="line">	&quot;name&quot;:&quot;lisi&quot;,</span><br><span class="line">	&quot;nickname&quot;:&quot;lisi&quot;,</span><br><span class="line">	&quot;sex&quot;:&quot;男&quot;,</span><br><span class="line">	&quot;age&quot;:20</span><br><span class="line">&#125;</span><br><span class="line"># POST /student/_doc/1003</span><br><span class="line">&#123;</span><br><span class="line">	&quot;name&quot;:&quot;wangwu&quot;,</span><br><span class="line">	&quot;nickname&quot;:&quot;wangwu&quot;,</span><br><span class="line">	&quot;sex&quot;:&quot;女&quot;,</span><br><span class="line">	&quot;age&quot;:40</span><br><span class="line">&#125;</span><br><span class="line"># POST /student/_doc/1004</span><br><span class="line">&#123;</span><br><span class="line">	&quot;name&quot;:&quot;zhangsan1&quot;,</span><br><span class="line">	&quot;nickname&quot;:&quot;zhangsan1&quot;,</span><br><span class="line">	&quot;sex&quot;:&quot;女&quot;,</span><br><span class="line">	&quot;age&quot;:50</span><br><span class="line">&#125;</span><br><span class="line"># POST /student/_doc/1005</span><br><span class="line">&#123;</span><br><span class="line">	&quot;name&quot;:&quot;zhangsan2&quot;,</span><br><span class="line">	&quot;nickname&quot;:&quot;zhangsan2&quot;,</span><br><span class="line">	&quot;sex&quot;:&quot;女&quot;,</span><br><span class="line">	&quot;age&quot;:30</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-4-1-查询所有文档">3.4.1 查询所有文档</h3>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123; </span><br><span class="line">	&quot;query&quot;: &#123; </span><br><span class="line">		&quot;match_all&quot;:&#123;&#125; </span><br><span class="line">	&#125; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># &quot;query&quot;：这里的query代表一个查询对象，里面可以有不同的查询属性 </span><br><span class="line"># &quot;match_all&quot;：查询类型，例如：match_all(代表查询所有)， match，term ， range 等等 </span><br><span class="line"># &#123;查询条件&#125;：查询条件会根据类型的不同，写法也有差异 </span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/6690da851b50495b8d22ccf2f2fdab47.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/64863fd6ed7d4951a4018b0754166bd9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;took&quot;: 7,	# 查询花费时间，单位毫秒</span><br><span class="line">    &quot;timed_out&quot;: false,	# 是否超时</span><br><span class="line">    &quot;_shards&quot;: &#123;	# 分片信息</span><br><span class="line">        &quot;total&quot;: 1,	# 总数</span><br><span class="line">        &quot;successful&quot;: 1,	# 成功</span><br><span class="line">        &quot;skipped&quot;: 0,	# 忽略</span><br><span class="line">        &quot;failed&quot;: 0	# 失败</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;hits&quot;: &#123;	# 搜索命中结果</span><br><span class="line">        &quot;total&quot;: &#123;	# 搜索条件匹配的文档总数</span><br><span class="line">            &quot;value&quot;: 5,	# 总命中计数的值</span><br><span class="line">            &quot;relation&quot;: &quot;eq&quot;	# 计数规则，eq表示计数准确，gte表示计数不准确</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;max_score&quot;: 1.0,	# 匹配度分值</span><br><span class="line">        &quot;hits&quot;: [	# 命中结果集合</span><br><span class="line">            ......</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-4-2-匹配查询">3.4.2 匹配查询</h3>
+<p>  match 匹配类型查询，会把查询条件进行分词，然后进行查询，多个词条之间是 or 的关系。<br>
+在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;query&quot;: &#123;</span><br><span class="line">		&quot;match&quot;: &#123;</span><br><span class="line">			&quot;name&quot;:&quot;zhangsan&quot;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/c7ff026542a5489a9f74b6b23e157034.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果为：</p>
+<p><img src="https://img-blog.csdnimg.cn/6e1247578aa04e86bdb7f97f669e2b68.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_14,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-4-3-字段匹配查询">3.4.3 字段匹配查询</h3>
+<p>  multi_match 与 match 类似，不同的是它可以在多个字段中查询。<br>
+  在 Postman 中，向 ES 服务器发<code>GET</code>请求 ：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;query&quot;: &#123;</span><br><span class="line">		&quot;multi_match&quot;: &#123;</span><br><span class="line">			&quot;query&quot;: &quot;zhangsan&quot;,</span><br><span class="line">			&quot;fields&quot;: [&quot;name&quot;,&quot;nickname&quot;]</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/0dd17d86072045ff9dcc87187c32b485.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果为：</p>
+<p><img src="https://img-blog.csdnimg.cn/6a70e9a9a61541c4a772e7cb3405cb9a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_14,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-4-4-关键字精确查询">3.4.4 关键字精确查询</h3>
+<p>  term 查询，精确的关键词匹配查询，不对查询条件进行分词。<br>
+  在 Postman 中，向 ES 服务器发<code>GET</code>请求 ：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;query&quot;: &#123;</span><br><span class="line">		&quot;term&quot;: &#123;</span><br><span class="line">			&quot;name&quot;: &#123;</span><br><span class="line">				&quot;value&quot;: &quot;zhangsan&quot;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/94592e1407f14e1484f574e820223652.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/d6301038090e4f5cbaaee2baf6a66c25.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-4-5-多关键字精确查询">3.4.5 多关键字精确查询</h3>
+<p>  terms 查询和 term 查询一样，但它允许你指定多值进行匹配。<br>
+  如果这个字段包含了指定值中的任何一个值，那么这个文档满足条件，类似于 mysql 的 in。<br>
+  在 Postman 中，向 ES 服务器发<code>GET</code>请求 ：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;query&quot;: &#123;</span><br><span class="line">		&quot;terms&quot;: &#123;</span><br><span class="line">			&quot;name&quot;: [&quot;zhangsan&quot;,&quot;lisi&quot;]</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/b391807f3e9341da8ea3c1d304ef2180.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/337c83740a8344e4b5caac04066cd661.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_11,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-4-6-指定查询字段">3.4.6 指定查询字段</h3>
+<p>  默认情况下，Elasticsearch 在搜索的结果中，会把文档中保存在_source 的所有字段都返回。<br>
+  如果我们只想获取其中的部分字段，我们可以添加_source 的过滤。<br>
+  在 Postman 中，向 ES 服务器发<code>GET</code>请求 ：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;_source&quot;: [&quot;name&quot;,&quot;nickname&quot;],</span><br><span class="line">	&quot;query&quot;: &#123;</span><br><span class="line">		&quot;terms&quot;: &#123;</span><br><span class="line">			&quot;nickname&quot;: [&quot;zhangsan&quot;]</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/4901afc0735543cf9c3e9199779d5116.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/59a8b5e3e3314415abdd6313b11f1d71.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-4-7-过滤查询字段">3.4.7 过滤查询字段</h3>
+<ul>
+<li>includes：来指定想要显示的字段；</li>
+<li>excludes：来指定不想要显示的字段；</li>
+</ul>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;_source&quot;: &#123;</span><br><span class="line">		&quot;includes&quot;: [&quot;name&quot;,&quot;nickname&quot;]</span><br><span class="line">	&#125;,</span><br><span class="line">	&quot;query&quot;: &#123;</span><br><span class="line">		&quot;terms&quot;: &#123;</span><br><span class="line">			&quot;nickname&quot;: [&quot;zhangsan&quot;]</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/26b2a45a8ca649abb2a7159f65c852c7.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/58f7bfa0153848ff8d50a15d7431415f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  在 Postman 中，向 ES 服务器发<code>GET</code>请求 ：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;_source&quot;: &#123;</span><br><span class="line">		&quot;excludes&quot;: [&quot;name&quot;,&quot;nickname&quot;]</span><br><span class="line">	&#125;,</span><br><span class="line">	&quot;query&quot;: &#123;</span><br><span class="line">		&quot;terms&quot;: &#123;</span><br><span class="line">			&quot;nickname&quot;: [&quot;zhangsan&quot;]</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/6dc593f8df684b8cbeaf97faf563563a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/a0dfe900fd5d4069b44250dd85a75279.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-4-8-组合查询">3.4.8 组合查询</h3>
+<p>  <code>bool</code>把各种其它查询通过<code>must</code>（必须 ）、<code>must_not</code>（必须不）、<code>should</code>（应该）的方式进行组合<br>
+  在 Postman 中，向 ES 服务器发<code>GET</code>请求 ：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;query&quot;: &#123;</span><br><span class="line">		&quot;bool&quot;: &#123;</span><br><span class="line">			&quot;must&quot;: [</span><br><span class="line">				&#123;</span><br><span class="line">					&quot;match&quot;: &#123;</span><br><span class="line">						&quot;name&quot;: &quot;zhangsan&quot;</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			],</span><br><span class="line">			&quot;must_not&quot;: [</span><br><span class="line">				&#123;</span><br><span class="line">					&quot;match&quot;: &#123;</span><br><span class="line">						&quot;age&quot;: &quot;40&quot;</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			],</span><br><span class="line">			&quot;should&quot;: [</span><br><span class="line">				&#123;</span><br><span class="line">					&quot;match&quot;: &#123;</span><br><span class="line">						&quot;sex&quot;: &quot;男&quot;</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			]</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/b725c6fdb7e24ac8bee4563d4d99f911.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/72566b40094646108860dee6166d2b7c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-4-9-范围查询">3.4.9 范围查询</h3>
+<p>  range 查询找出那些落在指定区间内的数字或者时间。range 查询允许以下字符：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">操作符</th>
+<th style="text-align:center">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">gt</td>
+<td style="text-align:center">大于&gt;</td>
+</tr>
+<tr>
+<td style="text-align:center">gte</td>
+<td style="text-align:center">大于等于&gt;=</td>
+</tr>
+<tr>
+<td style="text-align:center">lt</td>
+<td style="text-align:center">小于&lt;</td>
+</tr>
+<tr>
+<td style="text-align:center">lte</td>
+<td style="text-align:center">小于等于&lt;=</td>
+</tr>
+</tbody>
+</table>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123; </span><br><span class="line">	&quot;query&quot;: &#123; </span><br><span class="line">		&quot;range&quot;: &#123; </span><br><span class="line">			&quot;age&quot;: &#123; </span><br><span class="line">				&quot;gte&quot;: 30, </span><br><span class="line">				&quot;lte&quot;: 35 </span><br><span class="line">			&#125; </span><br><span class="line">		&#125; </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/fcc01c7eef9e457fb2826c9ff6acb66d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/ad0bed958ba04052b6fc2cfcdbe460c0.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-4-10-模糊查询">3.4.10 模糊查询</h3>
+<p>  返回包含与搜索字词相似的字词的文档。<br>
+  编辑距离是将一个术语转换为另一个术语所需的一个字符更改的次数。这些更改可以包括：</p>
+<ul>
+<li>更改字符（box → fox）；</li>
+<li>删除字符（black → lack）；</li>
+<li>插入字符（sic → sick）；</li>
+<li>转置两个相邻字符（act → cat）；</li>
+</ul>
+<p>  为了找到相似的术语，fuzzy 查询会在指定的编辑距离内创建一组搜索词的所有可能的变体或扩展。然后查询返回每个扩展的完全匹配。通过 fuzziness 修改编辑距离。一般使用默认值 AUTO，根据术语的长度生成编辑距离。<br>
+  在 Postman 中，向 ES 服务器发<code>GET</code>请求 ：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;query&quot;: &#123;</span><br><span class="line">		&quot;fuzzy&quot;: &#123;</span><br><span class="line">			&quot;name&quot;: &#123;</span><br><span class="line">				&quot;value&quot;: &quot;zhangsan&quot;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/dff4ae8c3d9f42a98e555e454d42368b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/280e333265064fedbe6dfc636b867ac0.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;query&quot;: &#123;</span><br><span class="line">		&quot;fuzzy&quot;: &#123;</span><br><span class="line">			&quot;name&quot;: &#123;</span><br><span class="line">				&quot;value&quot;: &quot;zhangsan&quot;,</span><br><span class="line">				&quot;fuzziness&quot;: 2</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/4b56eb01b90a4e14ac715400be905ebe.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/c05ec45b59ce428cb79325d9a357d129.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-4-11-单字段排序">3.4.11 单字段排序</h3>
+<p>  sort 可以让我们按照不同的字段进行排序，并且通过 order 指定排序的方式。（desc 降序，asc 升序）<br>
+  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;query&quot;: &#123;</span><br><span class="line">		&quot;match&quot;: &#123;</span><br><span class="line">			&quot;name&quot;:&quot;zhangsan&quot;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	&quot;sort&quot;: [&#123;</span><br><span class="line">		&quot;age&quot;: &#123;</span><br><span class="line">			&quot;order&quot;:&quot;desc&quot;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/df491e08016f417b9229f2bf5d02db11.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/754073f50d5f43a497f0974d8e513a10.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-4-12-多字段排序">3.4.12 多字段排序</h3>
+<p>  假定我们想要结合使用 age 和 _score 进行查询，并且匹配的结果首先按照年龄排序，然后按照相关性得分排序。<br>
+  在 Postman 中，向 ES 服务器发<code>GET</code>请求 ：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;query&quot;: &#123;</span><br><span class="line">		&quot;match_all&quot;: &#123;&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	&quot;sort&quot;: [</span><br><span class="line">		&#123;</span><br><span class="line">			&quot;age&quot;: &#123;</span><br><span class="line">				&quot;order&quot;: &quot;desc&quot;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;,</span><br><span class="line">		&#123;</span><br><span class="line">			&quot;_score&quot;:&#123;</span><br><span class="line">				&quot;order&quot;: &quot;desc&quot;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/857c4e990aef4f63805b027c3245edc6.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/ed7bb17008654d42a2fbffe53d573e95.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-4-13-高亮查询">3.4.13 高亮查询</h3>
+<p>  在进行关键字搜索时，搜索出的内容中的关键字会显示不同的颜色，称之为高亮。</p>
+<ul>
+<li>在百度搜索 “淘宝”<br>
+<img src="https://img-blog.csdnimg.cn/c0b1f9b140c64e3ca337de170af2eff3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_15,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></li>
+</ul>
+<p>  Elasticsearch 可以对查询内容中的关键字部分，进行标签和样式(高亮)的设置。<br>
+  在使用 match 查询的同时，加上一个 highlight 属性：</p>
+<ul>
+<li>pre_tags：前置标签；</li>
+<li>post_tags：后置标签；</li>
+<li>fields：需要高亮的字段；</li>
+<li>title：这里声明 title 字段需要高亮，后面可以为这个字段设置特有配置，也可以空；</li>
+</ul>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;query&quot;: &#123;</span><br><span class="line">		&quot;match&quot;: &#123;</span><br><span class="line">			&quot;name&quot;: &quot;zhangsan&quot;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	&quot;highlight&quot;: &#123;</span><br><span class="line">		&quot;pre_tags&quot;: &quot;&lt;font color=&#x27;red&#x27;&gt;&quot;,</span><br><span class="line">		&quot;post_tags&quot;: &quot;&lt;/font&gt;&quot;,</span><br><span class="line">		&quot;fields&quot;: &#123;</span><br><span class="line">			&quot;name&quot;: &#123;&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/7659c82e800f402ba65a34e70475685f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/96793162b8ef489191d8dec3d2a66c28.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-4-14-分页查询">3.4.14 分页查询</h3>
+<ul>
+<li>from：当前页的起始索引，默认从 0 开始。 from = (pageNum - 1) * size；</li>
+<li>size：每页显示多少条；</li>
+</ul>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;query&quot;: &#123;</span><br><span class="line">		&quot;match_all&quot;: &#123;&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	&quot;sort&quot;: [</span><br><span class="line">		&#123;</span><br><span class="line">			&quot;age&quot;: &#123;</span><br><span class="line">				&quot;order&quot;: &quot;desc&quot;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	],</span><br><span class="line">	&quot;from&quot;: 0,</span><br><span class="line">	&quot;size&quot;: 2</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/f17385d5d1fa4111a04d1a8e268617ec.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/0aee5473171048af911598457b827f72.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-4-15-聚合查询">3.4.15 聚合查询</h3>
+<p>  聚合允许使用者对 es 文档进行统计分析，类似与关系型数据库中的 group by，当然还有很多其他的聚合，例如取最大值、平均值等等。</p>
+<ul>
+<li><strong>对某个字段取最大值 max</strong></li>
+</ul>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;aggs&quot;:&#123;</span><br><span class="line">		&quot;max_age&quot;:&#123;</span><br><span class="line">			&quot;max&quot;:&#123;&quot;field&quot;:&quot;age&quot;&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	&quot;size&quot;:0</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/014d636be82745899a0638926d873d64.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：<br>
+<img src="https://img-blog.csdnimg.cn/48124d9feaa040b9ac737e658189bd35.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_8,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li><strong>对某个字段取最小值 min</strong></li>
+</ul>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;aggs&quot;:&#123;</span><br><span class="line">		&quot;min_age&quot;:&#123;</span><br><span class="line">			&quot;min&quot;:&#123;&quot;field&quot;:&quot;age&quot;&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	&quot;size&quot;:0</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/1128933f2b344a638b0e9b8d80f02794.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/fbbd8510172341f0bfaec5a35d34cce1.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_7,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li><strong>对某个字段求和 sum</strong></li>
+</ul>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;aggs&quot;:&#123;</span><br><span class="line">		&quot;sum_age&quot;:&#123;</span><br><span class="line">			&quot;sum&quot;:&#123;&quot;field&quot;:&quot;age&quot;&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	&quot;size&quot;:0</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/daec215622894299b25fd2dbff74a96c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/142e08ff1b9a44ab8d2a809242f63499.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_9,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li><strong>对某个字段取平均值 avg</strong></li>
+</ul>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;aggs&quot;:&#123;</span><br><span class="line">		&quot;avg_age&quot;:&#123;</span><br><span class="line">			&quot;avg&quot;:&#123;&quot;field&quot;:&quot;age&quot;&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	&quot;size&quot;:0</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/08d39785f0394cae8068a53076df5fd2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/7fe759a2f5e54bd68122c0f28bedd48c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_9,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li>**对某个字段的值进行去重之后再取总数 **</li>
+</ul>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;aggs&quot;:&#123;</span><br><span class="line">		&quot;distinct_age&quot;:&#123;</span><br><span class="line">			&quot;cardinality&quot;:&#123;&quot;field&quot;:&quot;age&quot;&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	&quot;size&quot;:0</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/62eca650e4694cf6b2799676da9459b0.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/d4eaa8ccb14246209861a0c6145ec372.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_8,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li><strong>State 聚合</strong></li>
+</ul>
+<p>  stats 聚合，对某个字段一次性返回 count，max，min，avg 和 sum 五个指标。<br>
+  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;aggs&quot;:&#123;</span><br><span class="line">		&quot;stats_age&quot;:&#123;</span><br><span class="line">			&quot;stats&quot;:&#123;&quot;field&quot;:&quot;age&quot;&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	&quot;size&quot;:0</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/ab4012fe81a1420a8b5397108aaf35c1.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/905c93ec76ff45b29c56c97668032fca.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_8,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="3-4-16-桶聚合查询">3.4.16 桶聚合查询</h3>
+<p>  桶聚和相当于 sql 中的 group by 语句。</p>
+<ul>
+<li><strong>terms 聚合，分组统计</strong></li>
+</ul>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;aggs&quot;:&#123;</span><br><span class="line">		&quot;age_groupby&quot;:&#123;</span><br><span class="line">			&quot;terms&quot;:&#123;&quot;field&quot;:&quot;age&quot;&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	&quot;size&quot;:0</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/dc557ebc56eb4f6587527b478c9288a6.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/986906fcc3ef44d4a6ab332679a8d311.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li><strong>在 terms 分组下再进行聚合</strong></li>
+</ul>
+<p>  在 Postman 中，向 ES 服务器发<code>GET</code>请求：<a target="_blank" rel="noopener" href="http://127.0.0.1:9200/student/_search">http://127.0.0.1:9200/student/_search</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;aggs&quot;:&#123;</span><br><span class="line">		&quot;age_groupby&quot;:&#123;</span><br><span class="line">			&quot;terms&quot;:&#123;&quot;field&quot;:&quot;age&quot;&#125;,</span><br><span class="line">			&quot;aggs&quot;:&#123;</span><br><span class="line">				&quot;sum_age&quot;:&#123;</span><br><span class="line">					&quot;sum&quot;:&#123;&quot;field&quot;:&quot;age&quot;&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	&quot;size&quot;:0</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/61df8d4064a94820a6b92e9e7c622d30.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  服务器响应结果：</p>
+<p><img src="https://img-blog.csdnimg.cn/4ebb9b34bafb4609a20a58a1e1f31d1f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2022/02/20/elastic_3/">https://program-park.github.io/2022/02/20/elastic_3/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Elasticsearch/">Elasticsearch</a><a class="post-meta__tags" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a></div><div class="post_share"><div class="social-share" data-image="/img/elastic/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/02/22/elastic_4/"><img class="prev-cover" src="/img/elastic/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Elastic Stack 日志分析（四）- Elasticsearch Java API 操作详解</div></div></a></div><div class="next-post pull-right"><a href="/2022/02/17/elastic_2/"><img class="next-cover" src="/img/elastic/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Elastic Stack 日志分析（二）- Elasticsearch 入门及核心概念详解</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/02/24/elastic_10/" title="Elastic Stack 日志分析（十）- Elasticsearch 数据路由详解"><img class="cover" src="/img/elastic/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-24</div><div class="title">Elastic Stack 日志分析（十）- Elasticsearch 数据路由详解</div></div></a></div><div><a href="/2022/02/16/elastic_1/" title="Elastic Stack 日志分析（一）- ELK 简介"><img class="cover" src="/img/elastic/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-16</div><div class="title">Elastic Stack 日志分析（一）- ELK 简介</div></div></a></div><div><a href="/2022/03/01/elastic_11/" title="Elastic Stack 日志分析（十一）- Elasticsearch 性能优化方案总结"><img class="cover" src="/img/elastic/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-03-01</div><div class="title">Elastic Stack 日志分析（十一）- Elasticsearch 性能优化方案总结</div></div></a></div><div><a href="/2022/03/08/elastic_12/" title="Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解"><img class="cover" src="/img/elastic/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-03-08</div><div class="title">Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解</div></div></a></div><div><a href="/2022/03/14/elastic_14/" title="Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解"><img class="cover" src="/img/elastic/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-03-14</div><div class="title">Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解</div></div></a></div><div><a href="/2022/03/08/elastic_13/" title="Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案"><img class="cover" src="/img/elastic/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-03-08</div><div class="title">Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">165</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">32</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-RESTful"><span class="toc-text">1. RESTful</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%AE%89%E8%A3%85"><span class="toc-text">2. 客户端安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-HTTP%E6%93%8D%E4%BD%9C"><span class="toc-text">3. HTTP操作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E7%B4%A2%E5%BC%95%E6%93%8D%E4%BD%9C"><span class="toc-text">3.1 索引操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-1-%E5%88%9B%E5%BB%BA%E7%B4%A2%E5%BC%95"><span class="toc-text">3.1.1 创建索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-2-%E6%9F%A5%E7%9C%8B%E6%89%80%E6%9C%89%E7%B4%A2%E5%BC%95"><span class="toc-text">3.1.2 查看所有索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-3-%E6%9F%A5%E7%9C%8B%E5%8D%95%E4%B8%AA%E7%B4%A2%E5%BC%95"><span class="toc-text">3.1.3 查看单个索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-4-%E5%88%A0%E9%99%A4%E7%B4%A2%E5%BC%95"><span class="toc-text">3.1.4 删除索引</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E6%96%87%E6%A1%A3%E6%93%8D%E4%BD%9C"><span class="toc-text">3.2 文档操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-1-%E5%88%9B%E5%BB%BA%E6%96%87%E6%A1%A3"><span class="toc-text">3.2.1 创建文档</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-2-%E6%9F%A5%E7%9C%8B%E6%96%87%E6%A1%A3"><span class="toc-text">3.2.2 查看文档</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-3-%E4%BF%AE%E6%94%B9%E6%96%87%E6%A1%A3"><span class="toc-text">3.2.3 修改文档</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-4-%E4%BF%AE%E6%94%B9%E6%9F%90%E4%B8%80%E6%9D%A1%E6%95%B0%E6%8D%AE%E7%9A%84%E5%B1%80%E9%83%A8%E4%BF%A1%E6%81%AF"><span class="toc-text">3.2.4 修改某一条数据的局部信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-5-%E5%88%A0%E9%99%A4%E6%96%87%E6%A1%A3"><span class="toc-text">3.2.5 删除文档</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-6-%E6%9D%A1%E4%BB%B6%E5%88%A0%E9%99%A4%E6%96%87%E6%A1%A3"><span class="toc-text">3.2.6 条件删除文档</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E6%98%A0%E5%B0%84%E6%93%8D%E4%BD%9C"><span class="toc-text">3.3 映射操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-1-%E5%88%9B%E5%BB%BA%E6%98%A0%E5%B0%84"><span class="toc-text">3.3.1 创建映射</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-2-%E6%9F%A5%E7%9C%8B%E6%98%A0%E5%B0%84"><span class="toc-text">3.3.2 查看映射</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-3-%E7%B4%A2%E5%BC%95%E6%98%A0%E5%B0%84%E5%85%B3%E8%81%94"><span class="toc-text">3.3.3 索引映射关联</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-4-%E9%AB%98%E7%BA%A7%E6%9F%A5%E8%AF%A2"><span class="toc-text">3.4 高级查询</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-1-%E6%9F%A5%E8%AF%A2%E6%89%80%E6%9C%89%E6%96%87%E6%A1%A3"><span class="toc-text">3.4.1 查询所有文档</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-2-%E5%8C%B9%E9%85%8D%E6%9F%A5%E8%AF%A2"><span class="toc-text">3.4.2 匹配查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-3-%E5%AD%97%E6%AE%B5%E5%8C%B9%E9%85%8D%E6%9F%A5%E8%AF%A2"><span class="toc-text">3.4.3 字段匹配查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-4-%E5%85%B3%E9%94%AE%E5%AD%97%E7%B2%BE%E7%A1%AE%E6%9F%A5%E8%AF%A2"><span class="toc-text">3.4.4 关键字精确查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-5-%E5%A4%9A%E5%85%B3%E9%94%AE%E5%AD%97%E7%B2%BE%E7%A1%AE%E6%9F%A5%E8%AF%A2"><span class="toc-text">3.4.5 多关键字精确查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-6-%E6%8C%87%E5%AE%9A%E6%9F%A5%E8%AF%A2%E5%AD%97%E6%AE%B5"><span class="toc-text">3.4.6 指定查询字段</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-7-%E8%BF%87%E6%BB%A4%E6%9F%A5%E8%AF%A2%E5%AD%97%E6%AE%B5"><span class="toc-text">3.4.7 过滤查询字段</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-8-%E7%BB%84%E5%90%88%E6%9F%A5%E8%AF%A2"><span class="toc-text">3.4.8 组合查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-9-%E8%8C%83%E5%9B%B4%E6%9F%A5%E8%AF%A2"><span class="toc-text">3.4.9 范围查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-10-%E6%A8%A1%E7%B3%8A%E6%9F%A5%E8%AF%A2"><span class="toc-text">3.4.10 模糊查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-11-%E5%8D%95%E5%AD%97%E6%AE%B5%E6%8E%92%E5%BA%8F"><span class="toc-text">3.4.11 单字段排序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-12-%E5%A4%9A%E5%AD%97%E6%AE%B5%E6%8E%92%E5%BA%8F"><span class="toc-text">3.4.12 多字段排序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-13-%E9%AB%98%E4%BA%AE%E6%9F%A5%E8%AF%A2"><span class="toc-text">3.4.13 高亮查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-14-%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2"><span class="toc-text">3.4.14 分页查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-15-%E8%81%9A%E5%90%88%E6%9F%A5%E8%AF%A2"><span class="toc-text">3.4.15 聚合查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-16-%E6%A1%B6%E8%81%9A%E5%90%88%E6%9F%A5%E8%AF%A2"><span class="toc-text">3.4.16 桶聚合查询</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/14/elastic_15/" title="Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项"/></a><div class="content"><a class="title" href="/2022/03/14/elastic_15/" title="Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项">Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项</a><time datetime="2022-03-14T06:12:45.000Z" title="发表于 2022-03-14 14:12:45">2022-03-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/14/elastic_14/" title="Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解"/></a><div class="content"><a class="title" href="/2022/03/14/elastic_14/" title="Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解">Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解</a><time datetime="2022-03-14T02:28:33.000Z" title="发表于 2022-03-14 10:28:33">2022-03-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/08/elastic_13/" title="Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案"/></a><div class="content"><a class="title" href="/2022/03/08/elastic_13/" title="Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案">Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案</a><time datetime="2022-03-08T09:24:42.000Z" title="发表于 2022-03-08 17:24:42">2022-03-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/08/elastic_12/" title="Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解"/></a><div class="content"><a class="title" href="/2022/03/08/elastic_12/" title="Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解">Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解</a><time datetime="2022-03-08T06:56:57.000Z" title="发表于 2022-03-08 14:56:57">2022-03-08</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/elastic/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2022/02/20/elastic_3/'
+    this.page.identifier = '/2022/02/20/elastic_3/'
+    this.page.title = 'Elastic Stack 日志分析（三）- Elasticsearch HTTP 操作详解'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

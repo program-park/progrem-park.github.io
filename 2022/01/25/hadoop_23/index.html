@@ -1,0 +1,427 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Hadoop 生态圈（十九）- HDFS 核心源码详解 | 程序园</title><meta name="keywords" content="大数据,Hadoop"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是《Hadoop生态圈》系列，第十九篇：HDFS 核心源码详解。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hadoop 生态圈（十九）- HDFS 核心源码详解">
+<meta property="og:url" content="https://program-park.github.io/2022/01/25/hadoop_23/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是《Hadoop生态圈》系列，第十九篇：HDFS 核心源码详解。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/hadoop/1.png">
+<meta property="article:published_time" content="2022-01-25T09:43:33.000Z">
+<meta property="article:modified_time" content="2022-09-08T02:29:20.513Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="大数据">
+<meta property="article:tag" content="Hadoop">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/hadoop/1.png"><link rel="shortcut icon" href="/img/favicon_logo/favicon.png"><link rel="canonical" href="https://program-park.github.io/2022/01/25/hadoop_23/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Hadoop 生态圈（十九）- HDFS 核心源码详解',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-08 10:29:20'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">165</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">32</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/hadoop/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Hadoop 生态圈（十九）- HDFS 核心源码详解</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-01-25T09:43:33.000Z" title="发表于 2022-01-25 17:43:33">2022-01-25</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-08T02:29:20.513Z" title="更新于 2022-09-08 10:29:20">2022-09-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Hadoop/">Hadoop</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">5.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>18分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Hadoop 生态圈（十九）- HDFS 核心源码详解"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="前言">前言</h1>
+<p><font color=#999AAA >部分内容摘自尚硅谷、黑马等等培训资料</font></p>
+<h1 id="1-HDFS源码结构分析">1. HDFS源码结构分析</h1>
+<h2 id="1-1-IDEA导入HDFS源码工程">1.1 IDEA导入HDFS源码工程</h2>
+<p>  解压Hadoop源码在Windows某个目录下（该目录最好没有中文没有空格）。<br>
+<img src="https://img-blog.csdnimg.cn/25ad9460cce744838300515c0e786341.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_16,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  打开 IDEA，选择<code>Open or Import</code><br>
+<img src="https://img-blog.csdnimg.cn/10f6492932964e1da840c9bcb3244854.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  选择 HDFS 工程打开<br>
+<img src="https://img-blog.csdnimg.cn/6e276c0513c5464eb651d23130431e7a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_10,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  初次导入 IDEA 会自动根据 POM 依赖下载插件和依赖，此时静静等待即可。确保下载完成。</p>
+<h2 id="1-2-HDFS工程结构">1.2 HDFS工程结构</h2>
+<p>  <code>hadoop-hdfs-project</code>工程目录结构如下：<br>
+<img src="https://img-blog.csdnimg.cn/f241338317394602a299431451781e6d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_9,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="1-2-1-hadoop-hdfs">1.2.1 hadoop-hdfs</h3>
+<p>  在<code>hadoop-hdfs</code>模块中，主要实现了网络、传输协议、JN、安全、server服务等相关功能。是 hdfs 的核心模块。并且提供了 hdfs web UI 页面功能的支撑。<br>
+<img src="https://img-blog.csdnimg.cn/22a30388bf524b5ea74162afaa358dda.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_7,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/7eebed690d0449bcbba1eb2a46f17e6b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_6,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="1-2-2-hadoop-hdfs-client">1.2.2 hadoop-hdfs-client</h3>
+<p>  在<code>hadoop-hdfs-client</code>模块中，主要定义实现了和 hdfs 客户端相关的功能逻辑。<br>
+<img src="https://img-blog.csdnimg.cn/db94767935524bfa902dfff18462b84c.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_7,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="1-2-3-hadoop-hdfs-httpfs">1.2.3 hadoop-hdfs-httpfs</h3>
+<p>  <code>hadoop-hdfs-httpfs</code>模块主要实现了<code>通过HTTP协议操作访问hdfs文件系统</code>的相关功能。HttpFS 是一种服务器，它提供到 HDFS 的 REST HTTP 网关，具有完整的文件系统读写功能。<br>
+  HttpFS 可用于在运行不同Hadoop版本的群集之间传输数据（克服 RPC 版本问题），例如使用 Hadoop DistCP。<br>
+<img src="https://img-blog.csdnimg.cn/81c235d9619c429696009dcf92a1c819.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_6,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="1-2-4-hadoop-hdfs-native-client">1.2.4 hadoop-hdfs-native-client</h3>
+<p>  <code>hadoop-hdfs-native-client</code>模块定义了<code>hdfs访问本地库</code>的相关功能和逻辑。该模块主要是使用 C 语言进行编写，用于和本地库进行交互操作。<br>
+<img src="https://img-blog.csdnimg.cn/82542bc4ad5b432d9a1945ba5d800a70.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_6,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="1-2-5-hadoop-hdfs-nfs">1.2.5 hadoop-hdfs-nfs</h3>
+<p>  <code>hadoop-hdfs-nfs</code>模块是Hadoop <code>HDFS的NFS实现</code>。<br>
+<img src="https://img-blog.csdnimg.cn/9c9a4d0b600b4f2bbcc63f0afd6433aa.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_7,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="1-2-6-hadoop-hdfs-rbf">1.2.6 hadoop-hdfs-rbf</h3>
+<p>  <code>hadoop-hdfs-rbf</code>模块是 hadoop3.0 之后的一个新的模块。主要实现了 RBF 功能。RBF 是 Router-based Federation 简称，翻译中文叫做：基于路由的 Federation 方案。<br>
+  简单来说就是：HDFS 将路由信息放在了服务端来处理，而不是在客户端。以此完全做到对于客户端的透明。<br>
+<img src="https://img-blog.csdnimg.cn/e4f5503657cc45a1b8cc58301785f155.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_7,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="2-HDFS核心源码解析">2. HDFS核心源码解析</h1>
+<h2 id="2-1-HDFS客户端核心类">2.1 HDFS客户端核心类</h2>
+<h3 id="2-1-1-Configuration">2.1.1 Configuration</h3>
+<p>  源码注释中对于<code>Configuration</code>类是这么描述的：<br>
+<img src="https://img-blog.csdnimg.cn/cb20932edde24fa284c298cbde950953.png#pic_center" alt="在这里插入图片描述"><br>
+  <code>Configuration</code>提供对配置参数的访问，通常称之为配置文件类。主要<code>用于加载或者设定程序运行时相关的参数属性</code>。</p>
+<h4 id="2-1-1-1-Configuration加载默认配置">2.1.1.1 Configuration加载默认配置</h4>
+<p>  在程序中打上断点，看一下新建<code>Configuration</code>对象的时候加载了什么：<br>
+<img src="https://img-blog.csdnimg.cn/73e93fb4ab3f4cc99d3fb29be79c920a.png#pic_center" alt="在这里插入图片描述"><br>
+  <code>按下F7进入方法内部</code>，再<code>一次次按下F8</code>，执行过程中可以发现，首先加载了静态方法和静态代码块，其中在静态代码块中显示默认加载了两个配置文件：<br>
+  <code>core-default.xml</code>以及<code>core-site.xml</code><br>
+<img src="https://img-blog.csdnimg.cn/3ae728f513cf45e59a991bc5431f33e6.png#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="2-1-1-2-Configuration加载用户设置">2.1.1.2 Configuration加载用户设置</h4>
+<p>  按下<code>shift+F8</code>，跳出<code>Configuration</code>类的创建，按<code>F8</code>执行下一步，当到达<code>FileSystem.get(conf)</code>这一行代码的时候，可以发现用户通过<code>conf.set</code>设置的属性也会被加载。<br>
+<img src="https://img-blog.csdnimg.cn/cede75f7543b48b68c47b7b9c50a4f9f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/17e2e9b4ed5642d98687944eb3345be6.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="2-1-2-FileSystem">2.1.2 FileSystem</h3>
+<p>  源码注释中对于<code>FileSystem</code>类是这么描述的：<br>
+<img src="https://img-blog.csdnimg.cn/a89a9776cab348fda83322800a4a6d68.png#pic_center" alt="在这里插入图片描述"><br>
+  简单翻译下：<code>FileSystem</code>类是一个<code>通用的文件系统的抽象基类</code>。具体来说它可以实现为一个分布式的文件系统，也可以实现为一个本地文件系统。所有的可能会使用到 HDFS 的用户代码在进行编写时都应该使用 FileSystem 对象。<br>
+  代表本地文件系统的实现是 LocalFileSystem，代表分布式文件系统的实现是<code>DistributedFileSystem</code>。当然针对其他 hadoop 支持的文件系统也有不同的具体实现。<br>
+  因此 HDFS 客户端在进行读写操作之前，需要创建 FileSystem 对象的实例。</p>
+<h4 id="2-1-2-1-获取FileSystem实例">2.1.2.1 获取FileSystem实例</h4>
+<p>  将断点达到如下的位置，debug 运行程序：<br>
+<img src="https://img-blog.csdnimg.cn/3ec0b2e1daeb463b894cc1af510e2e27.png#pic_center" alt="在这里插入图片描述"><br>
+  经过方法的层层调用，最终找到了<code>FileSystem</code>对象是通过调用<code>getInternal</code>方法得到的。<br>
+<img src="https://img-blog.csdnimg.cn/aeb2eb4f90584feeb43ebcb63f4b4a61.png#pic_center" alt="在这里插入图片描述"><br>
+  首先在<code>getInternal</code>方法中调用了<code>createFileSystem</code>方法，进去该方法：<br>
+  原来，<code>FileSystem</code>实例是通过反射的方式获得的，具体实现是通过调用反射工具类<code>ReflectionUtils</code>的<code>newInstance</code>方法并将 class 对象以及<code>Configuration</code>对象作为参数传入最终得到了<code>FileSystem</code>实例。<br>
+<img src="https://img-blog.csdnimg.cn/4cda53f2160c4b36bc80f270e3aa190d.png#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="2-2-HDFS通信协议">2.2 HDFS通信协议</h2>
+<h3 id="2-2-1-概述">2.2.1 概述</h3>
+<p>  HDFS 作为一个分布式文件系统，它的某些流程是非常复杂的（例如读、写文件等典型流程），常常涉及数据节点、名字节点和客户端三者之间的配合、相互调用才能实现。为了降低节点间代码的耦合性，提高单个节点代码的内聚性， HDFS 将这些节点间的调用抽象成不同的接口。<br>
+  HDFS 节点间的接口主要有两种类型：<br>
+  <code>Hadoop RPC接口</code>：基于 Hadoop RPC 框架实现的接口；<br>
+  <code>流式接口</code>：基于TCP或者HTTP实现的接口；</p>
+<h3 id="2-2-2-Hadoop-RPC接口">2.2.2 Hadoop RPC接口</h3>
+<h4 id="2-2-2-1-RPC介绍">2.2.2.1 RPC介绍</h4>
+<p>  <code>RPC</code>全称<code>Remote Procedure Call——远程过程调用</code>。就是为了解决远程调用服务的一种技术，使得调用者像调用本地服务一样方便透明。<br>
+<img src="https://img-blog.csdnimg.cn/874540e7e6cc44c7bd4695dd13cd3082.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_7,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  通信模块：传输 RPC 请求和响应的网络通信模块，可以基于 TCP 协议，也可以基于 UDP 协议，可以是同步，也可以是异步的。<br>
+  客户端 Stub 程序：服务器和客户端都包括 Stub 程序。在客户端，Stub 程序表现的就像本地程序一样，但底层却会将调用请求和参数序列化并通过通信模块发送给服务器。之后 Stub 程序等待服务器的响应信息，将响应信息反序列化并返回给请求程序。<br>
+  服务器端 Stub 程序：在服务器端，Stub 程序会将远程客户端发送的调用请求和参数反序列化，根据调用信息触发对应的服务程序，然后将服务程序返回的响应信息序列化并发回客户端。<br>
+  请求程序：请求程序会像调用本地方法一样调用客户端 Stub 程序，然后接收 Stub 程序返回的响应信息。<br>
+  服务程序：服务器会接收来自 Stub 程序的调用请求，执行对应的逻辑并返回执行结果。<br>
+  <code>Hadoop RPC调用使得HDFS进程能够像本地调用一样调用另一个进程中的方法，并且可以传递Java基本类型或者自定义类作为参数，同时接收返回值。如果远程进程在调用过程中出现异常，本地进程也会收到对应的异常。目前Hadoop RPC调用是基于Protobuf实现的。</code><br>
+  Hadoop RPC 接口主要定义在<code>org.apache.hadoop.hdfs.protocol</code>包和<code>org.apache.hadoop.hdfs.server.protocol</code>包中，核心的接口有：<br>
+  <code>ClientProtocol</code>、<code>ClientDatanodeProtocol</code>、<code>DatanodeProtocol</code>。</p>
+<h4 id="2-2-2-2-ClientProrocol">2.2.2.2 ClientProrocol</h4>
+<p>  <code>ClientProtocol</code>定义了客户端与名字节点间的接口，这个接口定义的方法非常多，客户端对<code>文件系统的所有操作</code>都需要通过这个接口，同时客户端读、写文件等操作也需要先通过这个接口与 Namenode 协商之后，再进行数据块的读出和写入操作。<br>
+  ClientProtocol 定义了所有由客户端发起的、由 Namenode 响应的操作。这个接口非常大，有 80 多个方法，核心的是：<code>HDFS文件读相关的操作</code>、<code>HDFS文件写以及追加写的相关操作</code>。</p>
+<ul>
+<li><strong>读数据相关的方法</strong></li>
+</ul>
+<p>  ClientProtocol 中与客户端读取文件相关的方法主要有两个： <code>getBlockLocations()</code>和<code>reportBadBlocks()</code>。<br>
+  客户端会调用<code>ClientProtocol.getBlockLocations()</code>方法获取 HDFS 文件指定范围内所有数据块的位置信息。这个方法的参数是 HDFS 文件的文件名以及读取范围，返回值是文件指定范围内所有数据块的文件名以及它们的位置信息，使用<code>LocatedBlocks</code>对象封装。每个数据块的位置信息指的是存储这个数据块副本的所有 Datanode 的信息，这些 Datanode 会以与当前客户端的距离远近排序。客户端读取数据时，会首先调用<code>getBlockLocations()</code>方法获取 HDFS 文件的所有数据块的位置信息，然后客户端会根据这些位置信息从数据节点读取数据块。<br>
+<img src="https://img-blog.csdnimg.cn/117e5c1c09e34f0d9f20e21374a1cdd3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  客户端会调用<code>ClientProtocol.reportBadBlocks()</code>方法向 Namenode 汇报错误的数据块。当客户端从数据节点读取数据块且发现数据块的校验和并不正确时，就会调用这个方法向 Namenode 汇报这个错误的数据块信息。<br>
+<img src="https://img-blog.csdnimg.cn/b73b027e9872472db6544cbbe12afe91.png#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li><strong>写、追加数据相关方法</strong></li>
+</ul>
+<p>  在 HDFS 客户端操作中最重要的一部分就是写入一个新的 HDFS 文件，或者打开一个已有的 HDFS 文件并执行追加写操作。ClientProtocol 中定义了 8 个方法支持 HDFS 文件的写操作： <code>create()</code>、 <code>append()</code>、<code> addBlock()</code>、 <code>complete()</code>， <code>abandonBlock()</code>，<code>getAddtionnalDatanodes()</code>、<code>updateBlockForPipeline()</code>和<code>updatePipeline()</code>。<br>
+  <code>create()</code>方法用于在 HDFS 的文件系统目录树中创建一个新的空文件，创建的路径由 src 参数指定。这个空文件创建后对于其他的客户端是 “可读” 的，但是这些客户端不能删除、重命名或者移动这个文件，直到这个文件被关闭或者租约过期。<code>客户端写一个新的文件时，会首先调用create方法在文件系统目录树中创建一个空文件，然后调用addBlock方法获取存储文件数据的数据块的位置信息，最后客户端就可以根据位置信息建立数据流管道，向数据节点写入数据了。</code><br>
+<img src="https://img-blog.csdnimg.cn/ae9bb56831e64b66bc971c9ba5057312.png#pic_center" alt="在这里插入图片描述"><br>
+  当客户端完成了整个文件的写入操作后，会调用<code>complete()</code>方法通知 Namenode。这个操作会提交新写入 HDFS 文件的所有数据块，当这些数据块的副本数量满足系统配置的最小副本系数（默认值为 1），也就是该文件的所有数据块至少有一个有效副本时， <code>complete()</code>方法会返回<code>true</code>，这时 Namenode 中文件的状态也会从构建中状态转换为正常状态；否则， <code>complete</code>会返回<code>false</code>，客户端就需要重复调用<code>complete</code>操作，直至该方法返回<code>true </code>。<br>
+<img src="https://img-blog.csdnimg.cn/ea8a688ec9eb490aa7335368d774f558.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="2-2-2-3-ClientDatanodeProtocol">2.2.2.3 ClientDatanodeProtocol</h4>
+<p>  客户端与数据节点间的接口。<code>ClientDatanodeProtocol</code>中定义的方法主要是用于客户端获取数据节点信息时调用，而真正的数据读写交互则是通过流式接口进行的。<br>
+  <code>ClientDatanodeProtocol</code>中定义的接口可以分为两部分：一部分是支持 HDFS 文件读取操作的，例如<code>getReplicaVisibleLength()</code>以及<code>getBlockLocalPathInf()</code>；另一部分是支持<code>DFSAdmin</code>中与数据节点管理相关的命令。我们重点关注第一部分。</p>
+<ul>
+<li><strong>getReplicaVisibleLength</strong>
+<ul>
+<li>客户端会调用<code>getReplicaVisibleLength()</code>方法从数据节点获取某个数据块副本真实的数据长度。当客户端读取一个 HDFS 文件时，需要获取这个文件对应的所有数据块的长度，用于建立数据块的输入流，然后读取数据。但是 Namenode 元数据中文件的最后一个数据块长度与 Datanode 实际存储的可能不一致，所以客户端在创建输入流时就需要调用<code>getReplicaVisibleLength()</code>方法从 Datanode 获取这个数据块的真实长度。<br>
+<img src="https://img-blog.csdnimg.cn/c96dce35f0f14ae79084c9a56a8070bc.png" alt="在这里插入图片描述"></li>
+</ul>
+</li>
+<li><strong>getBlockLocalPathInfo</strong>
+<ul>
+<li>HDFS 对于本地读取，也就是 Client 和保存该数据块的 Datanode 在同一台物理机器上时，是有很多优化的。Client 会调用<code>ClientProtocol.getBlockLocalPathInf()</code>方法获取指定数据块文件以及数据块校验文件在当前节点上的本地路径，然后利用这个本地路径执行本地读取操作，而不是通过流式接口执行远程读取，这样也就大大优化了读取的性能。</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-2-2-4-DatanodeProtocol">2.2.2.4 DatanodeProtocol</h4>
+<p>  数据节点通过这个接口与名字节点通信，同时名字节点会通过这个接口中方法的返回值向数据节点下发指令。注意，这是<code>名字节点与数据节点通信的唯一方式</code>。这个接口非常重要，数据节点会通过这个接口向名字节点注册、汇报数据块的全量以及增量的存储情况。同时，名字节点也会通过这个接口中方法的返回值，将名字节点指令带回该数据块，根据这些指令，数据节点会执行数据块的复制、删除以及恢复操作。<br>
+  可以将<code>DatanodeProtocol</code>定义的方法分为三种类型： Datanode启动相关、心跳相关以及数据块读写相关。</p>
+<h3 id="2-2-3-基于TCP-HTTP流式接口">2.2.3 基于TCP/HTTP流式接口</h3>
+<p>  HDFS 除了定义 RPC 调用接口外，还定义了流式接口，流式接口是 HDFS 中基于 TCP 或者 HTTP 实现的接口。在 HDFS 中，流式接口包括了基于 TCP 的<code>DataTransferProtocol</code>接口，以及 HA 架构中 Active Namenode 和 Standby Namenode 之间的 HTTP 接口。</p>
+<h4 id="2-2-3-1-DataTransferProtocol">2.2.3.1 DataTransferProtocol</h4>
+<p>  <code>DataTransferProtocol是用来描述写入或者读出Datanode上数据的基于TCP的流式接口</code>，HDFS 客户端与数据节点以及数据节点与数据节点之间的数据块传输就是基于 DataTransferProtocol 接口实现的。HDFS 没有采用 Hadoop RPC 来实现 HDFS 文件的读写功能，是因为 Hadoop RPC 框架的效率目前还不足以支撑超大文件的读写，而使用基于 TCP 的流式接口有利于批量处理数据，同时提高了数据的吞吐量。<br>
+  DataTransferProtocol 中最重要的方法就是 readBlock()和writeBlock()。</p>
+<ul>
+<li>readBlock：从当前 Datanode 读取指定的数据块。</li>
+<li>writeBlock：将指定数据块写入数据流管道（pipeLine）中。</li>
+</ul>
+<p>  DataTransferProtocol 接口调用并没有使用 Hadoop RPC 框架提供的功能，而是定义了用于发送 DataTransferProtocol 请求的 Sender 类，以及用于响应 DataTransferProtocol 请求的 Receiver 类。<br>
+   Sender 类和 Receiver 类都实现了 DataTransferProtocol 接口。。我们假设 DFSClient 发起了一个 DataTransferProtocol.readBlock() 操作，那么 DFSClient 会调用 Sender 将这个请求序列化，并传输给远端的 Receiver。远端的 Receiver 接收到这个请求后，会反序列化请求，然后调用代码执行读取操作。<br>
+<img src="https://img-blog.csdnimg.cn/d29c563186614d178a22b3b6460fca85.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_11,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="2-3-数据写入流程分析">2.3 数据写入流程分析</h2>
+<h3 id="2-3-1-写入流程图">2.3.1 写入流程图</h3>
+<p><img src="https://img-blog.csdnimg.cn/eea81ae95a284f70813d56d2b9ad23b5.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_13,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="2-3-2-写入数据代码">2.3.2 写入数据代码</h3>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HDFSWriteDemo</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        <span class="comment">//设置客户端用户身份：hadoop具备在hdfs读写权限</span></span><br><span class="line">        System.setProperty(<span class="string">&quot;HADOOP_USER_NAME&quot;</span>,<span class="string">&quot;hadoop&quot;</span>);</span><br><span class="line">        <span class="comment">//创建Conf对象</span></span><br><span class="line">        <span class="type">Configuration</span> <span class="variable">conf</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Configuration</span>();</span><br><span class="line">        <span class="comment">//设置操作的文件系统是HDFS 默认是file:///</span></span><br><span class="line">        conf.set(<span class="string">&quot;fs.defaultFS&quot;</span>,<span class="string">&quot;hdfs://192.168.68.101:8020&quot;</span>);</span><br><span class="line">        <span class="comment">//创建FileSystem对象 其是一个通用的文件系统的抽象基类</span></span><br><span class="line">        <span class="type">FileSystem</span> <span class="variable">fs</span> <span class="operator">=</span> FileSystem.get(conf);</span><br><span class="line">        <span class="comment">//设置文件输出的路径</span></span><br><span class="line">        <span class="type">Path</span> <span class="variable">path</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Path</span>(<span class="string">&quot;/helloworld.txt&quot;</span>);</span><br><span class="line">        <span class="comment">//调用create方法创建文件</span></span><br><span class="line">        <span class="type">FSDataOutputStream</span> <span class="variable">out</span> <span class="operator">=</span> fs.create(path);</span><br><span class="line">        <span class="comment">//创建本地文件输入流</span></span><br><span class="line">        <span class="type">FileInputStream</span> <span class="variable">in</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;D:\\datasets\\hdfs\\helloworld.txt&quot;</span>);</span><br><span class="line">		<span class="comment">//IO工具类实现流对拷贝</span></span><br><span class="line">        IOUtils.copy(in,out);</span><br><span class="line">        <span class="comment">//关闭连接</span></span><br><span class="line">        fs.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-3-3-写入数据流程梳理">2.3.3 写入数据流程梳理</h3>
+<h4 id="2-3-3-1-客户端请求NameNode创建">2.3.3.1 客户端请求NameNode创建</h4>
+<p>  HDFS 客户端通过对<code>DistributedFileSystem</code>对象调用<code>create()</code>请求创建文件。<code>DistributedFileSystem</code>为客户端返回<code>FSDataOutputStream</code>输出流对象。通过源码注释可以发现<code>FSDataOutputStream</code>是一个包装类，所包装的是<code>DFSOutputStream</code>。<br>
+  可以通过<code>create()</code>方法调用不断跟下去，可以发现最终的调用也验证了上述结论，返回的是<code>DFSOutputStream</code>。<br>
+<img src="https://img-blog.csdnimg.cn/b411e684b06d49c3957ce40f9413013a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  点击进入代码<code>DFSOutputStream dfsos = dfs.create</code>可以发现，<code>DFSOutputStream</code>这个类是从<code>DFSClient</code>类的<code>create</code>方法中返回过来的。<br>
+<img src="https://img-blog.csdnimg.cn/3cc0b17ac6054dbf9665ae8941f1934a.png#pic_center" alt="在这里插入图片描述"><br>
+  在<code>DFSOutputStream dfsos = dfs.create</code>打上断点，dubug。进来之后点进去发现，<code>DFSClient</code>类中的<code>DFSOutputStream</code>实例对象是通过调用<code>DFSOutputStream</code>类的<code>newStreamForCreate</code>方法产生的。<br>
+<img src="https://img-blog.csdnimg.cn/671141ed92e3474699251ff010cfb6e2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  点击进入这个方法，找到了客户端请求 NameNode 新建元数据的关键代码。<br>
+<img src="https://img-blog.csdnimg.cn/060a348681144f67ab900cf1d0196db0.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="2-3-3-2-NameNode执行请求检查">2.3.3.2 NameNode执行请求检查</h4>
+<p>  <code>DistributedFileSystem</code>对 namenode 进行<code>RPC</code>调用，请求上传文件。namenode 执行各种检查判断：目标文件是否存在、父目录是否存在、客户端是否具有创建该文件的权限。检查通过，namenode 就会为创建新文件记录一条记录。否则，文件创建失败并向客户端抛出一个<code>IOException</code>。</p>
+<h4 id="2-3-3-3-DataStreamer类">2.3.3.3 DataStreamer类</h4>
+<p>  在之前的<code>newStreamForCreate</code>方法中，我们发现了最终返回的是<code>out</code>对象，并且在返回之前，调用了<code>out</code>对象的<code>start</code>方法。<br>
+<img src="https://img-blog.csdnimg.cn/e33dc6c8861b499da2623b55347d79cc.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  点进<code>start</code>方法，发现调用的是<code>DataStreamer</code>对象的<code>start</code>方法。<br>
+<img src="https://img-blog.csdnimg.cn/76548fa7d6d244c5bc2ff66047ef0bdb.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/9de1a15ac78446bdaa2bc45822ab5211.png#pic_center" alt="在这里插入图片描述"><br>
+  <code>DataStreamer</code>类是<code>DFSOutputSteam</code>的一个内部类，在这个类中，有一个方法叫做<code>run</code>方法，数据写入的关键代码就在这个<code>run</code>方法中实现。<br>
+<img src="https://img-blog.csdnimg.cn/2b2b4813b8c041faac29048eac7799bd.png#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="2-3-3-4-DataStreamer写数据">2.3.3.4 DataStreamer写数据</h4>
+<p>  在客户端写入数据时，<code>DFSOutputStream</code>将它分成一个个数据包（packet 默认 64kb）,并写入一个称之为数据队列（data queue）的内部队列。<code>DataStreamer</code>请求 NameNode 挑选出适合存储数据副本的一组 DataNode。这一组 DataNode 采用<code>pipeline</code>机制做数据的发送。默认是 3 副本存储。<br>
+<img src="https://img-blog.csdnimg.cn/aa51f7950eff417092d763f9d7c9f191.png#pic_center" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/cec6ade28d964ccea459b695824460ca.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  <code>DataStreamer</code>将数据包流式传输到<code>pipeline</code>的第一个 datanode，该 DataNode 存储数据包并将它发送到<code>pipeline</code>的第二个 DataNode。同样，第二个 DataNode 存储数据包并且发送给第三个（也是最后一个） DataNode。<br>
+<img src="https://img-blog.csdnimg.cn/a142a6ac97f84e678f125cf277497a00.png#pic_center" alt="在这里插入图片描述"><br>
+  <code>DFSOutputStream</code>也维护着一个内部数据包队列来等待 DataNode 的收到确认回执，称之为确认队列（ack queue），收到<code>pipeline</code>中所有 DataNode 确认信息后，该数据包才会从确认队列删除。<br>
+<img src="https://img-blog.csdnimg.cn/a073e751776e4a908dc7ec790a04c2f3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  客户端完成数据写入后，将在流上调用<code>close()</code>方法关闭。该操作将剩余的所有数据包写入 DataNode pipeline，并在联系到 NameNode 告知其文件写入完成之前，等待确认。<br>
+  因为 namenode 已经知道文件由哪些块组成（DataStream 请求分配数据块），因此它仅需等待最小复制块即可成功返回。数据块最小复制是由参数<code>dfs.namenode.replication.min</code>指定，默认是 1。</p>
+<h2 id="2-4-数据读取流程分析">2.4 数据读取流程分析</h2>
+<h3 id="2-4-1-读取流程图">2.4.1 读取流程图</h3>
+<p><img src="https://img-blog.csdnimg.cn/1684fdb8517b4d66b21c87162ff62ab8.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_14,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="2-4-2-读取数据代码">2.4.2 读取数据代码</h3>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HDFSReadDemo</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        <span class="comment">//设置客户端用户身份：hadoop具备在hdfs读写权限</span></span><br><span class="line">        System.setProperty(<span class="string">&quot;HADOOP_USER_NAME&quot;</span>,<span class="string">&quot;hadoop&quot;</span>);</span><br><span class="line">        <span class="comment">//创建Conf对象</span></span><br><span class="line">        <span class="type">Configuration</span> <span class="variable">conf</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Configuration</span>();</span><br><span class="line">        <span class="comment">//设置操作的文件系统是HDFS 默认是file:///</span></span><br><span class="line">        conf.set(<span class="string">&quot;fs.defaultFS&quot;</span>,<span class="string">&quot;hdfs://192.168.68.101:8020&quot;</span>);</span><br><span class="line">        <span class="comment">//创建FileSystem对象 其是一个通用的文件系统的抽象基类</span></span><br><span class="line">        <span class="type">FileSystem</span> <span class="variable">fs</span> <span class="operator">=</span> FileSystem.get(conf);</span><br><span class="line">        <span class="comment">//调用open方法读取文件</span></span><br><span class="line">        <span class="type">FSDataInputStream</span> <span class="variable">in</span> <span class="operator">=</span> fs.open(<span class="keyword">new</span> <span class="title class_">Path</span>(<span class="string">&quot;/helloworld.txt&quot;</span>));</span><br><span class="line">        <span class="comment">//创建本地文件输出流</span></span><br><span class="line">        <span class="type">FileOutputStream</span> <span class="variable">out</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;D:\\helloworld.txt&quot;</span>);</span><br><span class="line">        <span class="comment">//IO工具类实现流对拷贝</span></span><br><span class="line">        IOUtils.copy(in,out);</span><br><span class="line">        <span class="comment">//关闭连接</span></span><br><span class="line">        fs.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-4-3-读取数据流程梳理">2.4.3 读取数据流程梳理</h3>
+<h4 id="2-4-3-1-客户端请求NameNode打开open">2.4.3.1 客户端请求NameNode打开open</h4>
+<p>  客户端通过调用<code>DistributedFileSystem</code>对象上的<code>open()</code>来打开希望读取的文件。<code>DistributedFileSystem</code>为客户端返回<code>FSDataInputStream</code>输入流对象。通过源码注释可以发现<code>FSDataInputStream</code>是一个包装类，所包装的是<code>DFSInputStream</code>。<br>
+  可以通过<code>open</code>方法调用不断跟下去，可以发现最终的调用也验证了上述结论，返回的是<code>DFSInputStream</code>。<br>
+<img src="https://img-blog.csdnimg.cn/70fe5aa98c2c4fafa99b06034d55aa76.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  点击进入代码<code>DFSInputStream dfsis = dfs.open()</code>可以发现，<code>DFSInputStream</code>这个类是从<code>DFSClient</code>类的<code>open</code>方法中返回过来的。该输入流从 namenode 获取 block 的位置信息。<br>
+<img src="https://img-blog.csdnimg.cn/a4283674f1604f2fa151b1d6423fdf75.png#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="2-4-3-2-getLocatedBlocks">2.4.3.2 getLocatedBlocks</h4>
+<p>  在上述<code>open</code>方法中，有一个核心方法调用叫做<code>getLocatedBlocks</code>，见名知意，该方法是用于获取块位置信息的。<br>
+<img src="https://img-blog.csdnimg.cn/9fc405ae7e1141b18f075d334ad29e30.png#pic_center" alt="在这里插入图片描述"><br>
+  点击方法进去之后发现，最终调用的是<code>callGetBlockLocations</code>：<br>
+<img src="https://img-blog.csdnimg.cn/a1d008454b274778909dc584ad37287a.png#pic_center" alt="在这里插入图片描述"><br>
+  继续点下去，发现最终调用的是<code>getBlockLocations</code>方法。<br>
+<img src="https://img-blog.csdnimg.cn/6a016c6019fb4d1dba4041d87d95e23e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  通过源码可以发现，<code>getBlockLocations</code>方法是位于<code>ClientProtocol</code>这个接口中。在<code>ClientProtocol</code>的注释上可以得出信息，这是客户端和 namenode 进行通信的。<br>
+<img src="https://img-blog.csdnimg.cn/fe2354b131774b3fb08adf48eb7d4568.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="2-4-3-3-NameNode返回块信息">2.4.3.3 NameNode返回块信息</h4>
+<p>  <code>DistributedFileSystem</code>使用<code>RPC</code>调用 namenode 来确定文件中前几个块的块位置。对于每个块，namenode 返回具有该块副本的 datanode 的地址，并且 datanode 根据块与客户端的距离进行排序。注意此距离指的是网络拓扑中的距离。比如客户端的本身就是一个 DataNode，那么从本地读取数据明显比跨网络读取数据效率要高。<br>
+  之前的<code>getBlockLocations</code>方法在源码注释上也描述了这段逻辑。<br>
+<img src="https://img-blog.csdnimg.cn/56967e3136db481098f06ec6f12a4ccb.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  大致意思如下：获取指定范围内指定文件的块位置。 每个块的 DataNode 位置按与客户端的接近程度进行排序。返回<code>LocatedBlocks</code>，其中包含文件长度，块及其位置。 每个块的 DataNode 位置按到客户端地址的距离排序。然后，客户端将必须联系指示的 DataNode 之一以获得实际数据。</p>
+<h4 id="2-4-3-4-客户端读数据">2.4.3.4 客户端读数据</h4>
+<p>  <code>DFSClient</code>在获取到 block 的位置信息之后，继续调用<code>openInternal</code>方法。<br>
+<img src="https://img-blog.csdnimg.cn/f5f1adbe730a4b859183735746d5c21b.png#pic_center" alt="在这里插入图片描述"><br>
+  点击进入该方法可以发现，分了两种不同的输入流。这取决于文件的存储策略是否采用 EC 纠删码。<code>如果未使用EC编码策略存储，那么直接创建DFSInputStream</code>。<br>
+<img src="https://img-blog.csdnimg.cn/05d3c8b5320e44f89850de7c3d77aee0.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_12,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>
+  最终将 block 位置信息保存到<code>DFSInputStream</code>输入流对象中的成员变量中返回给客户端。<br>
+  客户端在<code>DFSInputStream</code>流上调用<code>read()</code>方法。然后<code>DFSInputStream</code>连接到文件中第一个块的最近的 DataNode 节点。通过对数据流反复调用<code>read()</code>方法，将数据从 DataNode 传输到客户端。当该块快要读取结束时，<code>DFSInputStream</code>将关闭与该 DataNode 的连接，然后寻找下一个块的最佳 datanode。这些操作对用户来说是透明的。所以用户感觉起来它一直在读取一个连续的流。<br>
+  客户端从流中读取数据时，也会根据需要询问 NameNode 来检索下一批数据块的 DataNode 位置信息。一旦客户端完成读取，就对<code>FSDataInputStream</code>调用<code>close()</code>方法。<br>
+  如果<code>DFSInputStream</code>与 DataNode 通信时遇到错误，它将尝试该块的下一个最接近的 DataNode 读取数据。并将记住发生故障的 DataNode，保证以后不会反复读取该 DataNode 后续的块。此外，<code>DFSInputStream</code>也会通过校验和（checksum）确认从 DataNode 发来的数据是否完整。如果发现有损坏的块，<code>DFSInputStream</code>会尝试从其他 DataNode 读取该块的副本，也会将被损坏的块报告给 namenode 。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2022/01/25/hadoop_23/">https://program-park.github.io/2022/01/25/hadoop_23/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a><a class="post-meta__tags" href="/tags/Hadoop/">Hadoop</a></div><div class="post_share"><div class="social-share" data-image="/img/hadoop/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/01/27/mysql_1/"><img class="prev-cover" src="/img/mysql/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Mysql 安装报错 error while loading shared libraries: libaio.so.1: cannot open shared object file: No such</div></div></a></div><div class="next-post pull-right"><a href="/2022/01/25/hadoop_22/"><img class="next-cover" src="/img/hadoop/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Hadoop 生态圈（十八）- HDFS Transparent Encryption 透明加密</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/01/11/hadoop_1/" title="Hadoop 3.x 在 centos 上的完全分布式部署（包括免密登录、集群测试、历史服务器、日志聚集、常用命令、群起脚本）"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-11</div><div class="title">Hadoop 3.x 在 centos 上的完全分布式部署（包括免密登录、集群测试、历史服务器、日志聚集、常用命令、群起脚本）</div></div></a></div><div><a href="/2022/01/17/hadoop_11/" title="ERROR org.apache.hadoop.hdfs.server.datanode.DataNode: Exception in secureMain"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-17</div><div class="title">ERROR org.apache.hadoop.hdfs.server.datanode.DataNode: Exception in secureMain</div></div></a></div><div><a href="/2022/01/19/hadoop_13/" title="Hadoop 生态圈（九）- HDFS High Availability（HA）高可用集群"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-19</div><div class="title">Hadoop 生态圈（九）- HDFS High Availability（HA）高可用集群</div></div></a></div><div><a href="/2022/01/17/hadoop_10/" title="Hadoop 生态圈（七）- HDFS 优化方案"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-17</div><div class="title">Hadoop 生态圈（七）- HDFS 优化方案</div></div></a></div><div><a href="/2022/01/19/hadoop_14/" title="Hadoop 生态圈（十）- HDFS Federation 联邦机制"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-19</div><div class="title">Hadoop 生态圈（十）- HDFS Federation 联邦机制</div></div></a></div><div><a href="/2022/01/17/hadoop_12/" title="Hadoop 生态圈（八）- HDFS 动态节点管理"><img class="cover" src="/img/hadoop/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-17</div><div class="title">Hadoop 生态圈（八）- HDFS 动态节点管理</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">165</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">32</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-HDFS%E6%BA%90%E7%A0%81%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90"><span class="toc-text">1. HDFS源码结构分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-IDEA%E5%AF%BC%E5%85%A5HDFS%E6%BA%90%E7%A0%81%E5%B7%A5%E7%A8%8B"><span class="toc-text">1.1 IDEA导入HDFS源码工程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-HDFS%E5%B7%A5%E7%A8%8B%E7%BB%93%E6%9E%84"><span class="toc-text">1.2 HDFS工程结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-1-hadoop-hdfs"><span class="toc-text">1.2.1 hadoop-hdfs</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-2-hadoop-hdfs-client"><span class="toc-text">1.2.2 hadoop-hdfs-client</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-3-hadoop-hdfs-httpfs"><span class="toc-text">1.2.3 hadoop-hdfs-httpfs</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-4-hadoop-hdfs-native-client"><span class="toc-text">1.2.4 hadoop-hdfs-native-client</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-5-hadoop-hdfs-nfs"><span class="toc-text">1.2.5 hadoop-hdfs-nfs</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-6-hadoop-hdfs-rbf"><span class="toc-text">1.2.6 hadoop-hdfs-rbf</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-HDFS%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90"><span class="toc-text">2. HDFS核心源码解析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-HDFS%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%A0%B8%E5%BF%83%E7%B1%BB"><span class="toc-text">2.1 HDFS客户端核心类</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1-Configuration"><span class="toc-text">2.1.1 Configuration</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-1-1-Configuration%E5%8A%A0%E8%BD%BD%E9%BB%98%E8%AE%A4%E9%85%8D%E7%BD%AE"><span class="toc-text">2.1.1.1 Configuration加载默认配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-1-2-Configuration%E5%8A%A0%E8%BD%BD%E7%94%A8%E6%88%B7%E8%AE%BE%E7%BD%AE"><span class="toc-text">2.1.1.2 Configuration加载用户设置</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-2-FileSystem"><span class="toc-text">2.1.2 FileSystem</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-2-1-%E8%8E%B7%E5%8F%96FileSystem%E5%AE%9E%E4%BE%8B"><span class="toc-text">2.1.2.1 获取FileSystem实例</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-HDFS%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE"><span class="toc-text">2.2 HDFS通信协议</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-1-%E6%A6%82%E8%BF%B0"><span class="toc-text">2.2.1 概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-2-Hadoop-RPC%E6%8E%A5%E5%8F%A3"><span class="toc-text">2.2.2 Hadoop RPC接口</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-2-1-RPC%E4%BB%8B%E7%BB%8D"><span class="toc-text">2.2.2.1 RPC介绍</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-2-2-ClientProrocol"><span class="toc-text">2.2.2.2 ClientProrocol</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-2-3-ClientDatanodeProtocol"><span class="toc-text">2.2.2.3 ClientDatanodeProtocol</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-2-4-DatanodeProtocol"><span class="toc-text">2.2.2.4 DatanodeProtocol</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-3-%E5%9F%BA%E4%BA%8ETCP-HTTP%E6%B5%81%E5%BC%8F%E6%8E%A5%E5%8F%A3"><span class="toc-text">2.2.3 基于TCP&#x2F;HTTP流式接口</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-3-1-DataTransferProtocol"><span class="toc-text">2.2.3.1 DataTransferProtocol</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90"><span class="toc-text">2.3 数据写入流程分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-1-%E5%86%99%E5%85%A5%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="toc-text">2.3.1 写入流程图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-2-%E5%86%99%E5%85%A5%E6%95%B0%E6%8D%AE%E4%BB%A3%E7%A0%81"><span class="toc-text">2.3.2 写入数据代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-3-%E5%86%99%E5%85%A5%E6%95%B0%E6%8D%AE%E6%B5%81%E7%A8%8B%E6%A2%B3%E7%90%86"><span class="toc-text">2.3.3 写入数据流程梳理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-3-1-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AF%B7%E6%B1%82NameNode%E5%88%9B%E5%BB%BA"><span class="toc-text">2.3.3.1 客户端请求NameNode创建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-3-2-NameNode%E6%89%A7%E8%A1%8C%E8%AF%B7%E6%B1%82%E6%A3%80%E6%9F%A5"><span class="toc-text">2.3.3.2 NameNode执行请求检查</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-3-3-DataStreamer%E7%B1%BB"><span class="toc-text">2.3.3.3 DataStreamer类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-3-4-DataStreamer%E5%86%99%E6%95%B0%E6%8D%AE"><span class="toc-text">2.3.3.4 DataStreamer写数据</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-%E6%95%B0%E6%8D%AE%E8%AF%BB%E5%8F%96%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90"><span class="toc-text">2.4 数据读取流程分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-1-%E8%AF%BB%E5%8F%96%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="toc-text">2.4.1 读取流程图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-2-%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E4%BB%A3%E7%A0%81"><span class="toc-text">2.4.2 读取数据代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-3-%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E6%B5%81%E7%A8%8B%E6%A2%B3%E7%90%86"><span class="toc-text">2.4.3 读取数据流程梳理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-3-1-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AF%B7%E6%B1%82NameNode%E6%89%93%E5%BC%80open"><span class="toc-text">2.4.3.1 客户端请求NameNode打开open</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-3-2-getLocatedBlocks"><span class="toc-text">2.4.3.2 getLocatedBlocks</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-3-3-NameNode%E8%BF%94%E5%9B%9E%E5%9D%97%E4%BF%A1%E6%81%AF"><span class="toc-text">2.4.3.3 NameNode返回块信息</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-3-4-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AF%BB%E6%95%B0%E6%8D%AE"><span class="toc-text">2.4.3.4 客户端读数据</span></a></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/14/elastic_15/" title="Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项"/></a><div class="content"><a class="title" href="/2022/03/14/elastic_15/" title="Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项">Elastic Stack 日志分析（十五）- Elasticsearch 在生产环境上的使用注意事项</a><time datetime="2022-03-14T06:12:45.000Z" title="发表于 2022-03-14 14:12:45">2022-03-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/14/elastic_14/" title="Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解"/></a><div class="content"><a class="title" href="/2022/03/14/elastic_14/" title="Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解">Elastic Stack 日志分析（十四）- Elasticsearch 操作底层流程详解</a><time datetime="2022-03-14T02:28:33.000Z" title="发表于 2022-03-14 10:28:33">2022-03-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/08/elastic_13/" title="Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案"/></a><div class="content"><a class="title" href="/2022/03/08/elastic_13/" title="Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案">Elastic Stack 日志分析（十三）- Elasticsearch 集群脑裂解决方案</a><time datetime="2022-03-08T09:24:42.000Z" title="发表于 2022-03-08 17:24:42">2022-03-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/08/elastic_12/" title="Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解"><img src="/img/elastic/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解"/></a><div class="content"><a class="title" href="/2022/03/08/elastic_12/" title="Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解">Elastic Stack 日志分析（十二）- Elasticsearch Master 选举流程详解</a><time datetime="2022-03-08T06:56:57.000Z" title="发表于 2022-03-08 14:56:57">2022-03-08</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/hadoop/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2022/01/25/hadoop_23/'
+    this.page.identifier = '/2022/01/25/hadoop_23/'
+    this.page.title = 'Hadoop 生态圈（十九）- HDFS 核心源码详解'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
