@@ -1,0 +1,851 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Nginx 从入门到入坟（三）- Nginx 核心配置文件分析 | 程序园</title><meta name="keywords" content="Nginx"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是《Nginx从入门到入坟》系列，第三篇：Nginx 核心配置文件分析。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx 从入门到入坟（三）- Nginx 核心配置文件分析">
+<meta property="og:url" content="https://program-park.github.io/2022/04/15/nginx_4/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是《Nginx从入门到入坟》系列，第三篇：Nginx 核心配置文件分析。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/nginx/1.png">
+<meta property="article:published_time" content="2022-04-15T08:36:42.000Z">
+<meta property="article:modified_time" content="2022-09-08T06:51:18.608Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="Nginx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/nginx/1.png"><link rel="shortcut icon" href="/img/favicon_logo/favicon.png"><link rel="canonical" href="https://program-park.github.io/2022/04/15/nginx_4/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Nginx 从入门到入坟（三）- Nginx 核心配置文件分析',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-08 14:51:18'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">200</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">35</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">25</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/nginx/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Nginx 从入门到入坟（三）- Nginx 核心配置文件分析</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-04-15T08:36:42.000Z" title="发表于 2022-04-15 16:36:42">2022-04-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-08T06:51:18.608Z" title="更新于 2022-09-08 14:51:18">2022-09-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Nginx/">Nginx</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">6.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>24分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Nginx 从入门到入坟（三）- Nginx 核心配置文件分析"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="1-Nginx目录结构分析">1. Nginx目录结构分析</h1>
+<p>  在使用 Nginx 之前，我们先对安装好的 Nginx 目录文件进行一个分析，在这块给大家介绍一个工具 tree，通过 tree 我们可以很方面的去查看 centos 系统上的文件目录结构，当然，如果想使用 tree 工具，就得先通过<code>yum install -y tree</code>来进行安装，安装成功后，可以通过执行<code>tree /usr/local/nginx</code>（tree 后面跟的是 Nginx 的安装目录），获取的结果如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/275092abf7004ed28645f664512aa8f1.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5LiA5L2N5pyo5bim5oSf5oOF55qE56CB5Yac,size_9,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li><strong>conf：</strong> Nginx 所有配置文件目录；</li>
+<li><strong>fastcgi.conf：</strong> fastcgi 相关配置文件；</li>
+<li><strong>fastcgi.conf.default：</strong> fastcgi.conf 的备份文件；</li>
+<li><strong>fastcgi_params：</strong> fastcgi 的参数文件；</li>
+<li><strong>fastcgi_params.default：</strong> fastcgi 的参数备份文件；</li>
+<li><strong>scgi_params：</strong> scgi 的参数文件；</li>
+<li><strong>scgi_params.default：</strong> scgi 的参数备份文件；</li>
+<li><strong>uwsgi_params：</strong> uwsgi 的参数文件；</li>
+<li><strong>uwsgi_params.default：</strong> uwsgi 的参数备份文件；</li>
+<li><strong>mime.types：</strong> 记录的是 HTTP 协议中的 Content-Type 的值和文件后缀名的对应关系；</li>
+<li><strong>mime.types.default：</strong> mime.types 的备份文件；</li>
+<li><strong>nginx.conf：</strong> 这个是 Nginx 的核心配置文件，这个文件非常重要，也是我们后面要讲的重点；</li>
+<li><strong>nginx.conf.default：</strong> nginx.conf 的备份文件；</li>
+<li><strong>koi-utf、koi-win、win-utf</strong> 这三个文件都是与编码转换映射相关的配置文件，用来将一种编码转换成另一种编码；</li>
+<li><strong>html：</strong> 存放 Nginx 自带的两个静态的html页面；</li>
+<li><strong>50x.html：</strong> 访问失败后的失败页面；</li>
+<li><strong>index.html：</strong> 成功访问的默认首页；</li>
+<li><strong>logs：</strong> 记录入门的文件，当 Nginx 服务器启动后，这里面会有 access.log、error.log 和 nginx.pid 三个文件出现；</li>
+<li><strong>sbin：</strong> 是存放执行程序文件 nginx；</li>
+<li><strong>nginx：</strong> 是用来控制 Nginx 的启动和停止等相关的命令。</li>
+</ul>
+<h1 id="2-Nginx核心配置文件结构">2. Nginx核心配置文件结构</h1>
+<p>  前面已经说过，Nginx 的核心配置文件默认是放在<code>/usr/local/nginx/conf/nginx.conf</code>，下面我们就来说一下nginx.conf的内容和基本配置方法。<br>
+  读取 Nginx 自带的 Nginx 配置文件，将其中的注释部分删除掉后，就剩下下面内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">worker_processes 1;</span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">	worker_connections 1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">	include			mime.types;</span><br><span class="line">	default_type	application/octet-stream;</span><br><span class="line">	sendfile on;</span><br><span class="line">	keepalive_timeout 65;</span><br><span class="line">	</span><br><span class="line">	server &#123;</span><br><span class="line">		listen 80;</span><br><span class="line">		server_name localhost;</span><br><span class="line">		location / &#123;</span><br><span class="line">			root html;</span><br><span class="line">			index index.html index.htm;</span><br><span class="line">		&#125;</span><br><span class="line">		error_page 500 502 503 504 /50x.html;</span><br><span class="line">		location = /50x.html &#123;</span><br><span class="line">			root html;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">指令名 指令值;	# 全局块，主要设置Nginx服务器整体运行的配置指令</span><br><span class="line"></span><br><span class="line"># events块，主要设置，Nginx服务器与用户的网络连接，这一部分对Nginx服务器的性能影响较大</span><br><span class="line">events &#123;</span><br><span class="line">	指令名 指令值;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># http块，是Nginx服务器配置中的重要部分，代理、缓存、日志记录、第三方模块配置...</span><br><span class="line">http &#123;</span><br><span class="line">	指令名 指令值;</span><br><span class="line">	server &#123;	# server块，是Nginx配置和虚拟主机相关的内容</span><br><span class="line">		指令名 指令值;</span><br><span class="line">		location / &#123;</span><br><span class="line">		# location块，基于Nginx服务器接收请求字符串与location后面的值进行匹配，对特定请求进行处理</span><br><span class="line">			指令名 指令值;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  nginx.conf 配置文件中默认有三大块：<code>全局块</code>、<code>events块</code>、<code>http块</code>。<br>
+  http 块中可以配置多个 server 块，每个 server 块又可以配置多个 location 块。</p>
+<h2 id="2-1-全局块">2.1 全局块</h2>
+<h3 id="2-1-1-user指令">2.1.1 user指令</h3>
+<p>  <strong>user：</strong> 用于配置运行 Nginx 服务器的 worker 进程的用户和用户组。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">user user [group]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">nobody</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">全局块</td>
+</tr>
+</tbody>
+</table>
+<p>  该属性也可以在编译的时候指定，语法如下<code>./configure --user=user--group=group</code>，如果两个地方都进行了设置，最终生效的是配置文件中的配置。<br>
+  使用 user 指令可以指定启动运行工作进程的用户及用户组，这样对于系统的权限访问控制的更加精细，也更加安全。</p>
+<h3 id="2-1-2-work-process指令">2.1.2 work process指令</h3>
+<p>  <strong>master_process：</strong> 用来指定是否开启工作进程。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">master_process on|off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">master_process on</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">全局块</td>
+</tr>
+</tbody>
+</table>
+<p>  <strong>worker_processes：</strong> 用于配置 Nginx 生成工作进程的数量，这个是 Nginx 服务器实现并发处理服务的关键所在。理论上来说 workder process 的值越大，可以支持的并发处理量也越多，但事实上这个值的设定是需要受到来自服务器自身的限制，建议将该值和服务器 CPU 的内核数保存一致。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">worker_processes num/auto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">全局块</td>
+</tr>
+</tbody>
+</table>
+<p>  如果将 worker_processes 设置成 2，则会看到如下内容：</p>
+<p><img src="https://img-blog.csdnimg.cn/9390ec4d44d34479a99192582ac8d8cb.png#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="2-1-3-其他指令">2.1.3 其他指令</h3>
+<p>  <strong>daemon：</strong> 设定 Nginx 是否以守护进程的方式启动。<br>
+  守护式进程是 linux 后台执行的一种服务进程，特点是独立于控制终端，不会随着终端关闭而停止。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">daemon on|off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">daemon on</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">全局块</td>
+</tr>
+</tbody>
+</table>
+<p>  <strong>pid：</strong> 用来配置 Nginx 当前 master 进程的进程号 ID 存储的文件路径。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">pid file</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">默认为：/usr/local/nginx/logs/nginx.pid</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">全局块</td>
+</tr>
+</tbody>
+</table>
+<p>  该属性可以通过<code>./configure --pid-path=PATH</code>来指定。<br>
+  <strong>error_log：</strong> 用来配置 Nginx 的错误日志存放路径。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">error_log file [日志级别]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">error_log logs/error.log error</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">全局块、http、server、location</td>
+</tr>
+</tbody>
+</table>
+<p>  该属性可以通过<code>./configure --error-log-path=PATH</code>来指定。<br>
+  其中日志级别的值有：<code>debug|info|notice|warn|error|crit|alert|emerg</code>，翻译过来为<code>调试|信息|通知|警告|错误|临界|警报|紧急</code>，这块建议大家设置的时候不要设置成 info 以下的等级，因为会带来大量的磁盘 I/O 消耗，影响 Nginx 的性能。<br>
+  <strong>include：</strong> 用来引入其他配置文件，使 Nginx 的配置更加灵活。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">include file</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">无</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">any</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-2-events块">2.2 events块</h2>
+<p>  <strong>accept_mutex：</strong> 用来设置 Nginx 网络连接序列化。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">accept_mutex on|off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">accept_mutex on</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">events</td>
+</tr>
+</tbody>
+</table>
+<p>  这个配置主要可以用来解决常说的 “惊群” 问题。大致意思是在某一个时刻，客户端发来一个请求连接，Nginx 后台是以多进程的工作模式，也就是说有多个 worker 进程会被同时唤醒，但是最终只会有一个进程可以获取到连接，如果每次唤醒的进程数目太多，就会影响 Nginx 的整体性能。如果将上述值设置为 on（开启状态），将会对多个 Nginx 进程接收连接进行序列号，一个个来唤醒接收，就防止了多个进程对连接的争抢。<br>
+  <strong>multi_accept：</strong> 用来设置是否允许同时接收多个网络连接。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">multi_accept on|off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">multi_accept off</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">events</td>
+</tr>
+</tbody>
+</table>
+<p>  如果 multi_accept 被禁止了，Nginx 一个工作进程只能同时接受一个新的连接。否则，一个工作进程可以同时接受所有的新连接。<br>
+  <strong>worker_connections：</strong> 用来配置单个 worker 进程最大的连接数。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">worker_connections number</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">worker_commections 512</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">events</td>
+</tr>
+</tbody>
+</table>
+<p>  这里的连接数不仅仅包括和前端用户建立的连接数，而是包括所有可能的连接数。另外，number 值不能大于操作系统支持打开的最大文件句柄数量。<br>
+  <strong>use：</strong> 用来设置 Nginx 服务器选择哪种事件驱动来处理网络消息。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">use method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">根据操作系统定</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">events</td>
+</tr>
+</tbody>
+</table>
+<p>  注意：此处所选择事件处理模型是 Nginx 优化部分的一个重要内容，method 的可选值有<code>select/poll/epoll/kqueue</code>等，之前在准备 centos 环境的时候，我们强调过要使用 linux 内核在 2.6 以上，就是为了能使用 epoll 函数来优化 Nginx。<br>
+  另外这些值的选择，我们也可以在编译的时候使用<code>--with-select_module</code>、<code>--without-select_module</code>、<code>--with-poll_module、--without-poll_module</code>来设置是否需要将对应的事件驱动模块编译到 Nginx 的内核。</p>
+<h3 id="2-2-1-events指令配置实例">2.2.1 events指令配置实例</h3>
+<p>  打开 Nginx 的配置文件 nginx.conf，添加如下配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">events&#123;</span><br><span class="line">	accept_mutex on;</span><br><span class="line">	multi_accept on;</span><br><span class="line">	worker_commections 1024;</span><br><span class="line">	use epoll;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  启动测试：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./nginx -t</span><br><span class="line">./nginx -s reload</span><br></pre></td></tr></table></figure>
+<h2 id="2-3-http块">2.3 http块</h2>
+<h3 id="2-3-1-定义MIME-Type">2.3.1 定义MIME-Type</h3>
+<p>  我们都知道浏览器中可以显示的内容有 HTML、XML、GIF 等种类繁多的文件、媒体等资源，浏览器为了区分这些资源，就需要使用 MIME Type。所以说 MIME Type 是网络资源的媒体类型。Nginx 作为 web 服务器，也需要能够识别前端请求的资源类型。<br>
+  在 Nginx 的配置文件中，默认有两行配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">include mime.types;</span><br><span class="line">default_type application/octet-stream;</span><br></pre></td></tr></table></figure>
+<p>  <strong>default_type：</strong> 用来配置 Nginx 响应前端请求默认的 MIME 类型。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">default_type mime-type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">default_type text/plain</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http、server、location</td>
+</tr>
+</tbody>
+</table>
+<p>  在 default_type 之前还有一句<code>include mime.types</code>，include 之前我们已经介绍过，相当于把 mime.types 文件中 MIMT 类型与相关类型文件的文件后缀名的对应关系加入到当前的配置文件中。<br>
+  举例来说明：<br>
+  有些时候请求某些接口的时候需要返回指定的文本字符串或者 json 字符串，如果逻辑非常简单或者干脆是固定的字符串，那么可以使用 Nginx 快速实现，这样就不用编写程序响应请求了，可以减少服务器资源占用并且响应性能非常快。<br>
+  如何实现：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">location /get_text &#123;</span><br><span class="line">	# 这里也可以设置成text/plain</span><br><span class="line">	default_type text/html;</span><br><span class="line">	return 200 &quot;This is nginx&#x27;s text&quot;;</span><br><span class="line">&#125;</span><br><span class="line">location /get_json&#123;</span><br><span class="line">	default_type application/json;</span><br><span class="line">	return 200 &#x27;&#123;&quot;name&quot;:&quot;TOM&quot;,&quot;age&quot;:18&#125;&#x27;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-3-2-自定义服务日志">2.3.2 自定义服务日志</h3>
+<p>  Nginx 中日志的类型分 access.log、error.log。<br>
+  <code>access.log</code>：用来记录用户所有的访问请求。<br>
+  <code>error.log</code>：记录 Nginx 本身运行时的错误信息，不会记录用户的访问请求。<br>
+  Nginx 服务器支持对服务日志的格式、大小、输出等进行设置，需要使用到两个指令，分别是 access_log 和 log_format 指令。<br>
+  <strong>access_log：</strong> 用来设置用户访问日志的相关属性。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">access_log path[format[buffer=size]]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">access_log logs/access.log combined;</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http , server , location</td>
+</tr>
+</tbody>
+</table>
+<p>  <strong>log_format：</strong> 用来指定日志的输出格式。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">log_format name [escape=default|json|none] string…</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">log_format combined “…”</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-3-3-其他配置指令">2.3.3 其他配置指令</h3>
+<p>  <strong>sendfile：</strong> 用来设置 Nginx 服务器是否使用 sendfile() 传输文件，该属性可以大大提高 Nginx 处理静态资源的性能。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">sendfile on|off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">sendfile off</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http、server、location</td>
+</tr>
+</tbody>
+</table>
+<p>  <strong>keepalive_timeout：</strong> 用来设置长连接的超时时间。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">keepalive_timeout time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">keepalive_timeout 75s</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http、server、location</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>为什么要使用keepalive？</strong></p>
+</blockquote>
+<p>  我们都知道 HTTP 是一种无状态协议，客户端向服务端发送一个 TCP 请求，服务端响应完毕后断开连接。<br>
+  如何客户端向服务端发送多个请求，每个请求都需要重新创建一次连接，效率相对来说比较多，使用 keepalive 模式，可以告诉服务器端在处理完一个请求后保持这个 TCP 连接的打开状态，若接收到来自这个客户端的其他请求，服务端就会利用这个未被关闭的连接，而不需要重新创建一个新连接，提升效率，但是这个连接也不能一直保持，这样的话，连接如果过多，也会是服务端的性能下降，这个时候就需要我们进行设置其的超时时间。<br>
+  <strong>keepalive_requests：</strong> 用来设置一个 keep-alive 连接使用的次数。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">keepalive_requests number</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">keepalive_requests 100</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http、server、location</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-4-server块和location块">2.4 server块和location块</h2>
+<p>  server 块和 location 块都是比较重要的内容，因为后面会对 Nginx 的功能进行详细讲解，所以这块内容就放到静态资源部署的地方说明一下。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">	listen 80;</span><br><span class="line">	server_name localhost;</span><br><span class="line">	location / &#123;</span><br><span class="line">		root html;</span><br><span class="line">		index index.html index.htm;</span><br><span class="line">	&#125;</span><br><span class="line">	error_page 500 502 503 504 404 /50x.html;</span><br><span class="line">	location = /50x.html &#123;</span><br><span class="line">		root html;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-4-1-server块的匹配逻辑">2.4.1 server块的匹配逻辑</h3>
+<p>  Nginx 在决定请求由哪个 server 块执行时，主要关注的是 server 块中的<code>listen</code>和<code>server_name</code>两个字段。</p>
+<h4 id="2-4-1-1-listen指令">2.4.1.1 listen指令</h4>
+<p>  listen 字段定义 server 响应的 ip 和端口，如果没有明确配置 listen 字段，默认监听<code>0.0.0.0:80</code>（root 用户运行）或者<code>0.0.0.0:8080</code>（非 root 用户运行）。<br>
+  listen 可以被配置为：</p>
+<ul>
+<li>一个 ip 和端口的组合；</li>
+<li>一个单独的 ip，默认监听 80 端口；</li>
+<li>一个单独的端口，默认监听所有的 ip 接口；</li>
+<li>一个 Unix socket 路径；</li>
+</ul>
+<p>  其中最后一项通常只用于在不同的 server 之间传递请求。<br>
+  选择要使用的 server 的规则如下：</p>
+<ul>
+<li>Nginx 首先将所有 “不完整” 的 listen 指令进行转换，比如没有 listen 字段的转换为<code>listen 0.0.0.0:80</code>，<code>listen 1.1.1.1</code>转换为<code>listen 1.1.1.1:80</code>等；</li>
+<li>Nginx 根据请求的 ip 和端口创建一个与请求最匹配的 server 块列表，优先匹配指定了特定 ip 的 server 块，其次才会选择<code>listen 0.0.0.0</code>的这种 server 块，但是无论是哪种情况，端口必须是完全匹配的；</li>
+<li>如果只有一个最佳匹配，那么将使用匹配的 server 块响应请求，如果有多个 server 块具有相同级别的特异性匹配，Nginx 就开始评估每一个 server 块的<code>server_name</code>指令；</li>
+<li>注意：只有当 listen 指令无法找到最佳匹配时才会考虑评估 server_name 指令；</li>
+</ul>
+<p>  重要的是要理解，Nginx 仅 server_name 在需要区分与 listen 指令中特定级别的匹配的 server 块时才评估指令。比如下面的例子，如果 <a target="_blank" rel="noopener" href="http://example.com">example.com</a> 托管在 192.168.1.10 的端口 80 上，<a target="_blank" rel="noopener" href="http://example.com">example.com</a> 则在本示例中，尽管 server_name 第二个块中有指令，但对第一个块的请求始终会得到满足。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 192.168.1.10;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name example.com;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  如果多个 server 块以相同的特异性匹配，则下一步是检查 server_name 指令。</p>
+<h4 id="2-4-1-2-server-name指令">2.4.1.2 server_name指令</h4>
+<p>  如果根据 listen 指令无法得到最佳匹配，将会开始解析 server_name 指令。Nginx 会检查请求中的 “Host” 头，这个值包含了客户端实际试图请求的域名或者 ip 地址，Nginx 会根据这个值去匹配 server_name 指令，匹配规则如下：</p>
+<ul>
+<li>Nginx 会尝试寻找一个和 sever_name 和 Host 值完全匹配的 server 块，如果找到多个精确匹配，则会使用第一个匹配的 server 块；</li>
+<li>如果没有找到精确匹配的 server 块，则 nginx 尝试找到 server_name 带有<code>*</code>开头的 server 块，如果找到多个，则选择最长匹配的 server 块；</li>
+<li>如果没有找到使用<code>*</code>开头的 server 块，则会寻找以<code>*</code>结尾的 server 块，同样，如果有多个匹配，选择最长匹配；</li>
+<li>如果没有找到使用<code>*</code>匹配的 server 块，则会寻找使用正则表达式（以~开头）定义 server_name 的 server 块，如果找到多个匹配，会使用第一个匹配；</li>
+<li>如果没有找到正则表达式匹配的 server 块，则 Nginx 将会为该 IP 地址和端口选择默认的 server 块。每一个 ip 和端口组合都可以配置一个且只能配置一个默认的 default_server 块，如果没有的话，则会选择可用列表中的第一个 server（此时的选择是随机的，顺序不固定）；</li>
+</ul>
+<p>  示例如下：</p>
+<ol>
+<li>准确的 server_name 匹配： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">	listen 80;</span><br><span class="line">	server_name www.domain.com;</span><br><span class="line">	. . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li>以<code>*</code>通配符开始的字符串： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">	listen 80;</span><br><span class="line">	server_name *.domain.com;</span><br><span class="line">	. . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li>以<code>*</code>通配符结束的字符串： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">	listen 80;</span><br><span class="line">	server_name www.*;</span><br><span class="line">	. . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li>匹配正则表达式： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">	listen 80;</span><br><span class="line">	server_name ~^(?.+).domain.com$;</span><br><span class="line">	. . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li>如果以上都没有匹配，则使用 default_server。如果没有指定 default_server，则会选择第一个可用的 server，我们可以指定对于没有匹配的 host 值时，返回错误到客户端。可以用来防止别人把垃圾流量转到你的网站。 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80 default_server;</span><br><span class="line">    server_name _;</span><br><span class="line">    return 444;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+通过返回 444 这个 Nginx 的非标准错误码让 Nginx 断开与浏览器的连接。</li>
+</ol>
+<h4 id="2-4-1-3-实例示范">2.4.1.3 实例示范</h4>
+<p>  如果存在 server_name 与 “Host” 头值完全匹配的定义，则选择该服务器块来处理请求。<br>
+  在此示例中，如果请求的 “Host” 头设置为<code>host1.example.com</code>，则将选择第二台服务器：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name *.example.com;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name host1.example.com;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  如果找不到完全匹配的内容，则 Nginx 然后检查是否存在 server_name 带有合适的起始通配符。以通配符开头的最长匹配将被选择来满足请求。<br>
+  在此示例中，如果请求的 “Host” 头为<code>www.example.org</code>，则将选择第二个服务器块：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name www.example.*;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name *.example.org;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name *.org;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  如果找不到与起始通配符匹配的内容，则 Nginx 将在表达式末尾使用通配符查看是否存在匹配项。此时，将选择以通配符结尾的最长匹配来满足请求。<br>
+  例如，如果请求的 “Host” 标头设置为<code>www.example.com</code>，则将选择第三个服务器块：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name host1.example.com;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name example.com;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name www.example.*;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  如果找不到通配符匹配项，则 Nginx 将继续尝试匹配 server_name 使用正则表达式的指令。所述第一匹配正则表达式将被选择，以响应该请求。<br>
+  例如，如果请求的 “Host” 标头设置为<code>www.example.com</code>，则将选择第二个服务器块以满足请求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name example.com;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name ~^(www|host1).*.example.com$;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name ~^(subdomain|set|www|host1).*.example.com$;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  如果以上步骤均不能满足请求，则该请求将被传递到默认服务器以获取匹配的 IP 地址和端口。</p>
+<h3 id="2-4-2-location块的匹配逻辑">2.4.2 location块的匹配逻辑</h3>
+<h4 id="2-4-2-1-location块语法">2.4.2.1 location块语法</h4>
+<p>  location 块位于server 块（或其他 location 块）中，用于决定如何处理请求 URI（请求的一部分，位于域名或 IP 地址/端口之后）。<br>
+  位置块通常采用以下形式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> location optional_modifier location_match &#123;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  在上面的 location_match 定义了 Nginx 应该针对什么样的请求 URI 检查。上例中修饰符的存在或不存在会影响 Nginx 尝试匹配 location 块的方式。<br>
+  不同修饰符对 location 块的影响解释如下：</p>
+<ul>
+<li><code>无</code>：如果不存在修饰符，则该位置将解释为前缀匹配。这意味着给定的 location 将与请求 URI 的开头进行匹配以确定匹配；</li>
+<li><code>=</code>：精确匹配，如果使用等号，则如果请求 URI 完全匹配给定的位置，则此块将被视为匹配；</li>
+<li><code>~</code>：如果存在波浪号修饰符，则此位置将被解释为区分大小写的正则表达式匹配（大小写敏感正则匹配）；</li>
+<li><code>~*</code>：如果使用波浪号和星号修饰符，则位置块将被解释为不区分大小写的正则表达式匹配；</li>
+<li><code>^~</code>：如果存在 carat 和 tilde 修饰符，并且如果此块被选为最佳非正则表达式匹配，则不继续匹配后面的（前缀匹配）。</li>
+</ul>
+<h4 id="2-4-2-2-location块语法的示例">2.4.2.2 location块语法的示例</h4>
+<p>  作为前缀匹配的一个例子，以下 location 块可以被选择为响应于请求的 URI 的样子<code>/site</code>，<code>/site/page1/index.html</code>或<code>/site/index.html</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location /site &#123;</span><br><span class="line">	. . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  为了演示精确的请求 URI 匹配，此块将始终用于响应类似于<code>/page1</code>。它不会用于响应<code>/page1/index.html</code>请求 URI。请记住，如果选择此块并使用索引页完成请求，则内部重定向将发生到另一个位置，该位置将成为请求的实际处理程序：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location = /page1 &#123;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  作为应区分大小写的正则表达式的 location 示例，此块可用于处理对<code>/tortoise.jpg</code>的请求，但不能用于处理<code>/FLOWER.PNG</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location ~ .(jpe?g|png|gif|ico)$ &#123;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  下面是一个类似于上面的不区分大小写的匹配块。在这里，无论是<code>/tortoise.jpg</code>和<code>/FLOWER.PNG</code>都可以通过此块处理：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location ~* .(jpe?g|png|gif|ico)$ &#123;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  最后，如果确定为最佳非正则表达式匹配，则此块将防止正则表达式匹配发生。它可以处理以下请求<code>/costumes/ninja.html</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location ^~ /costumes &#123;</span><br><span class="line">    . . .</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  如上所述，修饰符对 location 块的不同影响。但是，这并没有告诉我们 Nginx 用于确定将请求发送到哪个 location 块的算法。<br>
+  类似于 Nginx 用来选择处理请求的服务器块的过程，Nginx 也有一个既定的算法来决定服务器中的哪个 location 块用于处理请求。</p>
+<h4 id="2-4-2-3-Nginx如何选择用于处理请求的location">2.4.2.3 Nginx如何选择用于处理请求的location</h4>
+<p>  Nginx 选择将用于为请求提供 server 的 location，其方式与它选择 server 块的方式类似。它通过一个过程来确定任何给定请求的最佳 location 块。了解这个过程是能够可靠、准确地配置 Nginx 的关键要求。<br>
+  考虑到我们上面描述的 location 声明的类型，Nginx 通过将请求 URI 与每个 location 进行比较来评估可能的 location 上下文。它使用以下算法执行此操作：</p>
+<ul>
+<li>Nginx 首先检查所有基于前缀的 location 匹配（所有不涉及正则表达式的 location 类型），它根据完整的请求 URI 检查每个 location；</li>
+<li>首先，Nginx 寻找完全匹配。如果发现使用<code>=</code>修饰符的 location 块与请求 URI 完全匹配，则立即选择该位置块来处理请求；</li>
+<li>如果没有找到精确的（使用<code>=</code>修饰符）位置块匹配，Nginx 然后继续评估非精确前缀。它发现给定请求 URI 的最长匹配前缀位置，然后按如下方式评估：
+<ul>
+<li>如果最长的匹配前缀 location 具有<code>^~</code>修饰符，则 Nginx 将立即结束其搜索并选择此 location 来满足请求；</li>
+<li>如果最长的匹配前缀 location 不使用<code>^~</code>修饰符，则该匹配项暂时由 Nginx 存储，以便可以移动搜索的焦点；</li>
+</ul>
+</li>
+<li>确定并存储了最长的匹配前缀 location 后，Nginx 继续评估正则表达式 location（区分大小写和不区分大小写）。如果有任何的正则表达式的 location 包括 在最长前缀匹配的 location 里，Nginx 会将这些移动到它的正则表达式的 location 列表的顶部进行检查。然后，Nginx 尝试顺序匹配正则表达式 location。第一个匹配上请求 URI 的正则表达式的 location 被立即选择来服务该请求；</li>
+<li>如果未找到与请求 URI 匹配的正则表达式的 location，则选择先前存储的前缀 location 来处理请求；</li>
+</ul>
+<p>  这里要理解的是，默认情况下，Nginx 将优先于前缀匹配提供正则表达式匹配。但是，它首先评估前缀位置，允许管理员通过使用<code>=</code>和<code>^~</code>修饰符指定位置来覆盖这种趋势。<br>
+  同样要注意的是，尽管前缀 location 通常是根据最长，最具体的匹配选择的，但是当找到第一个匹配的 location 时，正则表达式评估就会停止。这意味着配置中的定位对于正则表达式 location 具有广泛的意义。<br>
+  最后，重要的是要理解，当 Nginx 评估正则表达式 location 时，最长前缀匹配内的正则表达式匹配将 “插队”。在考虑其他任何正则表达式匹配项之前，将按顺序评估这些值。</p>
+<h4 id="2-4-2-4-location中的反斜线">2.4.2.4 location中的反斜线</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">location /test &#123;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br><span class="line">location /test/ &#123;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>不带<code>/</code>：当访问 ip 地址 /test 时， Nginx 先找是否有 test 目录，如果有则找 test 目录下的 index.html；如果没有 test 目录， nginx 则会找是否有 test 文件；</li>
+<li>带<code>/</code>：当访问 ip 地址 /test 时， Nginx 先找是否有 test 目录，如果有则找 test 目录下的 index.html，如果没有它也不会去找是否存在 test 文件。</li>
+</ul>
+<h4 id="2-4-2-5-设置请求资源的目录">2.4.2.5 设置请求资源的目录</h4>
+<p>  <strong>root：</strong> 设置请求的根目录。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">root path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">root html</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http、server、location</td>
+</tr>
+</tbody>
+</table>
+<p>  path 为 Nginx 服务器接收到请求以后查找资源的根目录路径。<br>
+  <strong>alias：</strong> 用来更改 location 的 URI。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">alias path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">-</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">location</td>
+</tr>
+</tbody>
+</table>
+<p>  path 为修改后的根路径。<br>
+  以上两个指令都可以来指定访问资源的路径，那么这两者之间的区别是什么?<br>
+  <strong>举例说明：</strong></p>
+<ol>
+<li>在<code>/usr/local/nginx/html</code>目录下创建一个<code>images</code>目录，并在目录下放入一张图片<code>mv.png</code>图片： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location /images &#123;</span><br><span class="line">	root /usr/local/nginx/html;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+访问图片的路径为： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost/images/mv.png</span><br></pre></td></tr></table></figure>
+</li>
+<li>如果把 root 改为 alias： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location /images &#123;</span><br><span class="line">	alias /usr/local/nginx/html;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+再次访问上述地址，页面会出现 404 的错误，查看错误日志会发现是因为地址不对，所以验证了： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root的处理结果是: root路径+location路径</span><br><span class="line">/usr/local/nginx/html/images/mv.png</span><br><span class="line">alias的处理结果是:使用alias路径替换location路径</span><br><span class="line">/usr/local/nginx/html/images</span><br></pre></td></tr></table></figure>
+需要在 alias 后面路径改为： <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location /images &#123;</span><br><span class="line">	alias /usr/local/nginx/html/images;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li>如果 location 路径是以<code>/</code>结尾，则 alias 也必须是以<code>/</code>结尾，root 没有要求，将上述配置修改为： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location /images/ &#123;</span><br><span class="line">	alias /usr/local/nginx/html/images;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+访问就会出问题，查看错误日志还是路径不对，所以需要把 alias 后面加上<code>/</code>。</li>
+</ol>
+<p>  <strong>总结：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root的处理结果是: root路径+location路径</span><br><span class="line">alias的处理结果是:使用alias路径替换location路径</span><br><span class="line">alias是一个目录别名的定义，root则是最上层目录的含义。</span><br><span class="line">如果location路径是以/结尾,则alias也必须是以/结尾，root没有要求</span><br></pre></td></tr></table></figure>
+<h4 id="2-4-2-6-index指令和error-page指令">2.4.2.6 index指令和error_page指令</h4>
+<p>  <strong>index：</strong> 设置网站的默认首页。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">index file …</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">index index.html</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http、server、location</td>
+</tr>
+</tbody>
+</table>
+<p>  index 后面可以跟多个设置，如果访问的时候没有指定具体访问的资源，则会依次进行查找，找到第一个为止。<br>
+  <strong>举例说明：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">location / &#123;</span><br><span class="line">	root /usr/local/nginx/html;</span><br><span class="line">	index index.html index.htm;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  访问该 location 的时候，可以通过<code>http://ip:port/</code>，地址后面如果不添加任何内容，则默认依次访问<code>index.html</code>和<code>index.htm</code>，找到第一个来进行返回。<br>
+  <strong>error_page：</strong> 设置网站的错误页面。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">error_page code … [=[response]] uri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">-</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http、server、location…</td>
+</tr>
+</tbody>
+</table>
+<p>  当出现对应的响应code后，如何来处理。<br>
+  <strong>举例说明：</strong></p>
+<ol>
+<li>可以指定具体跳转的地址： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">	error_page 404 http://www.itcast.cn;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li>可以指定重定向地址： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">server&#123;</span><br><span class="line">	error_page 404 /50x.html;</span><br><span class="line">	error_page 500 502 503 504 /50x.html;</span><br><span class="line">	location =/50x.html&#123;</span><br><span class="line">		root html;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li>使用 location 的 @ 符合完成错误信息展示： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">server&#123;</span><br><span class="line">	error_page 404 @jump_to_error;</span><br><span class="line">	location @jump_to_error &#123;</span><br><span class="line">		default_type text/plain;</span><br><span class="line">		return 404 &#x27;Not Found Page...&#x27;;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+可选项<code>=[response]</code>的作用是用来将相应代码更改为另外一个 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">server&#123;</span><br><span class="line">	error_page 404 =200 /50x.html;</span><br><span class="line">	location =/50x.html&#123;</span><br><span class="line">		root html;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+这样的话，当返回 404 找不到对应的资源的时候，在浏览器上可以看到，最终返回的状态码是 200，这块需要注意下，编写 error_page 后面的内容，404 后面需要加空格，200 前面不能加空格。</li>
+</ol>
+<h1 id="参考文献">参考文献</h1>
+<p>  【1】<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1yS4y1N76R?spm_id_from=333.337.search-card.all.click">https://www.bilibili.com/video/BV1yS4y1N76R?spm_id_from=333.337.search-card.all.click</a><br>
+  【2】<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1ov41187bq?spm_id_from=333.337.search-card.all.click">https://www.bilibili.com/video/BV1ov41187bq?spm_id_from=333.337.search-card.all.click</a><br>
+  【3】<a target="_blank" rel="noopener" href="https://www.bnskd.com/2813.html">https://www.bnskd.com/2813.html</a><br>
+  【4】<a target="_blank" rel="noopener" href="http://www.lmonkey.com/t/2zLAPYMyW">http://www.lmonkey.com/t/2zLAPYMyW</a><br>
+  【5】<a target="_blank" rel="noopener" href="https://my.oschina.net/python8/blog/5373448">https://my.oschina.net/python8/blog/5373448</a><br>
+  【6】<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_22783587/article/details/118891858">https://blog.csdn.net/qq_22783587/article/details/118891858</a><br>
+  【7】<a target="_blank" rel="noopener" href="https://blog.csdn.net/cr7258/article/details/117486459">https://blog.csdn.net/cr7258/article/details/117486459</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2022/04/15/nginx_4/">https://program-park.github.io/2022/04/15/nginx_4/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Nginx/">Nginx</a></div><div class="post_share"><div class="social-share" data-image="/img/nginx/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/04/19/nginx_5/"><img class="prev-cover" src="/img/nginx/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Nginx 从入门到入坟（四）- Nginx 基础配置实例</div></div></a></div><div class="next-post pull-right"><a href="/2022/04/13/nginx_3/"><img class="next-cover" src="/img/nginx/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Nginx 从入门到入坟（二）- Nginx 安装部署教程</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/01/27/nginx_1/" title="Nginx 1.21.6 生产环境升级教程"><img class="cover" src="/img/nginx/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-27</div><div class="title">Nginx 1.21.6 生产环境升级教程</div></div></a></div><div><a href="/2022/04/21/nginx_10/" title="Nginx 从入门到入坟（九）- Nginx 静态资源如何防盗链"><img class="cover" src="/img/nginx/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-04-21</div><div class="title">Nginx 从入门到入坟（九）- Nginx 静态资源如何防盗链</div></div></a></div><div><a href="/2022/06/14/nginx_12/" title="Nginx 从入门到入坟（十一）- Nginx 反向代理深入研究及优化"><img class="cover" src="/img/nginx/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-14</div><div class="title">Nginx 从入门到入坟（十一）- Nginx 反向代理深入研究及优化</div></div></a></div><div><a href="/2022/04/22/nginx_11/" title="Nginx 从入门到入坟（十）- Rewrite 功能详解与案例实操"><img class="cover" src="/img/nginx/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-04-22</div><div class="title">Nginx 从入门到入坟（十）- Rewrite 功能详解与案例实操</div></div></a></div><div><a href="/2022/07/13/nginx_16/" title="Nginx 从入门到入坟（十五）- Nginx + Tomcat 部署实现动静分离"><img class="cover" src="/img/nginx/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-13</div><div class="title">Nginx 从入门到入坟（十五）- Nginx + Tomcat 部署实现动静分离</div></div></a></div><div><a href="/2022/06/29/nginx_14/" title="Nginx 从入门到入坟（十三）- 负载均衡的原理及优化"><img class="cover" src="/img/nginx/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-29</div><div class="title">Nginx 从入门到入坟（十三）- 负载均衡的原理及优化</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">200</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">35</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">25</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-Nginx%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90"><span class="toc-text">1. Nginx目录结构分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-Nginx%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-text">2. Nginx核心配置文件结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E5%85%A8%E5%B1%80%E5%9D%97"><span class="toc-text">2.1 全局块</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1-user%E6%8C%87%E4%BB%A4"><span class="toc-text">2.1.1 user指令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-2-work-process%E6%8C%87%E4%BB%A4"><span class="toc-text">2.1.2 work process指令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-3-%E5%85%B6%E4%BB%96%E6%8C%87%E4%BB%A4"><span class="toc-text">2.1.3 其他指令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-events%E5%9D%97"><span class="toc-text">2.2 events块</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-1-events%E6%8C%87%E4%BB%A4%E9%85%8D%E7%BD%AE%E5%AE%9E%E4%BE%8B"><span class="toc-text">2.2.1 events指令配置实例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-http%E5%9D%97"><span class="toc-text">2.3 http块</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-1-%E5%AE%9A%E4%B9%89MIME-Type"><span class="toc-text">2.3.1 定义MIME-Type</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-2-%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1%E6%97%A5%E5%BF%97"><span class="toc-text">2.3.2 自定义服务日志</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-3-%E5%85%B6%E4%BB%96%E9%85%8D%E7%BD%AE%E6%8C%87%E4%BB%A4"><span class="toc-text">2.3.3 其他配置指令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-server%E5%9D%97%E5%92%8Clocation%E5%9D%97"><span class="toc-text">2.4 server块和location块</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-1-server%E5%9D%97%E7%9A%84%E5%8C%B9%E9%85%8D%E9%80%BB%E8%BE%91"><span class="toc-text">2.4.1 server块的匹配逻辑</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-1-1-listen%E6%8C%87%E4%BB%A4"><span class="toc-text">2.4.1.1 listen指令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-1-2-server-name%E6%8C%87%E4%BB%A4"><span class="toc-text">2.4.1.2 server_name指令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-1-3-%E5%AE%9E%E4%BE%8B%E7%A4%BA%E8%8C%83"><span class="toc-text">2.4.1.3 实例示范</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-2-location%E5%9D%97%E7%9A%84%E5%8C%B9%E9%85%8D%E9%80%BB%E8%BE%91"><span class="toc-text">2.4.2 location块的匹配逻辑</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-2-1-location%E5%9D%97%E8%AF%AD%E6%B3%95"><span class="toc-text">2.4.2.1 location块语法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-2-2-location%E5%9D%97%E8%AF%AD%E6%B3%95%E7%9A%84%E7%A4%BA%E4%BE%8B"><span class="toc-text">2.4.2.2 location块语法的示例</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-2-3-Nginx%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E7%94%A8%E4%BA%8E%E5%A4%84%E7%90%86%E8%AF%B7%E6%B1%82%E7%9A%84location"><span class="toc-text">2.4.2.3 Nginx如何选择用于处理请求的location</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-2-4-location%E4%B8%AD%E7%9A%84%E5%8F%8D%E6%96%9C%E7%BA%BF"><span class="toc-text">2.4.2.4 location中的反斜线</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-2-5-%E8%AE%BE%E7%BD%AE%E8%AF%B7%E6%B1%82%E8%B5%84%E6%BA%90%E7%9A%84%E7%9B%AE%E5%BD%95"><span class="toc-text">2.4.2.5 设置请求资源的目录</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-2-6-index%E6%8C%87%E4%BB%A4%E5%92%8Cerror-page%E6%8C%87%E4%BB%A4"><span class="toc-text">2.4.2.6 index指令和error_page指令</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="toc-text">参考文献</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/08/15/linux_6/" title="Linux 防火墙常用命令总结"><img src="/img/linux/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux 防火墙常用命令总结"/></a><div class="content"><a class="title" href="/2022/08/15/linux_6/" title="Linux 防火墙常用命令总结">Linux 防火墙常用命令总结</a><time datetime="2022-08-15T07:20:44.000Z" title="发表于 2022-08-15 15:20:44">2022-08-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/07/31/linux_5/" title="Linux 基础命令之 tar 解压缩详解"><img src="/img/linux/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux 基础命令之 tar 解压缩详解"/></a><div class="content"><a class="title" href="/2022/07/31/linux_5/" title="Linux 基础命令之 tar 解压缩详解">Linux 基础命令之 tar 解压缩详解</a><time datetime="2022-07-31T00:22:50.000Z" title="发表于 2022-07-31 08:22:50">2022-07-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/07/13/nginx_16/" title="Nginx 从入门到入坟（十五）- Nginx + Tomcat 部署实现动静分离"><img src="/img/nginx/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx 从入门到入坟（十五）- Nginx + Tomcat 部署实现动静分离"/></a><div class="content"><a class="title" href="/2022/07/13/nginx_16/" title="Nginx 从入门到入坟（十五）- Nginx + Tomcat 部署实现动静分离">Nginx 从入门到入坟（十五）- Nginx + Tomcat 部署实现动静分离</a><time datetime="2022-07-13T07:33:23.000Z" title="发表于 2022-07-13 15:33:23">2022-07-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/07/04/nginx_15/" title="Nginx 从入门到入坟（十四）- Nginx 缓存深入研究"><img src="/img/nginx/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx 从入门到入坟（十四）- Nginx 缓存深入研究"/></a><div class="content"><a class="title" href="/2022/07/04/nginx_15/" title="Nginx 从入门到入坟（十四）- Nginx 缓存深入研究">Nginx 从入门到入坟（十四）- Nginx 缓存深入研究</a><time datetime="2022-07-04T04:20:02.000Z" title="发表于 2022-07-04 12:20:02">2022-07-04</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/nginx/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2022/04/15/nginx_4/'
+    this.page.identifier = '/2022/04/15/nginx_4/'
+    this.page.title = 'Nginx 从入门到入坟（三）- Nginx 核心配置文件分析'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

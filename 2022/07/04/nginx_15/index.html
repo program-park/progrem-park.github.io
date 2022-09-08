@@ -1,0 +1,526 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Nginx 从入门到入坟（十四）- Nginx 缓存深入研究 | 程序园</title><meta name="keywords" content="Nginx"><meta name="author" content="一位木带感情的码农"><meta name="copyright" content="一位木带感情的码农"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="本文是《Nginx从入门到入坟》系列，第十四篇：Nginx 缓存深入研究。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx 从入门到入坟（十四）- Nginx 缓存深入研究">
+<meta property="og:url" content="https://program-park.github.io/2022/07/04/nginx_15/index.html">
+<meta property="og:site_name" content="程序园">
+<meta property="og:description" content="本文是《Nginx从入门到入坟》系列，第十四篇：Nginx 缓存深入研究。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://program-park.github.io/img/nginx/1.png">
+<meta property="article:published_time" content="2022-07-04T04:20:02.000Z">
+<meta property="article:modified_time" content="2022-09-08T07:19:58.792Z">
+<meta property="article:author" content="一位木带感情的码农">
+<meta property="article:tag" content="Nginx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://program-park.github.io/img/nginx/1.png"><link rel="shortcut icon" href="/img/favicon_logo/favicon.png"><link rel="canonical" href="https://program-park.github.io/2022/07/04/nginx_15/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":30,"languages":{"author":"作者: 一位木带感情的码农","link":"链接: ","source":"来源: 程序园","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Nginx 从入门到入坟（十四）- Nginx 缓存深入研究',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-08 15:19:58'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatat_img.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">200</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">35</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">25</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/nginx/1.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">程序园</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Nginx 从入门到入坟（十四）- Nginx 缓存深入研究</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-07-04T04:20:02.000Z" title="发表于 2022-07-04 12:20:02">2022-07-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-08T07:19:58.792Z" title="更新于 2022-09-08 15:19:58">2022-09-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Nginx/">Nginx</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>8分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Nginx 从入门到入坟（十四）- Nginx 缓存深入研究"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="1-缓存的概念">1. 缓存的概念</h1>
+<p>  缓存就是数据交换的缓冲区（Cache），当用户要获取数据的时候，会先从缓存中去查询获取数据，如果缓存中有就会直接返回给用户，如果缓存中没有，则会发请求从服务器重新查询数据，将数据返回给用户的同时将数据放入缓存，下次用户就会直接从缓存中获取数据。<br>
+  缓存其实在很多场景中都有用到，比如：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">场景</th>
+<th style="text-align:center">作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">操作系统磁盘缓存</td>
+<td style="text-align:center">减少磁盘机械操作</td>
+</tr>
+<tr>
+<td style="text-align:center">数据库缓存</td>
+<td style="text-align:center">减少文件系统的IO操作</td>
+</tr>
+<tr>
+<td style="text-align:center">应用程序缓存</td>
+<td style="text-align:center">减少对数据库的查询</td>
+</tr>
+<tr>
+<td style="text-align:center">Web服务器缓存</td>
+<td style="text-align:center">减少对应用服务器请求次数</td>
+</tr>
+<tr>
+<td style="text-align:center">浏览器缓存</td>
+<td style="text-align:center">减少与后台的交互次数</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>缓存的优点</strong>
+<ul>
+<li>减少数据传输，节省网络流量，加快响应速度，提升用户体验；</li>
+<li>减轻服务器压力；</li>
+<li>提供服务端的高可用性；</li>
+</ul>
+</li>
+<li><strong>缓存的缺点</strong>
+<ul>
+<li>数据的不一致；</li>
+<li>增加成本；</li>
+</ul>
+</li>
+</ul>
+<p>  这里讲的就是 Nginx 缓存，Nginx 作为 Web 缓存服务器，它介于客户端和应用服务器之间，当用户通过浏览器访问一个 URL 时，Web 缓存服务器会去应用服务器获取要展示给用户的内容，将内容缓存到自己的服务器上，当下一次请求到来时，如果访问的是同一个 URL，Web 缓存服务器就会直接将之前缓存的内容返回给客户端，而不是向应用服务器再次发送请求。Web 缓存降低了应用服务器、数据库的负载，减少了网络延迟，提高了用户访问的响应速度，增强了用户的体验。</p>
+<h1 id="2-Nginx的Web缓存服务">2. Nginx的Web缓存服务</h1>
+<p>  Nginx 是从 0.7.48 版开始提供缓存功能。Nginx 是基于 Proxy Store 来实现的，其原理是把 URL 及相关组合当做 Key，再使用 MD5 算法对 Key 进行哈希，得到硬盘上对应的哈希目录路径，从而将缓存内容保存在该目录中。它可以支持任意 URL 连接，同时也支持 404/301/302 这样的非 200 状态码。Nginx 既可以支持对指定 URL 或者状态码设置过期时间，也可以使用 purge 命令来手动清除指定 URL 的缓存。</p>
+<h2 id="2-1-Nginx缓存设置的相关指令">2.1 Nginx缓存设置的相关指令</h2>
+<p>  Nginx 的 Web 缓存服务主要是使用<code>ngx_http_proxy_module</code>模块相关指令集来完成，接下来我们把常用的指令来进行介绍下。</p>
+<h3 id="2-1-1-proxy-cache-path">2.1.1 proxy_cache_path</h3>
+<p>  该指令用于设置缓存文件的存放路径。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">proxy_cache_path path [levels=number]<br>keys_zone=zone_name:zone_size [inactive=time] [max_size=size]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>path：</strong> 缓存路径地址，如：/usr/local/proxy_cache；</li>
+<li><strong>levels：</strong> 指定该缓存空间对应的目录，最多可以设置 3 层，每层取值为 1|2，如：  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">levels=1:2 缓存空间有两层目录，第一次是1个字母，第二次是2个字母</span><br><span class="line">举例说明:</span><br><span class="line">itheima[key]通过MD5加密以后的值为43c8233266edce38c2c9af0694e2107d</span><br><span class="line">levels=1:2 最终的存储路径为/usr/local/proxy_cache/d/07</span><br><span class="line">levels=2:1:2 最终的存储路径为/usr/local/proxy_cache/7d/0/21</span><br><span class="line">levels=2:2:2 最终的存储路径为??/usr/local/proxy_cache/7d/10/e2</span><br></pre></td></tr></table></figure>
+</li>
+<li><strong>keys_zone：</strong> 用来为这个缓存区设置名称和指定大小，如：  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keys_zone=itcast:200m 缓存区的名称是itcast，大小为200M，1M大概能存储8000个keys</span><br></pre></td></tr></table></figure>
+</li>
+<li><strong>inactive：</strong> 指定缓存的数据多次时间未被访问就将被删除，如：  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">inactive=1d 缓存数据在1天内没有被访问就会被删除</span><br></pre></td></tr></table></figure>
+</li>
+<li><strong>max_size：</strong> 设置最大缓存空间，如果缓存空间存满，默认会覆盖缓存时间最长的资源，如：  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">max_size=20g</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>  配置实例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http&#123;</span><br><span class="line">	proxy_cache_path /usr/local/proxy_cache keys_zone=itcast:200m  levels=1:2:1 inactive=1d max_size=20g;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-1-2-proxy-cache">2.1.2 proxy_cache</h3>
+<p>  该指令用来开启或关闭代理缓存，如果是开启则自定使用哪个缓存区来进行缓存。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">proxy_cache zone_name|off;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">proxy_cache off;</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http、server、location</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>zone_name：</strong> 指定使用缓存区的名称；</li>
+</ul>
+<h3 id="2-1-3-proxy-cache-key">2.1.3 proxy_cache_key</h3>
+<p>  该指令用来设置 Web 缓存的 key 值，Nginx 会根据 key 值 MD5 哈希存缓存。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">proxy_cache_key key;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">proxy_cache_key $scheme$proxy_host$request_uri;</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http、server、location</td>
+</tr>
+</tbody>
+</table>
+<p>  <code>proxy_cache_key $scheme$proxy_host$request_uri</code>的含义在于把 http 协议 + 主机名 + uri 这三个作为一个单独的 key 来缓存，如何还需要缓存别的，就按照这种格式来设置。</p>
+<h3 id="2-1-4-proxy-cache-valid">2.1.4 proxy_cache_valid</h3>
+<p>  该指令用来对不同返回状态码的 URL 设置不同的缓存时间。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">proxy_cache_valid [code …] time;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http、server、location</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">proxy_cache_valid 200 302 10m;</span><br><span class="line">proxy_cache_valid 404 1m;</span><br><span class="line">为200和302的响应URL设置10分钟缓存，为404的响应URL设置1分钟缓存</span><br><span class="line">proxy_cache_valid any 1m;</span><br><span class="line">对所有响应状态码的URL都设置1分钟缓存</span><br></pre></td></tr></table></figure>
+<h3 id="2-1-5-proxy-cache-min-uses">2.1.5 proxy_cache_min_uses</h3>
+<p>  该指令用来设置资源被访问多少次后被缓存。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">proxy_cache_min_uses number;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">proxy_cache_min_uses 1;</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http、server、location</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-1-6-proxy-cache-methods">2.1.6 proxy_cache_methods</h3>
+<p>  该指令用户设置缓存哪些 HTTP 方法。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">proxy_cache_methods GET|HEAD|POST;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">proxy_cache_methods GET HEAD;</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http、server、location</td>
+</tr>
+</tbody>
+</table>
+<p>  默认缓存 HTTP 的 GET 和 HEAD 方法，不缓存 POST 方法。</p>
+<h3 id="2-1-7-upstream-cache-status变量">2.1.7 upstream_cache_status变量</h3>
+<p>  该变量存储了缓存是否命中的信息，会设置在响应头信息中，在调试中非常有用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MISS: 未命中缓存</span><br><span class="line">HIT： 命中缓存</span><br><span class="line">EXPIRED: 缓存过期</span><br><span class="line">STALE: 命中了陈旧缓存</span><br><span class="line">REVALIDDATED: Nginx验证陈旧缓存依然有效</span><br><span class="line">UPDATING: 内容陈旧，但正在更新</span><br><span class="line">BYPASS: X响应从原始服务器获取</span><br></pre></td></tr></table></figure>
+<h2 id="2-2-Nginx缓存案例">2.2 Nginx缓存案例</h2>
+<h3 id="2-2-1-需求分析">2.2.1 需求分析</h3>
+<p><img src="https://img-blog.csdnimg.cn/e31cdccaac6648e886c943cee95f6455.png#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="2-2-2-步骤实现">2.2.2 步骤实现</h3>
+<blockquote>
+<p><strong>应用服务器的环境准备</strong></p>
+</blockquote>
+<ol>
+<li>在<code>10.7.2.207</code>服务器上的 tomcat 的 webapps 下面添加一个 js 目录，并在 js 目录中添加一个 jquery.js 文件；</li>
+<li>启动 tomcat；</li>
+<li>访问测试： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://10.7.2.207:8080/js/jquery.js</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<blockquote>
+<p><strong>Nginx的环境准备</strong></p>
+</blockquote>
+<p>  完成 Nginx 反向代理配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">http&#123;</span><br><span class="line">	upstream backend&#123;</span><br><span class="line">		server 10.7.2.207:8080;</span><br><span class="line">	&#125;</span><br><span class="line">	server &#123;</span><br><span class="line">		listen 8080;</span><br><span class="line">		server_name localhost;</span><br><span class="line">		location / &#123;</span><br><span class="line">			proxy_pass http://backend/js/;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>添加Nginx缓存配置</strong></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">http&#123;</span><br><span class="line">	proxy_cache_path /usr/local/proxy_cache levels=2:1 keys_zone=itcast:200m inactive=1d max_size=20g;</span><br><span class="line">	upstream backend&#123;</span><br><span class="line">		server 10.7.2.207:8080;</span><br><span class="line">	&#125;</span><br><span class="line">	server &#123;</span><br><span class="line">		listen 8080;</span><br><span class="line">		server_name localhost;</span><br><span class="line">		location / &#123;</span><br><span class="line">			proxy_cache itcast;</span><br><span class="line">			proxy_cache_key itheima;</span><br><span class="line">			proxy_cache_min_uses 5;</span><br><span class="line">			proxy_cache_valid 200 5d;</span><br><span class="line">			proxy_cache_valid 404 30s;</span><br><span class="line">			proxy_cache_valid any 1m;</span><br><span class="line">			add_header nginx-cache &quot;$upstream_cache_status&quot;;</span><br><span class="line">			proxy_pass http://backend/js/;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="3-Nginx缓存的清除">3. Nginx缓存的清除</h1>
+<h2 id="3-1-方式一：删除对应的缓存目录">3.1 方式一：删除对应的缓存目录</h2>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rm -rf /usr/local/proxy_cache/......</span><br></pre></td></tr></table></figure>
+<h2 id="3-2-方式二：使用第三方扩展模块">3.2 方式二：使用第三方扩展模块</h2>
+<ol>
+<li>下载<code>ngx_cache_purge</code>模块对应的资源包，并上传到服务器上，下载链接：<a target="_blank" rel="noopener" href="http://labs.frickle.com/nginx_ngx_cache_purge/">点击下载</a>； <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ngx_cache_purge-2.3.tar.gz</span><br></pre></td></tr></table></figure>
+</li>
+<li>对资源文件进行解压缩； <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxf ngx_cache_purge-2.3.tar.gz</span><br></pre></td></tr></table></figure>
+</li>
+<li>修改文件夹名称，方便后期配置； <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mv ngx_cache_purge-2.3 purge</span><br></pre></td></tr></table></figure>
+</li>
+<li>查询 Nginx 的配置参数； <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nginx -V</span><br></pre></td></tr></table></figure>
+</li>
+<li>进入 Nginx 的安装目录，使用<code>./configure</code>进行参数配置； <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./configure --add-module=/root/nginx/module/purge</span><br></pre></td></tr></table></figure>
+</li>
+<li>使用<code>make</code>进行编译； <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make</span><br></pre></td></tr></table></figure>
+</li>
+<li>将 nginx 安装目录的 nginx 二进制可执行文件备份； <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mv /usr/local/nginx/sbin/nginx /usr/local/nginx/sbin/nginxold</span><br></pre></td></tr></table></figure>
+</li>
+<li>将编译后的<code>objs</code>中的<code>nginx</code>拷贝到<code>nginx</code>的<code>sbin</code>目录下； <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp objs/nginx /usr/local/nginx/sbin</span><br></pre></td></tr></table></figure>
+</li>
+<li>使用<code>make</code>进行升级； <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make upgrade</span><br></pre></td></tr></table></figure>
+</li>
+<li>在 nginx 配置文件中进行如下配置：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">server&#123;</span><br><span class="line">	location ~/purge(/.*) &#123;</span><br><span class="line">		proxy_cache_purge itcast itheima;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h1 id="4-Nginx如何设置对资源不缓存">4. Nginx如何设置对资源不缓存</h1>
+<p>  如何将 Nginx 作为 Web 缓存服务器使用在前面已经讲完了。但是我们得思考一个问题，是不是所有的数据都适合进行缓存？比如说对于一些经常发生变化的数据，如果进行缓存的话，就很容易出现用户访问到的数据不是服务器真实的数据。所以对于这些资源我们在缓存的过程中就需要进行过滤，不进行缓存。<br>
+  Nginx 也提供了这块的功能设置，需要使用到如下两个指令。</p>
+<h2 id="4-1-相关指令">4.1 相关指令</h2>
+<blockquote>
+<p><strong>proxy_no_cache</strong></p>
+</blockquote>
+<p>  该指令是用来定义不将数据进行缓存的条件。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">proxy_no_cache string …;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http、server、location</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">proxy_no_cache $cookie_nocache $arg_nocache $arg_comment;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>proxy_cache_bypass</strong></p>
+</blockquote>
+<p>  该指令是用来设置不从缓存中获取数据的条件。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">语法</th>
+<th style="text-align:center">proxy_cache_bypass string …;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">默认值</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td style="text-align:center">位置</td>
+<td style="text-align:center">http、server、location</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">proxy_cache_bypass $cookie_nocache $arg_nocache $arg_comment;</span><br></pre></td></tr></table></figure>
+<p>  上述两个指令都有一个指定的条件，这个条件可以是多个，并且多个条件中至少有一个不为空且不等于 “0”，则条件满足成立。上面给的配置实例是从官方网站获取的，里面使用到了三个变量，分别是<code>$cookie_nocache</code>、<code>$arg_nocache</code>、<code>$arg_comment</code>。<br>
+  这三个参数分别代表的含义是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$cookie_nocache</span><br><span class="line">指的是当前请求的cookie中键的名称为nocache对应的值</span><br><span class="line">$arg_nocache和$arg_comment</span><br><span class="line">指的是当前请求的参数中属性名为nocache和comment对应的属性值</span><br></pre></td></tr></table></figure>
+<h2 id="4-2-案例演示">4.2 案例演示</h2>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">server&#123;</span><br><span class="line">	listen 8080;</span><br><span class="line">	server_name localhost;</span><br><span class="line">	location / &#123;</span><br><span class="line">		if ($request_uri ~ /.*\.js$)&#123;</span><br><span class="line">			set $nocache 1;</span><br><span class="line">		&#125;</span><br><span class="line">		proxy_no_cache $nocache $cookie_nocache $arg_nocache $arg_comment;</span><br><span class="line">		proxy_cache_bypass $nocache $cookie_nocache $arg_nocache $arg_comment;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="参考文献">参考文献</h1>
+<p>  【1】<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1ov41187bq?p=116">https://www.bilibili.com/video/BV1ov41187bq?p=116</a><br>
+  【2】<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_25275355/article/details/120667386">https://blog.csdn.net/qq_25275355/article/details/120667386</a><br>
+  【3】<a target="_blank" rel="noopener" href="https://blog.csdn.net/xiaochao_123/article/details/123640451">https://blog.csdn.net/xiaochao_123/article/details/123640451</a><br>
+  【4】<a target="_blank" rel="noopener" href="https://www.cnblogs.com/watermeloncode/p/15499482.html">https://www.cnblogs.com/watermeloncode/p/15499482.html</a><br>
+  【5】<a target="_blank" rel="noopener" href="https://blog.csdn.net/H900302/article/details/120859532">https://blog.csdn.net/H900302/article/details/120859532</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://program-park.github.io/">一位木带感情的码农</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://program-park.github.io/2022/07/04/nginx_15/">https://program-park.github.io/2022/07/04/nginx_15/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">此文章版权归 <a href=https://program-park.github.io/>程序园</a> 所有，如有转载，请注明来自原作者。</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Nginx/">Nginx</a></div><div class="post_share"><div class="social-share" data-image="/img/nginx/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/07/13/nginx_16/"><img class="prev-cover" src="/img/nginx/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Nginx 从入门到入坟（十五）- Nginx + Tomcat 部署实现动静分离</div></div></a></div><div class="next-post pull-right"><a href="/2022/06/29/nginx_14/"><img class="next-cover" src="/img/nginx/1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Nginx 从入门到入坟（十三）- 负载均衡的原理及优化</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/01/27/nginx_1/" title="Nginx 1.21.6 生产环境升级教程"><img class="cover" src="/img/nginx/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-27</div><div class="title">Nginx 1.21.6 生产环境升级教程</div></div></a></div><div><a href="/2022/04/21/nginx_10/" title="Nginx 从入门到入坟（九）- Nginx 静态资源如何防盗链"><img class="cover" src="/img/nginx/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-04-21</div><div class="title">Nginx 从入门到入坟（九）- Nginx 静态资源如何防盗链</div></div></a></div><div><a href="/2022/06/14/nginx_12/" title="Nginx 从入门到入坟（十一）- Nginx 反向代理深入研究及优化"><img class="cover" src="/img/nginx/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-14</div><div class="title">Nginx 从入门到入坟（十一）- Nginx 反向代理深入研究及优化</div></div></a></div><div><a href="/2022/04/22/nginx_11/" title="Nginx 从入门到入坟（十）- Rewrite 功能详解与案例实操"><img class="cover" src="/img/nginx/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-04-22</div><div class="title">Nginx 从入门到入坟（十）- Rewrite 功能详解与案例实操</div></div></a></div><div><a href="/2022/07/13/nginx_16/" title="Nginx 从入门到入坟（十五）- Nginx + Tomcat 部署实现动静分离"><img class="cover" src="/img/nginx/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-13</div><div class="title">Nginx 从入门到入坟（十五）- Nginx + Tomcat 部署实现动静分离</div></div></a></div><div><a href="/2022/06/29/nginx_14/" title="Nginx 从入门到入坟（十三）- 负载均衡的原理及优化"><img class="cover" src="/img/nginx/1.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-29</div><div class="title">Nginx 从入门到入坟（十三）- 负载均衡的原理及优化</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatat_img.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一位木带感情的码农</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">200</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">35</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">25</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/program-park"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/program-park" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:lkm869666@126.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/weixin_44758876" target="_blank" title="CSDN"><i class="fa-solid fa-c"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">这里是程序园，如有任何意见和疑问，请反馈到我的邮箱。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E7%BC%93%E5%AD%98%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-text">1. 缓存的概念</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-Nginx%E7%9A%84Web%E7%BC%93%E5%AD%98%E6%9C%8D%E5%8A%A1"><span class="toc-text">2. Nginx的Web缓存服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-Nginx%E7%BC%93%E5%AD%98%E8%AE%BE%E7%BD%AE%E7%9A%84%E7%9B%B8%E5%85%B3%E6%8C%87%E4%BB%A4"><span class="toc-text">2.1 Nginx缓存设置的相关指令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1-proxy-cache-path"><span class="toc-text">2.1.1 proxy_cache_path</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-2-proxy-cache"><span class="toc-text">2.1.2 proxy_cache</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-3-proxy-cache-key"><span class="toc-text">2.1.3 proxy_cache_key</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-4-proxy-cache-valid"><span class="toc-text">2.1.4 proxy_cache_valid</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-5-proxy-cache-min-uses"><span class="toc-text">2.1.5 proxy_cache_min_uses</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-6-proxy-cache-methods"><span class="toc-text">2.1.6 proxy_cache_methods</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-7-upstream-cache-status%E5%8F%98%E9%87%8F"><span class="toc-text">2.1.7 upstream_cache_status变量</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-Nginx%E7%BC%93%E5%AD%98%E6%A1%88%E4%BE%8B"><span class="toc-text">2.2 Nginx缓存案例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-1-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90"><span class="toc-text">2.2.1 需求分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-2-%E6%AD%A5%E9%AA%A4%E5%AE%9E%E7%8E%B0"><span class="toc-text">2.2.2 步骤实现</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-Nginx%E7%BC%93%E5%AD%98%E7%9A%84%E6%B8%85%E9%99%A4"><span class="toc-text">3. Nginx缓存的清除</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E6%96%B9%E5%BC%8F%E4%B8%80%EF%BC%9A%E5%88%A0%E9%99%A4%E5%AF%B9%E5%BA%94%E7%9A%84%E7%BC%93%E5%AD%98%E7%9B%AE%E5%BD%95"><span class="toc-text">3.1 方式一：删除对应的缓存目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E6%96%B9%E5%BC%8F%E4%BA%8C%EF%BC%9A%E4%BD%BF%E7%94%A8%E7%AC%AC%E4%B8%89%E6%96%B9%E6%89%A9%E5%B1%95%E6%A8%A1%E5%9D%97"><span class="toc-text">3.2 方式二：使用第三方扩展模块</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-Nginx%E5%A6%82%E4%BD%95%E8%AE%BE%E7%BD%AE%E5%AF%B9%E8%B5%84%E6%BA%90%E4%B8%8D%E7%BC%93%E5%AD%98"><span class="toc-text">4. Nginx如何设置对资源不缓存</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E7%9B%B8%E5%85%B3%E6%8C%87%E4%BB%A4"><span class="toc-text">4.1 相关指令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E6%A1%88%E4%BE%8B%E6%BC%94%E7%A4%BA"><span class="toc-text">4.2 案例演示</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="toc-text">参考文献</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解"><img src="/img/reptile/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python 爬虫基础之 urllib 库的深入使用详解"/></a><div class="content"><a class="title" href="/2022/08/30/reptile_1/" title="Python 爬虫基础之 urllib 库的深入使用详解">Python 爬虫基础之 urllib 库的深入使用详解</a><time datetime="2022-08-30T09:15:02.000Z" title="发表于 2022-08-30 17:15:02">2022-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/08/15/linux_6/" title="Linux 防火墙常用命令总结"><img src="/img/linux/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux 防火墙常用命令总结"/></a><div class="content"><a class="title" href="/2022/08/15/linux_6/" title="Linux 防火墙常用命令总结">Linux 防火墙常用命令总结</a><time datetime="2022-08-15T07:20:44.000Z" title="发表于 2022-08-15 15:20:44">2022-08-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/07/31/linux_5/" title="Linux 基础命令之 tar 解压缩详解"><img src="/img/linux/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux 基础命令之 tar 解压缩详解"/></a><div class="content"><a class="title" href="/2022/07/31/linux_5/" title="Linux 基础命令之 tar 解压缩详解">Linux 基础命令之 tar 解压缩详解</a><time datetime="2022-07-31T00:22:50.000Z" title="发表于 2022-07-31 08:22:50">2022-07-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/07/13/nginx_16/" title="Nginx 从入门到入坟（十五）- Nginx + Tomcat 部署实现动静分离"><img src="/img/nginx/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx 从入门到入坟（十五）- Nginx + Tomcat 部署实现动静分离"/></a><div class="content"><a class="title" href="/2022/07/13/nginx_16/" title="Nginx 从入门到入坟（十五）- Nginx + Tomcat 部署实现动静分离">Nginx 从入门到入坟（十五）- Nginx + Tomcat 部署实现动静分离</a><time datetime="2022-07-13T07:33:23.000Z" title="发表于 2022-07-13 15:33:23">2022-07-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/07/04/nginx_15/" title="Nginx 从入门到入坟（十四）- Nginx 缓存深入研究"><img src="/img/nginx/1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx 从入门到入坟（十四）- Nginx 缓存深入研究"/></a><div class="content"><a class="title" href="/2022/07/04/nginx_15/" title="Nginx 从入门到入坟（十四）- Nginx 缓存深入研究">Nginx 从入门到入坟（十四）- Nginx 缓存深入研究</a><time datetime="2022-07-04T04:20:02.000Z" title="发表于 2022-07-04 12:20:02">2022-07-04</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/nginx/1.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 By 一位木带感情的码农</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js"></script><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', { class: 'katex-wrap'})
+  })
+})()</script><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://program-park.github.io/2022/07/04/nginx_15/'
+    this.page.identifier = '/2022/07/04/nginx_15/'
+    this.page.title = 'Nginx 从入门到入坟（十四）- Nginx 缓存深入研究'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Valine' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
